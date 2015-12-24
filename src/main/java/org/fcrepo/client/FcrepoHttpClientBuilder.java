@@ -82,6 +82,7 @@ public class FcrepoHttpClientBuilder {
                     new UsernamePasswordCredentials(username, password));
             return HttpClients.custom()
                     .setDefaultCredentialsProvider(credsProvider)
+                    .useSystemProperties()
                     .build();
         }
     }
