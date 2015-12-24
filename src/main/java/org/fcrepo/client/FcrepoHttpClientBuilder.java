@@ -65,7 +65,7 @@ public class FcrepoHttpClientBuilder {
     public CloseableHttpClient build() {
 
         if (isBlank(username) || isBlank(password)) {
-            return HttpClients.createDefault();
+            return HttpClients.createSystem();
         } else {
             LOGGER.debug("Accessing fcrepo with user credentials");
 
@@ -82,6 +82,7 @@ public class FcrepoHttpClientBuilder {
                     new UsernamePasswordCredentials(username, password));
             return HttpClients.custom()
                     .setDefaultCredentialsProvider(credsProvider)
+                    .useSystemProperties()
                     .build();
         }
     }
