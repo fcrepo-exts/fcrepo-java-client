@@ -19,6 +19,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -268,11 +269,44 @@ public class FcrepoClient {
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !throwExceptionOnFailure) {
             return new FcrepoResponse(url, status, contentTypeHeader, locationHeader, getEntityContent(response));
         } else {
+            drainResponseBody(response);
             throw new FcrepoOperationFailedException(url, status,
                     response.getStatusLine().getReasonPhrase());
         }
     }
 
+    /**
+     * Drains the response body input stream so that the connection is freed.
+     *
+     * @param response the response body
+     */
+    private void drainResponseBody(final HttpResponse response) {
+        drainResponseBody(response, null);
+    }
+
+    /**
+     * Drains the response body input stream to the supplied {@code OutputStream}
+     *
+     * @param response the response body
+     * @param sink contains a copy of the response body, may be {@code null}
+     */
+    private void drainResponseBody(final HttpResponse response, final OutputStream sink) {
+        try {
+            if (response.getEntity() != null && response.getEntity().getContent() != null) {
+                final InputStream responseBody = response.getEntity().getContent();
+                final byte[] buf = new byte[1024];
+                int read = 0;
+                do {
+                    read = responseBody.read(buf);
+                    if (sink != null) {
+                        sink.write(buf, 0, read);
+                    }
+                } while (read > -1);
+            }
+        } catch (IOException e) {
+            // ignore
+        }
+    }
 
     /**
      * Extract the response body as an input stream
