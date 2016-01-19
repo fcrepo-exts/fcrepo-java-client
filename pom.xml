@@ -45,6 +45,7 @@
     <jersey.version>2.15</jersey.version>
     <mockito.version>1.10.8</mockito.version>
     <slf4j.version>1.7.10</slf4j.version>
+    <mockserver.version>3.10.2</mockserver.version>
     <!-- osgi -->
     <osgi.export.packages>org.fcrepo.client.*;version=${project.version}</osgi.export.packages>
     <osgi.import.packages>*</osgi.import.packages>
@@ -118,7 +119,21 @@
       <version>${jersey.version}</version>
       <scope>test</scope>
     </dependency>
-   
+
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-client-java</artifactId>
+      <version>${mockserver.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-netty</artifactId>
+      <version>${mockserver.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -132,6 +147,63 @@
     </resources>
 
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <!-- reserve a port under the property ${fcrepo.httpclient.test.port} for integration
+          tests -->
+        <configuration>
+          <portNames>
+            <portName>fcrepo.httpclient.test.port</portName>
+          </portNames>
+        </configuration>
+        <executions>
+          <execution>
+            <id>reserve-port</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>reserve-network-port</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <fcrepo.httpclient.test.port>${fcrepo.httpclient.test.port}</fcrepo.httpclient.test.port>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+
+      <plugin>
+          <groupId>org.mock-server</groupId>
+          <artifactId>mockserver-maven-plugin</artifactId>
+          <version>${mockserver.version}</version>
+          <configuration>
+            <initializationClass>org.fcrepo.client.MockHttpExpectations</initializationClass>
+             <serverPort>${fcrepo.httpclient.test.port}</serverPort>
+            <logLevel>OFF</logLevel>
+          </configuration>
+          <executions>
+              <execution>
+                  <id>process-test-classes</id>
+                <phase>pre-integration-test</phase>
+                  <goals>
+                      <goal>start</goal>
+                  </goals>
+              </execution>
+              <execution>
+                  <id>verify</id>
+                <phase>post-integration-test</phase>
+                  <goals>
+                      <goal>stop</goal>
+                  </goals>
+              </execution>
+          </executions>
+      </plugin>
+
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
