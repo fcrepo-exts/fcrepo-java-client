@@ -18,12 +18,22 @@ package org.fcrepo.client;
 import static org.junit.Assert.assertEquals;
 import static java.net.URI.create;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 
+import org.apache.commons.io.output.NullOutputStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.apache.commons.io.IOUtils;
@@ -67,6 +77,105 @@ public class FcrepoResponseTest {
                     "<http://example.org/book/3> <dc:title> \"Title\" .".getBytes(UTF_8)));
         assertEquals(IOUtils.toString(response.getBody(), UTF_8),
                     "<http://example.org/book/3> <dc:title> \"Title\" .");
+    }
+
+    /**
+     * Demonstrates that response objects are <em>not</em> {@code close()}ed by default, that the state of
+     * {@link FcrepoResponse#closed} is set appropriately when {@link FcrepoResponse#close()} is invoked under normal
+     * (i.e. no exception thrown during {@code close()}) conditions, and that {@link InputStream#close()} is not invoked
+     * repeatedly after the {@code FcrepoResponse} has been {@code close()}ed.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testClosableReleasesResources() throws Exception {
+        final InputStream mockBody = mock(InputStream.class);
+        final FcrepoResponse underTest = new FcrepoResponse(
+                URI.create("http://localhost/foo"), 201, "text/plain", URI.create("http://localhost/bar"), mockBody);
+
+        assertFalse("FcrepoResponse objects should not be closed until close() is invoked.", underTest.isClosed());
+
+        underTest.close();
+        assertTrue(underTest.isClosed());
+        verify(mockBody, times(1)).close();
+
+        underTest.close();
+        assertTrue(underTest.isClosed());
+        verify(mockBody, times(1)).close();
+    }
+
+    /**
+     * Demonstrates that if an {@code IOException} is thrown by {@link FcrepoResponse#close()}, <em>and</em> an
+     * exception is thrown inside of a client's {@code try} block, the {@code IOException} from the {@code close()}
+     * method is properly appended as a suppressed exception.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testClosableSuppressedExceptions() throws Exception {
+        final InputStream mockBody = mock(InputStream.class);
+        final String notSuppressedMsg = "Not suppressed.";
+        final String suppressedMsg = "Suppressed IOE";
+        doThrow(new IOException(suppressedMsg)).when(mockBody).close();
+
+        try (FcrepoResponse underTest = new FcrepoResponse(URI.create("http://localhost/foo"), 201, "text/plain",
+                URI.create("http://localhost/bar"), mockBody)) {
+            assertFalse(underTest.isClosed());
+
+            throw new RuntimeException(notSuppressedMsg);
+
+        } catch (Exception e) {
+            assertEquals(notSuppressedMsg, e.getMessage());
+            assertTrue(e.getSuppressed() != null && e.getSuppressed().length == 1);
+            assertEquals(suppressedMsg, e.getSuppressed()[0].getMessage());
+        }
+
+        verify(mockBody).close();
+    }
+
+    /**
+     * Demonstrates a successful idiomatic usage with try-with-resources
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testIdiomaticInvokation() throws Exception {
+        final String content = "Hello World!";
+        final ByteArrayInputStream entityBody = new ByteArrayInputStream(content.getBytes());
+        final FcrepoClient client = mock(FcrepoClient.class);
+
+        when(client.get(any(URI.class), any(String.class), any(String.class))).thenReturn(
+                new FcrepoResponse(null, 200, null, null, entityBody));
+
+        try (FcrepoResponse res = client.get(URI.create("foo"), "", "")) {
+            assertEquals(content, IOUtils.toString(res.getBody()));
+        } catch (Exception e) {
+            fail("Unexpected exception: " + e);
+        }
+    }
+
+    /**
+     * Demonstrates idiomatic exception handling with try-with-resources
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testIdiomaticInvokationThrowsException() throws Exception {
+        final InputStream mockBody = mock(InputStream.class);
+        when(mockBody.read(any(byte[].class))).thenThrow(new IOException("Mocked IOE"));
+
+        final FcrepoClient client = mock(FcrepoClient.class);
+        when(client.get(any(URI.class), any(String.class), any(String.class))).thenReturn(
+                new FcrepoResponse(null, 200, null, null, mockBody));
+
+        try (FcrepoResponse res = client.get(URI.create("foo"), "", "")) {
+            IOUtils.copy(res.getBody(), NullOutputStream.NULL_OUTPUT_STREAM);
+            fail("Expected an IOException to be thrown.");
+        } catch (Exception e) {
+            assertEquals("Mocked IOE", e.getMessage());
+        }
+
+        verify(mockBody).close();
     }
 
 }
