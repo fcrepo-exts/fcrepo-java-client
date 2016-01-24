@@ -30,13 +30,25 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 
 /**
  * Represents a client to interact with Fedora's HTTP API.
+ * <p>
+ * Users of the {@code FcrepoClient} are responsible for managing connection resources.  Specifically, the underlying
+ * HTTP connections of this client must be freed.  Suggested usage is to create the {@code FcrepoResponse} within
+ * a {@code try-with-resources} block, insuring that any resources held by the response are freed automatically.
+ * </p>
+ * <pre>
+ * FcrepoClient client = ...;
+ * try (FcrepoResponse res = client.get(...)) {
+ *     // do something with the response
+ * } catch (FcrepoOperationFailedException|IOException e) {
+ *     // handle any exceptions
+ * }
+ * </pre>
  *
  * @author Aaron Coburn
  * @since October 20, 2014
