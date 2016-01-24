@@ -34,6 +34,7 @@ import java.net.URI;
  *     // handle any exceptions
  * }
  * </pre>
+ * Closed responses have no obligation to provide access to released resources.
  *
  * @author Aaron Coburn
  * @since October 20, 2014
@@ -91,7 +92,8 @@ public class FcrepoResponse implements Closeable {
     }
 
     /**
-     * Whether or not the resources have been freed from this response.
+     * Whether or not the resources have been freed from this response.  There should be no expectation that a closed
+     * response provides access to the {@link #getBody() entity body}.
      *
      * @return {@code true} if resources have been freed, otherwise {@code false}
      */

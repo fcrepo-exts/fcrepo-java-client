@@ -85,7 +85,7 @@ public class FcrepoResponseTest {
      * (i.e. no exception thrown during {@code close()}) conditions, and that {@link InputStream#close()} is not invoked
      * repeatedly after the {@code FcrepoResponse} has been {@code close()}ed.
      *
-     * @throws Exception
+     * @throws Exception if something exceptional happens
      */
     @Test
     public void testClosableReleasesResources() throws Exception {
@@ -109,7 +109,7 @@ public class FcrepoResponseTest {
      * exception is thrown inside of a client's {@code try} block, the {@code IOException} from the {@code close()}
      * method is properly appended as a suppressed exception.
      *
-     * @throws Exception
+     * @throws Exception if something exceptional happens
      */
     @Test
     public void testClosableSuppressedExceptions() throws Exception {
@@ -136,7 +136,7 @@ public class FcrepoResponseTest {
     /**
      * Demonstrates a successful idiomatic usage with try-with-resources
      *
-     * @throws Exception
+     * @throws Exception if something exceptional happens
      */
     @Test
     public void testIdiomaticInvokation() throws Exception {
@@ -157,7 +157,7 @@ public class FcrepoResponseTest {
     /**
      * Demonstrates idiomatic exception handling with try-with-resources
      *
-     * @throws Exception
+     * @throws Exception if something exceptional happens
      */
     @Test
     public void testIdiomaticInvokationThrowsException() throws Exception {
