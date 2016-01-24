@@ -29,6 +29,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
@@ -93,6 +94,11 @@ public class FcrepoClient {
             }
             return new FcrepoResponse(url, status, contentType, describedBy, null);
         } else {
+            try {
+                free(response);
+            } catch (IOException e) {
+                // ignore, no viable recovery
+            }
             throw new FcrepoOperationFailedException(url, status,
                     response.getStatusLine().getReasonPhrase());
         }
@@ -239,6 +245,11 @@ public class FcrepoClient {
             return new FcrepoResponse(url, status, contentType, describedBy,
                     getEntityContent(response));
         } else {
+            try {
+                free(response);
+            } catch (IOException e) {
+                // ignore, no viable recovery
+            }
             throw new FcrepoOperationFailedException(url, status,
                     response.getStatusLine().getReasonPhrase());
         }
@@ -268,11 +279,31 @@ public class FcrepoClient {
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !throwExceptionOnFailure) {
             return new FcrepoResponse(url, status, contentTypeHeader, locationHeader, getEntityContent(response));
         } else {
+            try {
+                free(response);
+            } catch (IOException e) {
+                // ignore, no viable recovery path
+            }
             throw new FcrepoOperationFailedException(url, status,
                     response.getStatusLine().getReasonPhrase());
         }
     }
 
+    /**
+     * Frees resources associated with the {@code HttpResponse}.  Specifically, closing the {@code InputStream} of the
+     * response body closes and frees the connection of the {@link HttpClientConnectionManager} underlying this
+     * {@link #httpclient}.
+     *
+     * @param response the HttpResponse
+     * @throws IOException if there is trouble closing the response body {@code InputStream}
+     */
+    private void free(HttpResponse response) throws IOException {
+        // Free resources associated with the response.
+        final InputStream entityContent = getEntityContent(response);
+        if (entityContent != null) {
+            entityContent.close();
+        }
+    }
 
     /**
      * Extract the response body as an input stream
