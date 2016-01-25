@@ -27,6 +27,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.HttpClientConnectionManager;
@@ -80,7 +81,7 @@ public class FcrepoClient {
             throws FcrepoOperationFailedException {
 
         final HttpRequestBase request = HttpMethods.HEAD.createRequest(url);
-        final HttpResponse response = executeRequest(request);
+        final CloseableHttpResponse response = executeRequest(request);
         final int status = response.getStatusLine().getStatusCode();
         final String contentType = getContentTypeHeader(response);
 
@@ -94,11 +95,7 @@ public class FcrepoClient {
             }
             return new FcrepoResponse(url, status, contentType, describedBy, null);
         } else {
-            try {
-                free(response);
-            } catch (IOException e) {
-                // ignore, no viable recovery
-            }
+            free(response);
             throw new FcrepoOperationFailedException(url, status,
                     response.getStatusLine().getReasonPhrase());
         }
@@ -127,7 +124,7 @@ public class FcrepoClient {
 
         LOGGER.debug("Fcrepo PUT request headers: {}", request.getAllHeaders());
 
-        final HttpResponse response = executeRequest(request);
+        final CloseableHttpResponse response = executeRequest(request);
 
         LOGGER.debug("Fcrepo PUT request returned status [{}]", response.getStatusLine().getStatusCode());
 
@@ -153,7 +150,7 @@ public class FcrepoClient {
 
         LOGGER.debug("Fcrepo PATCH request headers: {}", request.getAllHeaders());
 
-        final HttpResponse response = executeRequest(request);
+        final CloseableHttpResponse response = executeRequest(request);
 
         LOGGER.debug("Fcrepo PATCH request returned status [{}]", response.getStatusLine().getStatusCode());
 
@@ -183,7 +180,7 @@ public class FcrepoClient {
 
         LOGGER.debug("Fcrepo POST request headers: {}", request.getAllHeaders());
 
-        final HttpResponse response = executeRequest(request);
+        final CloseableHttpResponse response = executeRequest(request);
 
         LOGGER.debug("Fcrepo POST request returned status [{}]", response.getStatusLine().getStatusCode());
 
@@ -200,7 +197,7 @@ public class FcrepoClient {
             throws FcrepoOperationFailedException {
 
         final HttpRequestBase request = HttpMethods.DELETE.createRequest(url);
-        final HttpResponse response = executeRequest(request);
+        final CloseableHttpResponse response = executeRequest(request);
 
         LOGGER.debug("Fcrepo DELETE request returned status [{}]", response.getStatusLine().getStatusCode());
 
@@ -230,7 +227,7 @@ public class FcrepoClient {
 
         LOGGER.debug("Fcrepo GET request headers: {}", request.getAllHeaders());
 
-        final HttpResponse response = executeRequest(request);
+        final CloseableHttpResponse response = executeRequest(request);
         final int status = response.getStatusLine().getStatusCode();
         final String contentType = getContentTypeHeader(response);
 
@@ -245,11 +242,7 @@ public class FcrepoClient {
             return new FcrepoResponse(url, status, contentType, describedBy,
                     getEntityContent(response));
         } else {
-            try {
-                free(response);
-            } catch (IOException e) {
-                // ignore, no viable recovery
-            }
+            free(response);
             throw new FcrepoOperationFailedException(url, status,
                     response.getStatusLine().getReasonPhrase());
         }
@@ -258,7 +251,7 @@ public class FcrepoClient {
     /**
      * Execute the HTTP request
      */
-    private HttpResponse executeRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {
+    private CloseableHttpResponse executeRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {
         try {
             return httpclient.execute(request);
         } catch (IOException ex) {
@@ -270,7 +263,7 @@ public class FcrepoClient {
     /**
      * Handle the general case with responses.
      */
-    private FcrepoResponse fcrepoGenericResponse(final URI url, final HttpResponse response,
+    private FcrepoResponse fcrepoGenericResponse(final URI url, final CloseableHttpResponse response,
             final Boolean throwExceptionOnFailure) throws FcrepoOperationFailedException {
         final int status = response.getStatusLine().getStatusCode();
         final URI locationHeader = getLocationHeader(response);
@@ -279,29 +272,24 @@ public class FcrepoClient {
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !throwExceptionOnFailure) {
             return new FcrepoResponse(url, status, contentTypeHeader, locationHeader, getEntityContent(response));
         } else {
-            try {
-                free(response);
-            } catch (IOException e) {
-                // ignore, no viable recovery path
-            }
+            free(response);
             throw new FcrepoOperationFailedException(url, status,
                     response.getStatusLine().getReasonPhrase());
         }
     }
 
     /**
-     * Frees resources associated with the {@code HttpResponse}.  Specifically, closing the {@code InputStream} of the
-     * response body closes and frees the connection of the {@link HttpClientConnectionManager} underlying this
-     * {@link #httpclient}.
+     * Frees resources associated with the HTTP response.  Specifically, closing the {@code response} frees the
+     * connection of the {@link org.apache.http.conn.HttpClientConnectionManager} underlying this {@link #httpclient}.
      *
-     * @param response the HttpResponse
-     * @throws IOException if there is trouble closing the response body {@code InputStream}
+     * @param response the response object to close
      */
-    private void free(HttpResponse response) throws IOException {
+    private void free(final CloseableHttpResponse response) {
         // Free resources associated with the response.
-        final InputStream entityContent = getEntityContent(response);
-        if (entityContent != null) {
-            entityContent.close();
+        try {
+            response.close();
+        } catch (IOException e) {
+            LOGGER.warn("Unable to close HTTP response.", e);
         }
     }
 
