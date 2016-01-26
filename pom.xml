@@ -13,7 +13,7 @@
   <artifactId>fcrepo-java-client</artifactId>
   <packaging>bundle</packaging>
 
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.1.2-SNAPSHOT</version>
 
   <name>Fedora 4 Java Client Libraries</name>
   <description>Java libraries for interacting with a Fedora 4 Repository</description>
