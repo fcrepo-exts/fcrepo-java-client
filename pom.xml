@@ -37,7 +37,7 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <fcrepo.version>4.4.1-SNAPSHOT</fcrepo.version>
+    <fcrepo.version>4.5.0</fcrepo.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang3.version>3.3.2</commons.lang3.version>
     <commons.logging.version>1.1.3</commons.logging.version>
