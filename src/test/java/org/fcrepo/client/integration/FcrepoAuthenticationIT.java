@@ -1,23 +1,40 @@
+/**
+ * Copyright 2015 DuraSpace, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.fcrepo.client.integration;
 
 import static javax.ws.rs.core.Response.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.FORBIDDEN;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
+import static org.fcrepo.client.TestUtils.rdfTtl;
+import static org.fcrepo.client.TestUtils.sparqlUpdate;
 import static org.junit.Assert.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.fcrepo.client.FcrepoClient;
+import org.fcrepo.client.FcrepoResponse;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.AbstractHttpMessage;
-import org.apache.http.util.EntityUtils;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -46,7 +63,9 @@ public class FcrepoAuthenticationIT {
     protected final PoolingHttpClientConnectionManager connectionManager =
             new PoolingHttpClientConnectionManager();
 
-    protected static CloseableHttpClient client;
+    protected static FcrepoClient client;
+
+    protected static FcrepoClient authClient;
 
     private static boolean is_setup = false;
 
@@ -54,42 +73,86 @@ public class FcrepoAuthenticationIT {
         connectionManager.setMaxTotal(Integer.MAX_VALUE);
         connectionManager.setDefaultMaxPerRoute(20);
         connectionManager.closeIdleConnections(3, TimeUnit.SECONDS);
-        client =
-                HttpClientBuilder.create().setConnectionManager(
-                        connectionManager).build();
-
-
+        client = new FcrepoClient(null, null, null, false);
+        authClient = new FcrepoClient("fedoraAdmin", "password", "localhost", false);
     }
 
-    private static void setAuth(final AbstractHttpMessage method, final String username) {
-        final String creds = username + ":password";
-        // in test configuration we don't need real passwords
-        final String encCreds =
-                new String(Base64.encodeBase64(creds.getBytes()));
-        final String basic = "Basic " + encCreds;
-        method.setHeader("Authorization", basic);
-    }
+    @Test
+    public void testAuthUserCanPut() throws Exception {
 
-    @Before
-    public void setUp() throws Exception {
-        final HttpPut method = new HttpPut(serverAddress + "test");
-        setAuth(method, "fedoraAdmin");
-        final HttpResponse response = client.execute(method);
-        final String content =  EntityUtils.toString(response.getEntity());
-        final int status = response.getStatusLine().getStatusCode();
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        final FcrepoResponse response = authClient.put(new URI(serverAddress + "testobj1"), body, TEXT_TURTLE);
+        final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
         assertEquals("Didn't get a CREATED response! Got content:\n" + content,
                 CREATED.getStatusCode(), status);
     }
 
-    /* Public object, one open datastream */
     @Test
-    public void testUnauthenticatedReaderCanReadOpenObj()
-            throws IOException {
-        final HttpGet method = new HttpGet(serverAddress + "test");
-        //setAuth(method, "fedoraAdmin");
-        final HttpResponse response = client.execute(method);
-        final int status = response.getStatusLine().getStatusCode();
-        assertEquals("Unauthenticated user cannot read testparent1!", OK
+    public void testUnAuthUserCannotPut() throws Exception {
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        final FcrepoResponse response = client.put(new URI(serverAddress + "testobj2"), body, TEXT_TURTLE);
+        final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
+        assertEquals("Unauthenticated user should be forbidden! Got content:\n" + content,
+                FORBIDDEN.getStatusCode(), status);
+    }
+
+    @Test
+    public void testAuthUserCanPatch() throws Exception {
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        final FcrepoResponse response = authClient.patch(new URI(serverAddress + "testobj1"), body);
+        //final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
+        assertEquals("Didn't get a successful PATCH response! Got content:\n",
+                NO_CONTENT.getStatusCode(), status);
+    }
+
+    @Test
+    public void testUnAuthUserCannotPatch() throws Exception {
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        final FcrepoResponse response = client.patch(new URI(serverAddress + "testobj1"), body);
+        final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
+        assertEquals("Unauthenticated user should be forbidden! Got content:\n" + content,
+                FORBIDDEN.getStatusCode(), status);
+    }
+
+    @Test
+    public void testAuthUserCanPost() throws Exception {
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        final FcrepoResponse response = authClient.post(new URI(serverAddress), body, TEXT_TURTLE);
+        final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
+        assertEquals("Didn't get a CREATED response! Got content:\n" + content,
+                CREATED.getStatusCode(), status);
+    }
+
+    @Test
+    public void testUnAuthUserCannotPost() throws Exception {
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        final FcrepoResponse response = client.post(new URI(serverAddress), body, TEXT_TURTLE);
+        final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
+        assertEquals("Unauthenticated user should be forbidden! Got content:\n" + content,
+                FORBIDDEN.getStatusCode(), status);
+    }
+
+    @Test
+    public void testAuthUserCanGet()
+            throws Exception {
+        final FcrepoResponse response = authClient.get(new URI(serverAddress), null, null);
+        final int status = response.getStatusCode();
+        assertEquals("Authenticated user can not read root!", OK
+                .getStatusCode(), status);
+    }
+
+    @Test
+    public void testUnAuthUserCannotGet()
+            throws Exception {
+        final FcrepoResponse response = client.get(new URI(serverAddress), null, null);
+        final int status = response.getStatusCode();
+        assertEquals("Unauthenticated user should be forbidden!", FORBIDDEN
                 .getStatusCode(), status);
     }
 }
