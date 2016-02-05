@@ -60,7 +60,7 @@ import static org.mockito.Mockito.verify;
  * @author esm
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ConnectionManagementIT {
+public class ConnectionManagementTest {
 
     /**
      * Starts a mock HTTP server on a free port
@@ -159,7 +159,7 @@ public class ConnectionManagementIT {
     private PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
         // Required because we have a test that doesn't close connections, so we have to insure that the
         // connection manager doesn't block during that test.
@@ -183,18 +183,16 @@ public class ConnectionManagementIT {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() throws IOException {
         underTest.close();
     }
 
     /**
      * Demonstrates that HTTP connections are released when the FcrepoClient throws an exception.  Each method of the
      * FcrepoClient (get, put, post, etc.) is tested.
-     *
-     * @throws Exception if something exceptional happens
      */
     @Test
-    public void connectionReleasedOnException() throws Exception {
+    public void connectionReleasedOnException() {
         // Hard-coded 6 b/c HttpMethods lists Options, which isn't supported by the FcrepoClient.
         final int expectedCount = 6;
         final AtomicInteger actualCount = new AtomicInteger(0);
@@ -217,11 +215,9 @@ public class ConnectionManagementIT {
     /**
      * Demonstrates that HTTP connections are released when the user of the FcrepoClient closes the HTTP entity body.
      * Each method of the FcrepoClient (get, put, post, etc.) is tested.
-     *
-     * @throws Exception if something exceptional happens
      */
     @Test
-    public void connectionReleasedOnEntityBodyClose() throws Exception {
+    public void connectionReleasedOnEntityBodyClose() {
         final int expectedCount = (int) Stream.of(HttpMethods.values()).filter(m -> m.entity).count();
         final AtomicInteger actualCount = new AtomicInteger(0);
         final MockHttpExpectations.Uris uri = uris.uri200;
@@ -240,11 +236,9 @@ public class ConnectionManagementIT {
 
     /**
      * Demonstrates that are connections are released when the user of the FcrepoClient reads the HTTP entity body.
-     *
-     * @throws Exception if something exceptional happens
      */
     @Test
-    public void connectionReleasedOnEntityBodyRead() throws Exception {
+    public void connectionReleasedOnEntityBodyRead() {
         final int expectedCount = (int) Stream.of(HttpMethods.values()).filter(m -> m.entity).count();
         final AtomicInteger actualCount = new AtomicInteger(0);
         final MockHttpExpectations.Uris uri = uris.uri200;
@@ -264,11 +258,9 @@ public class ConnectionManagementIT {
     /**
      * Demonstrates that are connections are NOT released if the user of the FcrepoClient does not handle the response
      * body at all.
-     *
-     * @throws Exception if something exceptional happens
      */
     @Test
-    public void connectionNotReleasedWhenEntityBodyIgnored() throws Exception {
+    public void connectionNotReleasedWhenEntityBodyIgnored() {
         final int expectedCount = (int) Stream.of(HttpMethods.values()).filter(m -> m.entity).count();
         final AtomicInteger actualCount = new AtomicInteger(0);
         final MockHttpExpectations.Uris uri = uris.uri200;

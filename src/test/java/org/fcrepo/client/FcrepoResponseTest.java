@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static java.net.URI.create;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -33,6 +34,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 
+import com.google.common.io.ByteStreams;
 import org.apache.commons.io.output.NullOutputStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,10 +87,10 @@ public class FcrepoResponseTest {
      * (i.e. no exception thrown during {@code close()}) conditions, and that {@link InputStream#close()} is not invoked
      * repeatedly after the {@code FcrepoResponse} has been {@code close()}ed.
      *
-     * @throws Exception if something exceptional happens
+     * @throws IOException if something exceptional happens
      */
     @Test
-    public void testClosableReleasesResources() throws Exception {
+    public void testClosableReleasesResources() throws IOException {
         final InputStream mockBody = mock(InputStream.class);
         final FcrepoResponse underTest = new FcrepoResponse(
                 URI.create("http://localhost/foo"), 201, "text/plain", URI.create("http://localhost/bar"), mockBody);
@@ -109,25 +111,25 @@ public class FcrepoResponseTest {
      * exception is thrown inside of a client's {@code try} block, the {@code IOException} from the {@code close()}
      * method is properly appended as a suppressed exception.
      *
-     * @throws Exception if something exceptional happens
+     * @throws IOException if something exceptional happens
      */
     @Test
-    public void testClosableSuppressedExceptions() throws Exception {
+    public void testClosableSuppressedExceptions() throws IOException {
         final InputStream mockBody = mock(InputStream.class);
-        final String notSuppressedMsg = "Not suppressed.";
-        final String suppressedMsg = "Suppressed IOE";
-        doThrow(new IOException(suppressedMsg)).when(mockBody).close();
+        final IOException notSuppressed = new IOException("Not suppressed.");
+        final IOException suppressed = new IOException("Suppressed");
+        doThrow(suppressed).when(mockBody).close();
 
         try (FcrepoResponse underTest = new FcrepoResponse(URI.create("http://localhost/foo"), 201, "text/plain",
                 URI.create("http://localhost/bar"), mockBody)) {
             assertFalse(underTest.isClosed());
 
-            throw new RuntimeException(notSuppressedMsg);
+            throw notSuppressed;
 
         } catch (Exception e) {
-            assertEquals(notSuppressedMsg, e.getMessage());
+            assertSame(notSuppressed, e);
             assertTrue(e.getSuppressed() != null && e.getSuppressed().length == 1);
-            assertEquals(suppressedMsg, e.getSuppressed()[0].getMessage());
+            assertSame(suppressed, e.getSuppressed()[0]);
         }
 
         verify(mockBody).close();
@@ -136,10 +138,10 @@ public class FcrepoResponseTest {
     /**
      * Demonstrates a successful idiomatic usage with try-with-resources
      *
-     * @throws Exception if something exceptional happens
+     * @throws FcrepoOperationFailedException if something exceptional happens
      */
     @Test
-    public void testIdiomaticInvokation() throws Exception {
+    public void testIdiomaticInvokation() throws FcrepoOperationFailedException {
         final String content = "Hello World!";
         final ByteArrayInputStream entityBody = new ByteArrayInputStream(content.getBytes());
         final FcrepoClient client = mock(FcrepoClient.class);
@@ -149,7 +151,7 @@ public class FcrepoResponseTest {
 
         try (FcrepoResponse res = client.get(URI.create("foo"), "", "")) {
             assertEquals(content, IOUtils.toString(res.getBody()));
-        } catch (Exception e) {
+        } catch (IOException e) {
             fail("Unexpected exception: " + e);
         }
     }
@@ -162,17 +164,18 @@ public class FcrepoResponseTest {
     @Test
     public void testIdiomaticInvokationThrowsException() throws Exception {
         final InputStream mockBody = mock(InputStream.class);
-        when(mockBody.read(any(byte[].class))).thenThrow(new IOException("Mocked IOE"));
+        final IOException ioe = new IOException("Mocked IOE");
+        when(mockBody.read(any(byte[].class))).thenThrow(ioe);
 
         final FcrepoClient client = mock(FcrepoClient.class);
         when(client.get(any(URI.class), any(String.class), any(String.class))).thenReturn(
                 new FcrepoResponse(null, 200, null, null, mockBody));
 
         try (FcrepoResponse res = client.get(URI.create("foo"), "", "")) {
-            IOUtils.copy(res.getBody(), NullOutputStream.NULL_OUTPUT_STREAM);
+            ByteStreams.copy(res.getBody(), NullOutputStream.NULL_OUTPUT_STREAM);
             fail("Expected an IOException to be thrown.");
-        } catch (Exception e) {
-            assertEquals("Mocked IOE", e.getMessage());
+        } catch (IOException e) {
+            assertSame(ioe, e);
         }
 
         verify(mockBody).close();
