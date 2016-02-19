@@ -20,11 +20,14 @@ import java.lang.reflect.Field;
 /**
  * @author acoburn
  */
-class TestUtils {
+public class TestUtils {
 
     private TestUtils() { }
 
     public static final String baseUrl = "http://localhost:8080/rest/foo";
+
+    public static final String rdfTtl = "@prefix dc: <http://purl.org/dc/elements/1.1/> .\n" +
+            "<> dc:title \"Test Object\" . ";
 
     public static final String rdfXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
             "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
