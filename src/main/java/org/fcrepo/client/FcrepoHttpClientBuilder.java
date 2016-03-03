@@ -18,13 +18,24 @@ package org.fcrepo.client;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.io.IOException;
+
+import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthState;
+import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpCoreContext;
 import org.slf4j.Logger;
 
 /**
@@ -83,7 +94,28 @@ public class FcrepoHttpClientBuilder {
             return HttpClients.custom()
                     .setDefaultCredentialsProvider(credsProvider)
                     .useSystemProperties()
+                    .addInterceptorFirst(new PreemptiveAuthInterceptor())
                     .build();
+        }
+    }
+
+    static class PreemptiveAuthInterceptor implements HttpRequestInterceptor {
+
+        public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
+            final AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
+            // If no auth scheme available yet, try to initialize it
+            // preemptively
+            if (authState.getAuthScheme() == null) {
+                final CredentialsProvider credsProvider = (CredentialsProvider)
+                        context.getAttribute(HttpClientContext.CREDS_PROVIDER);
+                final HttpHost targetHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
+                final AuthScope authScope = new AuthScope(targetHost.getHostName(), targetHost.getPort());
+                final Credentials creds = credsProvider.getCredentials(authScope);
+                if (creds == null) {
+                    LOGGER.debug("Cannot initiate preemtive authentication, Credentials not found!");
+                }
+                authState.update(new BasicScheme(), creds);
+            }
         }
     }
 }
