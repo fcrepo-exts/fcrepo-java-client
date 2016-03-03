@@ -55,8 +55,6 @@ public class FcrepoAuthenticationIT {
 
     protected static final String HOSTNAME = "localhost";
 
-    protected static final String SUFFIX = "fcr:accessroles";
-
     protected static final String serverAddress = "http://" + HOSTNAME + ":" +
             SERVER_PORT + "/rest/";
 
@@ -66,8 +64,6 @@ public class FcrepoAuthenticationIT {
     protected static FcrepoClient client;
 
     protected static FcrepoClient authClient;
-
-    private static boolean is_setup = false;
 
     public FcrepoAuthenticationIT() throws Exception {
         connectionManager.setMaxTotal(Integer.MAX_VALUE);
@@ -102,7 +98,6 @@ public class FcrepoAuthenticationIT {
     public void testAuthUserCanPatch() throws Exception {
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
         final FcrepoResponse response = authClient.patch(new URI(serverAddress + "testobj1"), body);
-        //final String content = IOUtils.toString(response.getBody(), "UTF-8");
         final int status = response.getStatusCode();
         assertEquals("Didn't get a successful PATCH response! Got content:\n",
                 NO_CONTENT.getStatusCode(), status);
