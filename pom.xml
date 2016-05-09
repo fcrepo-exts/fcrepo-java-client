@@ -40,7 +40,6 @@
     <fcrepo.version>4.5.0</fcrepo.version>
     <commons.io.version>2.4</commons.io.version>
     <commons.lang3.version>3.3.2</commons.lang3.version>
-    <commons.logging.version>1.1.3</commons.logging.version>
     <grizzly.version>2.3.18</grizzly.version>
     <httpclient.version>4.3.6</httpclient.version>
     <jersey.version>2.15</jersey.version>
@@ -172,6 +171,7 @@
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-netty</artifactId>
       <version>${mockserver.version}</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
