@@ -168,6 +168,17 @@ public class FcrepoClient {
 
         return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
+    
+    /**
+     * Make a POST request
+     * 
+     * @param url the URL of the resource to which to POST
+     * @return a post request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public PostBuilder<?> post(final URI url) throws FcrepoOperationFailedException {
+        return new PostBuilder<>(url, this);
+    }
 
     /**
      * Make a POST request
@@ -258,6 +269,13 @@ public class FcrepoClient {
             throw new FcrepoOperationFailedException(url, status,
                     response.getStatusLine().getReasonPhrase());
         }
+    }
+    
+    public FcrepoResponse executeRequest(final URI uri, final HttpRequestBase request)
+            throws FcrepoOperationFailedException {
+        final CloseableHttpResponse response = executeRequest(request);
+        
+        return fcrepoGenericResponse(uri, response, throwExceptionOnFailure);
     }
 
     /**
