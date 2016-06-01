@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.fcrepo.client;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 /**
  * Request builder which includes a body component
@@ -28,6 +28,10 @@ import java.io.InputStream;
  */
 public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extends
         RequestBuilder<BodyRequestBuilder<T>> {
+
+    protected BodyRequestBuilder(URI uri, FcrepoClient client) {
+        super(uri, client);
+    }
 
     protected InputStream bodyStream;
 

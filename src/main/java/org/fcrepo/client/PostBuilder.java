@@ -46,8 +46,7 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
     protected String slug;
 
     public PostBuilder(URI uri, FcrepoClient client) {
-        this.targetUri = uri;
-        this.client = client;
+        super(uri, client);
     }
 
     @Override

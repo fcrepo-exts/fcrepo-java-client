@@ -226,6 +226,10 @@ public class FcrepoClient {
 
         return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
+    
+    public GetBuilder<?> get(final URI url) {
+        return new GetBuilder<>(url, this);
+    }
 
     /**
      * Make a GET request
@@ -271,11 +275,32 @@ public class FcrepoClient {
         }
     }
     
-    public FcrepoResponse executeRequest(final URI uri, final HttpRequestBase request)
+    public FcrepoResponse executeRequest(final URI url, final HttpRequestBase request)
             throws FcrepoOperationFailedException {
         final CloseableHttpResponse response = executeRequest(request);
         
-        return fcrepoGenericResponse(uri, response, throwExceptionOnFailure);
+        if (request.getMethod() == "GET" || request.getMethod() == "HEAD") {
+            final int status = response.getStatusLine().getStatusCode();
+            final String contentType = getContentTypeHeader(response);
+
+            LOGGER.debug("Fcrepo {} request returned status [{}]", request.getMethod(), status);
+
+            if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
+                URI describedBy = null;
+                final List<URI> links = getLinkHeaders(response, DESCRIBED_BY);
+                if (links.size() == 1) {
+                    describedBy = links.get(0);
+                }
+                return new FcrepoResponse(url, status, contentType, describedBy,
+                        getEntityContent(response));
+            } else {
+                free(response);
+                throw new FcrepoOperationFailedException(url, status,
+                        response.getStatusLine().getReasonPhrase());
+            }
+        }
+        
+        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
 
     /**

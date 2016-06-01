@@ -27,6 +27,11 @@ public abstract class RequestBuilder<T extends RequestBuilder<T>> {
     // URL this request will be executed against
     protected URI targetUri;
 
+    protected RequestBuilder(URI uri, FcrepoClient client) {
+        this.targetUri = uri;
+        this.client = client;
+    }
+    
     /**
      * Performs the request constructed in this builder and returns the response
      * 
