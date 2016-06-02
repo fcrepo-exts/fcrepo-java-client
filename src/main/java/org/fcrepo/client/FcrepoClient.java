@@ -264,6 +264,17 @@ public class FcrepoClient {
     }
     
     /**
+     * Make a MOVE request to move a resource (and its subtree) to a new location.
+     * @param source url of the resource to move
+     * @param destination url of the new location for the resource
+     * @return a move request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public MoveBuilder<?> move(final URI source, final URI destination) throws FcrepoOperationFailedException {
+        return new MoveBuilder<>(source, destination, this);
+    }
+    
+    /**
      * Make a GET request to retrieve the content of a resource
      * 
      * @param url the URL of the resource to which to POST

@@ -41,7 +41,8 @@ public enum HttpMethods {
     PUT(HttpPut.class),
     DELETE(HttpDelete.class),
     HEAD(HttpHead.class),
-    OPTIONS(HttpOptions.class);
+    OPTIONS(HttpOptions.class),
+    MOVE(HttpMove.class);
 
     final Class<? extends HttpRequestBase> clazz;
     final boolean entity;
@@ -62,6 +63,26 @@ public enum HttpMethods {
             return clazz.getDeclaredConstructor(URI.class).newInstance(url);
         } catch (ReflectiveOperationException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+    
+    /**
+     * HTTP MOVE method.
+     * 
+     * @author bbpennel
+     */
+    public class HttpMove extends HttpRequestBase {
+
+        public final static String METHOD_NAME = "MOVE";
+
+        public HttpMove(final URI uri) {
+            super();
+            setURI(uri);
+        }
+
+        @Override
+        public String getMethod() {
+            return METHOD_NAME;
         }
     }
 }
