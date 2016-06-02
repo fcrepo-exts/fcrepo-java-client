@@ -234,6 +234,17 @@ public class FcrepoClient {
 
         return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
+    
+    /**
+     * Make a DELETE request to delete a resource
+     * 
+     * @param url the URL of the resource to which to DELETE
+     * @return a delete request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+//    public DeleteBuilder<?> delete(final URI url) throws FcrepoOperationFailedException {
+//        return new DeleteBuilder<>(url, this);
+//    }
 
     /**
      * Make a DELETE request
