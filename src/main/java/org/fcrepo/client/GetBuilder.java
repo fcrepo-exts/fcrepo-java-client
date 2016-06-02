@@ -31,7 +31,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.slf4j.Logger;
 
 /**
- * Builds a GET request for retrieving representations of objects from the Fedora HTTP API
+ * Builds a GET request to retrieve the content of a resource from the Fedora HTTP API
  * 
  * @author bbpennel
  */

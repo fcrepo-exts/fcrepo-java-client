@@ -112,6 +112,18 @@ public class FcrepoClient {
                     response.getStatusLine().getReasonPhrase());
         }
     }
+    
+    /**
+     * Make a PUT request to create a resource with a specified path,
+     * or replace the triples associated with a resource with the triples provided in the request body.
+     * 
+     * @param url the URL of the resource to which to PUT
+     * @return a put request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public PutBuilder<?> put(final URI url) throws FcrepoOperationFailedException {
+        return new PutBuilder<>(url, this);
+    }
 
     /**
      * Make a PUT request
@@ -142,6 +154,18 @@ public class FcrepoClient {
 
         return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
+    
+    /**
+     * Make a PATCH request to modify the triples associated with a
+     * resource with SPARQL-Update.
+     * 
+     * @param url the URL of the resource to which to PATCH
+     * @return a patch request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public PatchBuilder<?> patch(final URI url) throws FcrepoOperationFailedException {
+        return new PatchBuilder<>(url, this);
+    }
 
     /**
      * Make a PATCH request
@@ -170,7 +194,8 @@ public class FcrepoClient {
     }
     
     /**
-     * Make a POST request
+     * Make a POST request to create a new resource within an LDP
+     * container.
      * 
      * @param url the URL of the resource to which to POST
      * @return a post request builder object
@@ -227,6 +252,13 @@ public class FcrepoClient {
         return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
     
+    /**
+     * Make a GET request to retrieve the content of a resource
+     * 
+     * @param url the URL of the resource to which to POST
+     * @return a post request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
     public GetBuilder<?> get(final URI url) {
         return new GetBuilder<>(url, this);
     }
