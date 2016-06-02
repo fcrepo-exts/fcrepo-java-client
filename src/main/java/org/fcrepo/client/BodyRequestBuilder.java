@@ -13,13 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.client;
+
+import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
+import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
+import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.InputStreamEntity;
 
 /**
  * Request builder which includes a body component
@@ -29,13 +38,19 @@ import java.net.URI;
 public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extends
         RequestBuilder<BodyRequestBuilder<T>> {
 
-    protected BodyRequestBuilder(URI uri, FcrepoClient client) {
-        super(uri, client);
-    }
-
     protected InputStream bodyStream;
 
     protected String contentType;
+
+    protected String digest;
+
+    protected String etag;
+
+    protected String unmodifiedSince;
+
+    protected BodyRequestBuilder(URI uri, FcrepoClient client) {
+        super(uri, client);
+    }
 
     protected abstract T self();
 
@@ -77,5 +92,30 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
      */
     public T body(File file, String contentType) throws IOException {
         return body(new FileInputStream(file), contentType);
+    }
+
+    protected void addBody(HttpEntityEnclosingRequestBase request) {
+        if (bodyStream != null) {
+            request.setEntity(new InputStreamEntity(bodyStream));
+            request.addHeader(CONTENT_TYPE, contentType);
+        }
+    }
+
+    protected void addDigest(HttpRequestBase request) {
+        if (digest != null) {
+            request.addHeader(DIGEST, "sha1=" + digest);
+        }
+    }
+    
+    protected void addIfUnmodifiedSince(HttpRequestBase request) {
+        if (unmodifiedSince != null) {
+            request.setHeader(IF_UNMODIFIED_SINCE, unmodifiedSince);
+        }
+    }
+    
+    protected void addIfMatch(HttpRequestBase request) {
+        if (etag != null) {
+            request.setHeader(IF_UNMODIFIED_SINCE, etag);
+        }
     }
 }

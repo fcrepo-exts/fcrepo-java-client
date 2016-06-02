@@ -17,15 +17,12 @@
 package org.fcrepo.client;
 
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
-import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
-import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.SLUG;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.entity.InputStreamEntity;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 
@@ -39,7 +36,7 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
 
     private static final Logger LOGGER = getLogger(PostBuilder.class);
 
-    protected String digest;
+    
 
     protected String contentDisposition;
 
@@ -55,14 +52,8 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
         final HttpEntityEnclosingRequestBase request =
                 (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);
 
-        if (bodyStream != null) {
-            request.setEntity(new InputStreamEntity(bodyStream));
-            request.addHeader(CONTENT_TYPE, contentType);
-        }
-
-        if (digest != null) {
-            request.addHeader(DIGEST, "sha1=" + digest);
-        }
+        addBody(request);
+        addDigest(request);
 
         if (slug != null) {
             request.addHeader(SLUG, slug);
