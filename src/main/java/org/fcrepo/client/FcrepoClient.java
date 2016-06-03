@@ -288,14 +288,25 @@ public class FcrepoClient {
     /**
      * Make a GET request to retrieve the content of a resource
      * 
-     * @param url the URL of the resource to which to POST
-     * @return a post request builder object
+     * @param url the URL of the resource to which to GET
+     * @return a get request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public GetBuilder<?> get(final URI url) {
+    public GetBuilder<?> get(final URI url) throws FcrepoOperationFailedException {
         return new GetBuilder<>(url, this);
     }
 
+    /**
+     * Make a HEAD request to retrieve resource headers.
+     * 
+     * @param url the URL of the resource to make the HEAD request on.
+     * @return a HEAD request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public HeadBuilder<?> head2(final URI url) throws FcrepoOperationFailedException {
+        return new HeadBuilder<>(url, this);
+    }
+    
     /**
      * Make a GET request
      * @param url the URL of the resource to fetch
@@ -342,6 +353,7 @@ public class FcrepoClient {
     
     public FcrepoResponse executeRequest(final URI url, final HttpRequestBase request)
             throws FcrepoOperationFailedException {
+        LOGGER.debug("Fcrepo {} request to resource {}", request.getMethod(), url);
         final CloseableHttpResponse response = executeRequest(request);
         
         if (request.getMethod() == "GET" || request.getMethod() == "HEAD") {

@@ -15,12 +15,10 @@
  */
 package org.fcrepo.client;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.slf4j.Logger;
+import org.apache.http.client.methods.HttpRequestBase;
 
 /**
  * Builds a PUT request for interacting with the Fedora HTTP API in order to create a resource with a specified path,
@@ -30,8 +28,6 @@ import org.slf4j.Logger;
  */
 public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutBuilder<T>> {
 
-    private static final Logger LOGGER = getLogger(PutBuilder.class);
-
     protected PutBuilder(URI uri, FcrepoClient client) {
         super(uri, client);
     }
@@ -40,22 +36,11 @@ public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutB
     protected PutBuilder<T> self() {
         return this;
     }
-
+    
     @Override
-    public FcrepoResponse perform() throws FcrepoOperationFailedException {
+    protected HttpRequestBase createRequest() {
         final HttpMethods method = HttpMethods.PUT;
-        final HttpEntityEnclosingRequestBase request =
-                (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);
-
-        addBody(request);
-        addDigest(request);
-        
-        addIfUnmodifiedSince(request);
-        addIfMatch(request);
-
-        LOGGER.debug("Fcrepo PUT request headers: {}", (Object[]) request.getAllHeaders());
-
-        return client.executeRequest(targetUri, request);
+        return (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);
     }
 
     /**

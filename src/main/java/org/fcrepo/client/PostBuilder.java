@@ -18,13 +18,12 @@ package org.fcrepo.client;
 
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.SLUG;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
-import org.slf4j.Logger;
 
 /**
  * Builds a post request for interacting with the Fedora HTTP API in order to create a new resource within an LDP
@@ -34,41 +33,12 @@ import org.slf4j.Logger;
  */
 public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<PostBuilder<T>> {
 
-    private static final Logger LOGGER = getLogger(PostBuilder.class);
-
-    
-
     protected String contentDisposition;
 
     protected String slug;
 
     public PostBuilder(URI uri, FcrepoClient client) {
         super(uri, client);
-    }
-
-    @Override
-    public FcrepoResponse perform() throws FcrepoOperationFailedException {
-        final HttpMethods method = HttpMethods.POST;
-        final HttpEntityEnclosingRequestBase request =
-                (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);
-
-        addBody(request);
-        addDigest(request);
-
-        if (slug != null) {
-            request.addHeader(SLUG, slug);
-        }
-
-        if (contentDisposition != null) {
-            final ContentDisposition cdValue = ContentDisposition.type("attachment")
-                    .fileName(contentDisposition)
-                    .build();
-            request.addHeader(CONTENT_DISPOSITION, cdValue.toString());
-        }
-
-        LOGGER.debug("Fcrepo POST request headers: {}", (Object[]) request.getAllHeaders());
-
-        return client.executeRequest(targetUri, request);
     }
 
     @Override
@@ -85,6 +55,28 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
     public PostBuilder<T> digest(String value) {
         this.digest = value;
         return self();
+    }
+
+    @Override
+    protected void populateRequest(final HttpRequestBase request) {
+        if (slug != null) {
+            request.addHeader(SLUG, slug);
+        }
+
+        if (contentDisposition != null) {
+            final ContentDisposition cdValue = ContentDisposition.type("attachment")
+                    .fileName(contentDisposition)
+                    .build();
+            request.addHeader(CONTENT_DISPOSITION, cdValue.toString());
+        }
+        
+        super.populateRequest(request);
+    }
+
+    @Override
+    protected HttpRequestBase createRequest() {
+        final HttpMethods method = HttpMethods.POST;
+        return (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);
     }
 
     /**
@@ -108,5 +100,4 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
         this.slug = value;
         return self();
     }
-
 }

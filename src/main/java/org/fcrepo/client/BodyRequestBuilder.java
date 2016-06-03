@@ -19,6 +19,7 @@ package org.fcrepo.client;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,6 +30,7 @@ import java.net.URI;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
+import org.slf4j.Logger;
 
 /**
  * Request builder which includes a body component
@@ -37,6 +39,8 @@ import org.apache.http.entity.InputStreamEntity;
  */
 public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extends
         RequestBuilder<BodyRequestBuilder<T>> {
+    
+    private static final Logger LOGGER = getLogger(PatchBuilder.class);
 
     protected InputStream bodyStream;
 
@@ -53,6 +57,18 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
     }
 
     protected abstract T self();
+    
+    @Override
+    protected void populateRequest(final HttpRequestBase request) {
+        addBody((HttpEntityEnclosingRequestBase) request);
+
+        addIfUnmodifiedSince(request);
+        addIfMatch(request);
+        
+        addDigest(request);
+        
+        LOGGER.debug("Fcrepo {} request headers: {}", request.getMethod(), (Object[]) request.getAllHeaders());
+    }
 
     /**
      * Add a body to this request from a stream, with application/octet-stream as its content type

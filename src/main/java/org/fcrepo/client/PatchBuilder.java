@@ -16,12 +16,10 @@
 
 package org.fcrepo.client;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.slf4j.Logger;
+import org.apache.http.client.methods.HttpRequestBase;
 
 /**
  * Builds a PUT request for interacting with the Fedora HTTP API in order to modify the triples associated with a
@@ -30,8 +28,6 @@ import org.slf4j.Logger;
  * @author bbpennel
  */
 public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<PatchBuilder<T>> {
-
-    private static final Logger LOGGER = getLogger(PatchBuilder.class);
 
     protected PatchBuilder(URI uri, FcrepoClient client) {
         super(uri, client);
@@ -43,19 +39,9 @@ public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<
     }
 
     @Override
-    public FcrepoResponse perform() throws FcrepoOperationFailedException {
+    protected HttpRequestBase createRequest() {
         final HttpMethods method = HttpMethods.PATCH;
-        final HttpEntityEnclosingRequestBase request =
-                (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);
-
-        addBody(request);
-
-        addIfUnmodifiedSince(request);
-        addIfMatch(request);
-
-        LOGGER.debug("Fcrepo PATCH request headers: {}", (Object[]) request.getAllHeaders());
-
-        return client.executeRequest(targetUri, request);
+        return (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);
     }
 
     /**

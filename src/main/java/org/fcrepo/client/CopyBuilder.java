@@ -18,6 +18,8 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
+import org.apache.http.client.methods.HttpRequestBase;
+
 /**
  * Builds a request to copy a resource (and its subtree) to a new location
  * 
@@ -27,7 +29,11 @@ public class CopyBuilder<T extends CopyBuilder<T>> extends MoveBuilder<CopyBuild
 
     protected CopyBuilder(URI sourceUrl, URI destinationUrl, FcrepoClient client) {
         super(sourceUrl, destinationUrl, client);
-        this.method = HttpMethods.COPY;
+    }
+    
+    @Override
+    protected HttpRequestBase createRequest() {
+        return HttpMethods.COPY.createRequest(targetUri);
     }
 
     @Override

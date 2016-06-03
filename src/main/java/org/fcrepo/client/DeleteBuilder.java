@@ -16,12 +16,9 @@
 
 package org.fcrepo.client;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
-import org.slf4j.Logger;
 
 /**
  * Builds a request to delete a resource
@@ -30,19 +27,13 @@ import org.slf4j.Logger;
  */
 public class DeleteBuilder<T extends DeleteBuilder<T>> extends RequestBuilder<DeleteBuilder<T>> {
 
-    private static final Logger LOGGER = getLogger(DeleteBuilder.class);
-
     protected DeleteBuilder(URI uri, FcrepoClient client) {
         super(uri, client);
     }
-
+    
     @Override
-    public FcrepoResponse perform() throws FcrepoOperationFailedException {
-        final HttpRequestBase request = HttpMethods.DELETE.createRequest(targetUri);
-
-        LOGGER.debug("Fcrepo DELETE request of {}", targetUri);
-
-        return client.executeRequest(targetUri, request);
+    protected HttpRequestBase createRequest() {
+        return HttpMethods.DELETE.createRequest(targetUri);
     }
 
     @Override

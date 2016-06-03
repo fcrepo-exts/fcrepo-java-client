@@ -64,11 +64,14 @@ public class GetBuilder<T extends GetBuilder<T>> extends
     protected GetBuilder<T> self() {
         return this;
     }
-
+    
     @Override
-    public FcrepoResponse perform() throws FcrepoOperationFailedException {
-        final HttpRequestBase request = HttpMethods.GET.createRequest(targetUri);
-
+    protected HttpRequestBase createRequest() {
+        return HttpMethods.GET.createRequest(targetUri);
+    }
+    
+    @Override
+    protected void populateRequest(final HttpRequestBase request) {
         if (acceptType != null) {
             request.setHeader(ACCEPT, acceptType);
         }
@@ -115,10 +118,8 @@ public class GetBuilder<T extends GetBuilder<T>> extends
         if (lastModified != null) {
             request.setHeader(IF_MODIFIED_SINCE, lastModified);
         }
-
-        System.out.println("Fcrepo GET request headers: " + (Object[]) request.getAllHeaders());
-        LOGGER.error("Fcrepo GET request headers: {}", (Object[]) request.getAllHeaders());
-        return client.executeRequest(targetUri, request);
+        
+        LOGGER.debug("Fcrepo GET request headers: {}", (Object[]) request.getAllHeaders());
     }
 
     /**

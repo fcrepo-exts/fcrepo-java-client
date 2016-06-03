@@ -18,12 +18,16 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
+import org.apache.http.client.methods.HttpRequestBase;
+
 /**
  * @author bbpennel
  */
 public abstract class RequestBuilder<T extends RequestBuilder<T>> {
+
     // Fedora client which will make this request
     protected FcrepoClient client;
+
     // URL this request will be executed against
     protected URI targetUri;
 
@@ -31,13 +35,22 @@ public abstract class RequestBuilder<T extends RequestBuilder<T>> {
         this.targetUri = uri;
         this.client = client;
     }
-    
+
     /**
      * Performs the request constructed in this builder and returns the response
      * 
      * @return
      */
-    public abstract FcrepoResponse perform() throws FcrepoOperationFailedException;
+    public FcrepoResponse perform() throws FcrepoOperationFailedException {
+        final HttpRequestBase request = createRequest();
+
+        return client.executeRequest(targetUri, request);
+    };
+
+    protected abstract HttpRequestBase createRequest();
+
+    protected void populateRequest(HttpRequestBase request) {
+    }
 
     protected abstract T self();
 }
