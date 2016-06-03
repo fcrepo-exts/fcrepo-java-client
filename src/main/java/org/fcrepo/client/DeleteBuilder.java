@@ -27,10 +27,16 @@ import org.apache.http.client.methods.HttpRequestBase;
  */
 public class DeleteBuilder<T extends DeleteBuilder<T>> extends RequestBuilder<DeleteBuilder<T>> {
 
-    protected DeleteBuilder(URI uri, FcrepoClient client) {
+    /**
+     * Instantiate builder
+     * 
+     * @param uri uri request will be issued to
+     * @param client the client
+     */
+    public DeleteBuilder(final URI uri, final FcrepoClient client) {
         super(uri, client);
     }
-    
+
     @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.DELETE.createRequest(targetUri);

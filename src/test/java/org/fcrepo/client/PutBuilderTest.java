@@ -72,10 +72,10 @@ public class PutBuilderTest {
     public void testPutNoBody() throws Exception {
         testBuilder.perform();
 
-        ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
         assertNull("Request body should not be set", request.getEntity());
         assertEquals(0, request.getAllHeaders().length);
     }
@@ -88,11 +88,11 @@ public class PutBuilderTest {
                 .digest("checksum")
                 .perform();
 
-        ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
-        HttpEntity bodyEntity = request.getEntity();
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpEntity bodyEntity = request.getEntity();
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
@@ -106,23 +106,23 @@ public class PutBuilderTest {
 
         testBuilder.perform();
     }
-    
+
     @Test
     public void testWithModificationHeaders() throws Exception {
         final InputStream bodyStream = mock(InputStream.class);
 
-        String etag = "123456";
-        String lastModified = "Mon, 19 May 2014 19:44:59 GMT";
+        final String etag = "123456";
+        final String lastModified = "Mon, 19 May 2014 19:44:59 GMT";
         testBuilder.body(bodyStream, "plain/text")
                 .ifMatch(etag)
                 .ifUnmodifiedSince(lastModified)
                 .perform();
 
-        ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
-        HttpEntity bodyEntity = request.getEntity();
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpEntity bodyEntity = request.getEntity();
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());

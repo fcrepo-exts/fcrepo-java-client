@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.client;
 
 import java.net.URI;
@@ -28,7 +29,13 @@ import org.apache.http.client.methods.HttpRequestBase;
  */
 public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutBuilder<T>> {
 
-    protected PutBuilder(URI uri, FcrepoClient client) {
+    /**
+     * Instantiate builder
+     * 
+     * @param uri uri of the resource this request is being made to
+     * @param client the client
+     */
+    public PutBuilder(final URI uri, final FcrepoClient client) {
         super(uri, client);
     }
 
@@ -36,7 +43,7 @@ public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutB
     protected PutBuilder<T> self() {
         return this;
     }
-    
+
     @Override
     protected HttpRequestBase createRequest() {
         final HttpMethods method = HttpMethods.PUT;
@@ -46,33 +53,33 @@ public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutB
     /**
      * Provide an etag for the if-match header for this request
      * 
-     * @param value
-     * @return
+     * @param etag etag to provide as the if-match header
+     * @return this builder
      */
-    public PutBuilder<T> ifMatch(String value) {
-        this.etag = value;
+    public PutBuilder<T> ifMatch(final String etag) {
+        this.etag = etag;
         return self();
     }
 
     /**
      * Provide a if-unmodified-since header for this request
      * 
-     * @param lastModified
-     * @return
+     * @param modified date to provide as the if-unmodified-since header
+     * @return this builder
      */
-    public PutBuilder<T> ifUnmodifiedSince(String value) {
-        this.unmodifiedSince = value;
+    public PutBuilder<T> ifUnmodifiedSince(final String modified) {
+        this.unmodifiedSince = modified;
         return self();
     }
-    
+
     /**
      * Provide a SHA-1 checksum for the body of this request
      * 
-     * @param value
-     * @return
+     * @param digest sha-1 checksum to provide as the digest for the request body
+     * @return this builder
      */
-    public PutBuilder<T> digest(String value) {
-        this.digest = value;
+    public PutBuilder<T> digest(final String digest) {
+        this.digest = digest;
         return self();
     }
 }

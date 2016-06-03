@@ -27,6 +27,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,6 +60,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author esm
  */
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class ConnectionManagementTest {
 

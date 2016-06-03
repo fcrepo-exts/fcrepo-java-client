@@ -70,10 +70,10 @@ public class GetBuilderTest {
     public void testGet() throws Exception {
         testBuilder.perform();
 
-        ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        HttpRequestBase request = getRequest();
+        final HttpRequestBase request = getRequest();
         assertEquals(0, request.getAllHeaders().length);
     }
 
@@ -81,7 +81,7 @@ public class GetBuilderTest {
     public void testPreferMinimal() throws Exception {
         testBuilder.preferMinimal().perform();
 
-        HttpRequestBase request = getRequest();
+        final HttpRequestBase request = getRequest();
         assertEquals("return=minimal", request.getFirstHeader(PREFER).getValue());
     }
 
@@ -89,18 +89,18 @@ public class GetBuilderTest {
     public void testPreferRepresentation() throws Exception {
         testBuilder.preferRepresentation().perform();
 
-        HttpRequestBase request = getRequest();
+        final HttpRequestBase request = getRequest();
         assertEquals("return=representation", request.getFirstHeader(PREFER).getValue());
     }
 
     @Test
     public void testPreferInclude() throws Exception {
-        List<URI> includes = Arrays.asList(
+        final List<URI> includes = Arrays.asList(
                 new URI("http://fedora.info/definitions/v4/repository#InboundReferences"),
                 new URI("http://www.w3.org/ns/ldp#PreferMembership"));
         testBuilder.preferRepresentation(includes, null).perform();
 
-        HttpRequestBase request = getRequest();
+        final HttpRequestBase request = getRequest();
         assertEquals("return=representation; include=\"" +
                 "http://fedora.info/definitions/v4/repository#InboundReferences" +
                 " http://www.w3.org/ns/ldp#PreferMembership\"",
@@ -109,11 +109,11 @@ public class GetBuilderTest {
 
     @Test
     public void testModificationHeaders() throws Exception {
-        String etag = "123456";
-        String lastModified = "Mon, 19 May 2014 19:44:59 GMT";
+        final String etag = "123456";
+        final String lastModified = "Mon, 19 May 2014 19:44:59 GMT";
         testBuilder.ifNoneMatch(etag).ifModifiedSince(lastModified).perform();
 
-        HttpRequestBase request = getRequest();
+        final HttpRequestBase request = getRequest();
         assertEquals(etag, request.getFirstHeader(IF_NONE_MATCH).getValue());
         assertEquals(lastModified, request.getFirstHeader(IF_MODIFIED_SINCE).getValue());
     }
@@ -122,7 +122,7 @@ public class GetBuilderTest {
     public void testRange() throws Exception {
         testBuilder.range(5L, 100L).perform();
 
-        HttpRequestBase request = getRequest();
+        final HttpRequestBase request = getRequest();
         assertEquals("bytes=5-100", request.getFirstHeader(RANGE).getValue());
     }
 
@@ -130,7 +130,7 @@ public class GetBuilderTest {
     public void testStartRange() throws Exception {
         testBuilder.range(5L, null).perform();
 
-        HttpRequestBase request = getRequest();
+        final HttpRequestBase request = getRequest();
         assertEquals("bytes=5-", request.getFirstHeader(RANGE).getValue());
     }
 
@@ -138,7 +138,7 @@ public class GetBuilderTest {
     public void testEndRange() throws Exception {
         testBuilder.range(null, 100L).perform();
 
-        HttpRequestBase request = getRequest();
+        final HttpRequestBase request = getRequest();
         assertEquals("bytes=-100", request.getFirstHeader(RANGE).getValue());
     }
 
@@ -146,12 +146,12 @@ public class GetBuilderTest {
     public void testAccept() throws Exception {
         testBuilder.accept("text/turtle").perform();
 
-        HttpRequestBase request = getRequest();
+        final HttpRequestBase request = getRequest();
         assertEquals("text/turtle", request.getFirstHeader(ACCEPT).getValue());
     }
 
     private HttpRequestBase getRequest() throws FcrepoOperationFailedException {
-        ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
         return requestCaptor.getValue();

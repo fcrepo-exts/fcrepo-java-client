@@ -31,7 +31,14 @@ public class MoveBuilder<T extends MoveBuilder<T>> extends RequestBuilder<MoveBu
 
     protected URI destinationUrl;
 
-    protected MoveBuilder(URI sourceUrl, URI destinationUrl, FcrepoClient client) {
+    /**
+     * Instantiate builder
+     * 
+     * @param sourceUrl uri of the resource
+     * @param destinationUrl uri for the new path for the moved resource
+     * @param client the client
+     */
+    protected MoveBuilder(final URI sourceUrl, final URI destinationUrl, final FcrepoClient client) {
         super(sourceUrl, client);
         this.destinationUrl = destinationUrl;
     }
@@ -45,7 +52,7 @@ public class MoveBuilder<T extends MoveBuilder<T>> extends RequestBuilder<MoveBu
     protected HttpRequestBase createRequest() {
         return HttpMethods.MOVE.createRequest(targetUri);
     }
-    
+
     @Override
     protected void populateRequest(final HttpRequestBase request) {
         if (destinationUrl != null) {

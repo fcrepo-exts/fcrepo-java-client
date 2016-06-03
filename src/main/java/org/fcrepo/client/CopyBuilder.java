@@ -27,10 +27,17 @@ import org.apache.http.client.methods.HttpRequestBase;
  */
 public class CopyBuilder<T extends CopyBuilder<T>> extends MoveBuilder<CopyBuilder<T>> {
 
-    protected CopyBuilder(URI sourceUrl, URI destinationUrl, FcrepoClient client) {
+    /**
+     * Instantiate builder
+     * 
+     * @param sourceUrl uri of the resource
+     * @param destinationUrl uri for the new path for the moved resource
+     * @param client the client
+     */
+    protected CopyBuilder(final URI sourceUrl, final URI destinationUrl, final FcrepoClient client) {
         super(sourceUrl, destinationUrl, client);
     }
-    
+
     @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.COPY.createRequest(targetUri);

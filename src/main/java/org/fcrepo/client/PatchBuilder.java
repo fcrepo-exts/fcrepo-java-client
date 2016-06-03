@@ -29,7 +29,13 @@ import org.apache.http.client.methods.HttpRequestBase;
  */
 public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<PatchBuilder<T>> {
 
-    protected PatchBuilder(URI uri, FcrepoClient client) {
+    /**
+     * Instantiate builder
+     * 
+     * @param uri uri of the resource this request is being made to
+     * @param client the client
+     */
+    public PatchBuilder(final URI uri, final FcrepoClient client) {
         super(uri, client);
     }
 
@@ -47,22 +53,22 @@ public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<
     /**
      * Provide an etag for the if-match header for this request
      * 
-     * @param value
-     * @return
+     * @param etag etag to provide as the if-match header
+     * @return this builder
      */
-    public PatchBuilder<T> ifMatch(String value) {
-        this.etag = value;
+    public PatchBuilder<T> ifMatch(final String etag) {
+        this.etag = etag;
         return self();
     }
 
     /**
      * Provide a if-unmodified-since header for this request
      * 
-     * @param lastModified
-     * @return
+     * @param modified date to provide as the if-unmodified-since header
+     * @return this builder
      */
-    public PatchBuilder<T> ifUnmodifiedSince(String value) {
-        this.unmodifiedSince = value;
+    public PatchBuilder<T> ifUnmodifiedSince(final String modified) {
+        this.unmodifiedSince = modified;
         return self();
     }
 }

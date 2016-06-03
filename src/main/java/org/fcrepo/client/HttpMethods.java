@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.client;
 
 import java.net.URI;
@@ -46,6 +47,7 @@ public enum HttpMethods {
     COPY(HttpCopy.class);
 
     final Class<? extends HttpRequestBase> clazz;
+
     final boolean entity;
 
     HttpMethods(final Class<? extends HttpRequestBase> clazz) {
@@ -66,16 +68,21 @@ public enum HttpMethods {
             throw new RuntimeException(ex);
         }
     }
-    
+
     /**
      * HTTP MOVE method.
      * 
      * @author bbpennel
      */
-    public class HttpMove extends HttpRequestBase {
+    public static class HttpMove extends HttpRequestBase {
 
         public final static String METHOD_NAME = "MOVE";
 
+        /**
+         * Instantiate MOVE request base
+         * 
+         * @param uri uri for the request
+         */
         public HttpMove(final URI uri) {
             super();
             setURI(uri);
@@ -86,16 +93,21 @@ public enum HttpMethods {
             return METHOD_NAME;
         }
     }
-    
+
     /**
      * HTTP COPY method.
      * 
      * @author bbpennel
      */
-    public class HttpCopy extends HttpRequestBase {
+    public static class HttpCopy extends HttpRequestBase {
 
         public final static String METHOD_NAME = "COPY";
 
+        /**
+         * Instantiate COPY request base
+         * 
+         * @param uri uri for the request
+         */
         public HttpCopy(final URI uri) {
             super();
             setURI(uri);

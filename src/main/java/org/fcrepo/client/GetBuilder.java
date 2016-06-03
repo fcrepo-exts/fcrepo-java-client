@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.client;
 
 import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT;
@@ -56,7 +57,13 @@ public class GetBuilder<T extends GetBuilder<T>> extends
 
     protected String lastModified;
 
-    public GetBuilder(URI uri, FcrepoClient client) {
+    /**
+     * Construct a GetBuilder
+     * 
+     * @param uri the target
+     * @param client the client for this request
+     */
+    public GetBuilder(final URI uri, final FcrepoClient client) {
         super(uri, client);
     }
 
@@ -64,12 +71,12 @@ public class GetBuilder<T extends GetBuilder<T>> extends
     protected GetBuilder<T> self() {
         return this;
     }
-    
+
     @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.GET.createRequest(targetUri);
     }
-    
+
     @Override
     protected void populateRequest(final HttpRequestBase request) {
         if (acceptType != null) {
@@ -78,18 +85,18 @@ public class GetBuilder<T extends GetBuilder<T>> extends
 
         // Construct the prefer header, with include and omit parameters if available.
         if (prefer != null) {
-            StringJoiner preferJoin = new StringJoiner("; ");
+            final StringJoiner preferJoin = new StringJoiner("; ");
             preferJoin.add("return=" + prefer);
 
             if (includeUris != null) {
-                String include = includeUris.stream().map(URI::toString).collect(Collectors.joining(" "));
+                final String include = includeUris.stream().map(URI::toString).collect(Collectors.joining(" "));
                 if (include.length() > 0) {
                     preferJoin.add("include=\"" + include + "\"");
                 }
             }
 
             if (omitUris != null) {
-                String omit = omitUris.stream().map(URI::toString).collect(Collectors.joining(" "));
+                final String omit = omitUris.stream().map(URI::toString).collect(Collectors.joining(" "));
                 if (omit.length() > 0) {
                     preferJoin.add("omit=\"" + omit + "\"");
                 }
@@ -118,7 +125,7 @@ public class GetBuilder<T extends GetBuilder<T>> extends
         if (lastModified != null) {
             request.setHeader(IF_MODIFIED_SINCE, lastModified);
         }
-        
+
         LOGGER.debug("Fcrepo GET request headers: {}", (Object[]) request.getAllHeaders());
     }
 
@@ -127,9 +134,9 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * 
      * @param mediaType media type to set as the accept header. It should be a value from one of the allowed RDF
      *        source formats supported by Fedora.
-     * @return
+     * @return this builder
      */
-    public GetBuilder<T> accept(String mediaType) {
+    public GetBuilder<T> accept(final String mediaType) {
         this.acceptType = mediaType;
         return self();
     }
@@ -139,9 +146,9 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * 
      * @param start beginning byte index
      * @param end ending byte index
-     * @return
+     * @return this builder
      */
-    public GetBuilder<T> range(Long start, Long end) {
+    public GetBuilder<T> range(final Long start, final Long end) {
         this.rangeStart = start;
         this.rangeEnd = end;
         return self();
@@ -151,7 +158,7 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * Set the prefer header for this request to minimal, to indicate that only triples directly related to a resource
      * should be returned.
      * 
-     * @return
+     * @return this builder
      */
     public GetBuilder<T> preferMinimal() {
         this.prefer = "minimal";
@@ -162,7 +169,7 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * Set the prefer header for this request to representation, to indicate that links to other resources and their
      * properties should also be included.
      * 
-     * @return
+     * @return this builder
      */
     public GetBuilder<T> preferRepresentation() {
         this.prefer = "representation";
@@ -176,9 +183,9 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * 
      * @param includeUris URIs of LDP defined preferences to include
      * @param omitUris URIs of LDP defined preferences to omit
-     * @return
+     * @return this builder
      */
-    public GetBuilder<T> preferRepresentation(List<URI> includeUris, List<URI> omitUris) {
+    public GetBuilder<T> preferRepresentation(final List<URI> includeUris, final List<URI> omitUris) {
         this.preferRepresentation();
         this.includeUris = includeUris;
         this.omitUris = omitUris;
@@ -188,10 +195,10 @@ public class GetBuilder<T extends GetBuilder<T>> extends
     /**
      * Provide an etag for the if-none-match header for this request
      * 
-     * @param etag
-     * @return
+     * @param etag etag to provide as the if-none-match header
+     * @return this builder
      */
-    public GetBuilder<T> ifNoneMatch(String etag) {
+    public GetBuilder<T> ifNoneMatch(final String etag) {
         this.etag = etag;
         return self();
     }
@@ -199,10 +206,10 @@ public class GetBuilder<T extends GetBuilder<T>> extends
     /**
      * Provide a if-last-modified header for this request
      * 
-     * @param lastModified
-     * @return
+     * @param lastModified date to provided as the if-modified-since header
+     * @return this builder
      */
-    public GetBuilder<T> ifModifiedSince(String lastModified) {
+    public GetBuilder<T> ifModifiedSince(final String lastModified) {
         this.lastModified = lastModified;
         return self();
     }

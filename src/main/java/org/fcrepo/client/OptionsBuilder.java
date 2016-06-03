@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.client;
 
 import java.net.URI;
@@ -27,7 +28,13 @@ import org.apache.http.client.methods.HttpRequestBase;
 public class OptionsBuilder<T extends OptionsBuilder<T>> extends
         RequestBuilder<OptionsBuilder<T>> {
 
-    public OptionsBuilder(URI uri, FcrepoClient client) {
+    /**
+     * Instantiate builder
+     * 
+     * @param uri uri of the resource this request is being made to
+     * @param client the client
+     */
+    public OptionsBuilder(final URI uri, final FcrepoClient client) {
         super(uri, client);
     }
 

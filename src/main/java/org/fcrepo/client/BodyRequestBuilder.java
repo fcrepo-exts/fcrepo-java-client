@@ -18,6 +18,7 @@ package org.fcrepo.client;
 
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
+import static org.fcrepo.client.FedoraHeaderConstants.IF_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -39,7 +40,7 @@ import org.slf4j.Logger;
  */
 public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extends
         RequestBuilder<BodyRequestBuilder<T>> {
-    
+
     private static final Logger LOGGER = getLogger(PatchBuilder.class);
 
     protected InputStream bodyStream;
@@ -52,42 +53,48 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
 
     protected String unmodifiedSince;
 
-    protected BodyRequestBuilder(URI uri, FcrepoClient client) {
+    /**
+     * Instantiate builder
+     * 
+     * @param uri uri request will be issued to
+     * @param client the client
+     */
+    protected BodyRequestBuilder(final URI uri, final FcrepoClient client) {
         super(uri, client);
     }
 
     protected abstract T self();
-    
+
     @Override
-    protected void populateRequest(final HttpRequestBase request) {
+    protected void populateRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {
         addBody((HttpEntityEnclosingRequestBase) request);
 
         addIfUnmodifiedSince(request);
         addIfMatch(request);
-        
+
         addDigest(request);
-        
+
         LOGGER.debug("Fcrepo {} request headers: {}", request.getMethod(), (Object[]) request.getAllHeaders());
     }
 
     /**
      * Add a body to this request from a stream, with application/octet-stream as its content type
      * 
-     * @param stream
-     * @return
+     * @param stream InputStream of the content to be sent to the server
+     * @return this builder
      */
-    public T body(InputStream stream) {
+    public T body(final InputStream stream) {
         return body(stream, null);
     }
 
     /**
      * Add a body to this request as a stream with the given content type
      * 
-     * @param stream
-     * @param contentType
-     * @return
+     * @param stream InputStream of the content to be sent to the server
+     * @param contentType the Content-Type of the body
+     * @return this builder
      */
-    public T body(InputStream stream, String contentType) {
+    public T body(final InputStream stream, final String contentType) {
         this.bodyStream = stream;
         if (contentType == null) {
             this.contentType = "application/octet-stream";
@@ -101,37 +108,37 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
     /**
      * Add the given file as the body for this request with the provided content type
      * 
-     * @param file
-     * @param contentType
-     * @return
-     * @throws IOException
+     * @param file File containing the content to be sent to the server
+     * @param contentType the Content-Type of the body
+     * @return this builder
+     * @throws IOException when unable to stream the body file
      */
-    public T body(File file, String contentType) throws IOException {
+    public T body(final File file, final String contentType) throws IOException {
         return body(new FileInputStream(file), contentType);
     }
 
-    protected void addBody(HttpEntityEnclosingRequestBase request) {
+    protected void addBody(final HttpEntityEnclosingRequestBase request) {
         if (bodyStream != null) {
             request.setEntity(new InputStreamEntity(bodyStream));
             request.addHeader(CONTENT_TYPE, contentType);
         }
     }
 
-    protected void addDigest(HttpRequestBase request) {
+    protected void addDigest(final HttpRequestBase request) {
         if (digest != null) {
             request.addHeader(DIGEST, "sha1=" + digest);
         }
     }
-    
-    protected void addIfUnmodifiedSince(HttpRequestBase request) {
+
+    protected void addIfUnmodifiedSince(final HttpRequestBase request) {
         if (unmodifiedSince != null) {
             request.setHeader(IF_UNMODIFIED_SINCE, unmodifiedSince);
         }
     }
-    
-    protected void addIfMatch(HttpRequestBase request) {
+
+    protected void addIfMatch(final HttpRequestBase request) {
         if (etag != null) {
-            request.setHeader(IF_UNMODIFIED_SINCE, etag);
+            request.setHeader(IF_MATCH, etag);
         }
     }
 }

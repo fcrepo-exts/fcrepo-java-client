@@ -19,11 +19,12 @@ package org.fcrepo.client;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.SLUG;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 /**
  * Builds a post request for interacting with the Fedora HTTP API in order to create a new resource within an LDP
@@ -33,11 +34,17 @@ import org.glassfish.jersey.media.multipart.ContentDisposition;
  */
 public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<PostBuilder<T>> {
 
-    protected String contentDisposition;
+    protected String filename;
 
     protected String slug;
 
-    public PostBuilder(URI uri, FcrepoClient client) {
+    /**
+     * Instantiate builder
+     * 
+     * @param uri uri of the resource this request is being made to
+     * @param client the client
+     */
+    public PostBuilder(final URI uri, final FcrepoClient client) {
         super(uri, client);
     }
 
@@ -49,27 +56,31 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
     /**
      * Provide a SHA-1 checksum for the body of this request
      * 
-     * @param value
-     * @return
+     * @param digest sha-1 checksum to provide as the digest for the request body
+     * @return this builder
      */
-    public PostBuilder<T> digest(String value) {
-        this.digest = value;
+    public PostBuilder<T> digest(final String digest) {
+        this.digest = digest;
         return self();
     }
 
     @Override
-    protected void populateRequest(final HttpRequestBase request) {
+    protected void populateRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {
         if (slug != null) {
             request.addHeader(SLUG, slug);
         }
 
-        if (contentDisposition != null) {
-            final ContentDisposition cdValue = ContentDisposition.type("attachment")
-                    .fileName(contentDisposition)
-                    .build();
-            request.addHeader(CONTENT_DISPOSITION, cdValue.toString());
+        if (filename != null) {
+            try {
+                final String encodedFilename = URLEncoder.encode(filename, "utf-8");
+                final String disposition = "attachment; filename=\"" + encodedFilename + "\"";
+                request.addHeader(CONTENT_DISPOSITION, disposition);
+            } catch (UnsupportedEncodingException e) {
+                throw new FcrepoOperationFailedException(request.getURI(), -1, e.getMessage());
+            }
+
         }
-        
+
         super.populateRequest(request);
     }
 
@@ -82,22 +93,22 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
     /**
      * Provide a content disposition header which will be used as the filename
      * 
-     * @param value
-     * @return
+     * @param filename the name of the file being provided in the body of the request
+     * @return this builder
      */
-    public PostBuilder<T> contentDisposition(String value) {
-        this.contentDisposition = value;
+    public PostBuilder<T> filename(final String filename) {
+        this.filename = filename;
         return self();
     }
 
     /**
      * Provide a suggested name for the new child resource, which the repository may ignore.
      * 
-     * @param value
-     * @return
+     * @param slug value to supply as the slug header
+     * @return this builder
      */
-    public PostBuilder<T> slug(String value) {
-        this.slug = value;
+    public PostBuilder<T> slug(final String slug) {
+        this.slug = slug;
         return self();
     }
 }

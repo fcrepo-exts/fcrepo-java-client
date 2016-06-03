@@ -72,10 +72,10 @@ public class PostBuilderTest {
     public void testPostNoBody() throws Exception {
         testBuilder.perform();
 
-        ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
         assertNull("Request body should not be set", request.getEntity());
         assertEquals(0, request.getAllHeaders().length);
     }
@@ -86,15 +86,15 @@ public class PostBuilderTest {
 
         testBuilder.body(bodyStream, "plain/text")
                 .digest("checksum")
-                .contentDisposition("file.txt")
+                .filename("file.txt")
                 .slug("slug_value")
                 .perform();
 
-        ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
-        HttpEntity bodyEntity = request.getEntity();
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpEntity bodyEntity = request.getEntity();
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
@@ -109,11 +109,11 @@ public class PostBuilderTest {
 
         testBuilder.body(bodyStream).perform();
 
-        ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
-        HttpEntity bodyEntity = request.getEntity();
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpEntity bodyEntity = request.getEntity();
         assertEquals(bodyStream, bodyEntity.getContent());
         assertEquals("application/octet-stream", request.getFirstHeader(CONTENT_TYPE).getValue());
     }

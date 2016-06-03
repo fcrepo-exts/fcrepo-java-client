@@ -31,7 +31,13 @@ public abstract class RequestBuilder<T extends RequestBuilder<T>> {
     // URL this request will be executed against
     protected URI targetUri;
 
-    protected RequestBuilder(URI uri, FcrepoClient client) {
+    /**
+     * Instantiate builder
+     * 
+     * @param uri uri of the resource this request is being made to
+     * @param client the client
+     */
+    protected RequestBuilder(final URI uri, final FcrepoClient client) {
         this.targetUri = uri;
         this.client = client;
     }
@@ -39,17 +45,20 @@ public abstract class RequestBuilder<T extends RequestBuilder<T>> {
     /**
      * Performs the request constructed in this builder and returns the response
      * 
-     * @return
+     * @return the repository response
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
     public FcrepoResponse perform() throws FcrepoOperationFailedException {
         final HttpRequestBase request = createRequest();
+
+        populateRequest(request);
 
         return client.executeRequest(targetUri, request);
     };
 
     protected abstract HttpRequestBase createRequest();
 
-    protected void populateRequest(HttpRequestBase request) {
+    protected void populateRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {
     }
 
     protected abstract T self();

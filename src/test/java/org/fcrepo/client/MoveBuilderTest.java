@@ -69,11 +69,11 @@ public class MoveBuilderTest {
     public void testMove() throws Exception {
         testBuilder.perform();
 
-        ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        HttpRequestBase request = requestCaptor.getValue();
+        final HttpRequestBase request = requestCaptor.getValue();
         assertEquals("MOVE", request.getMethod());
-        assertEquals(destUrl, request.getFirstHeader(DESTINATION));
+        assertEquals(destUrl, request.getFirstHeader(DESTINATION).getValue());
     }
 }

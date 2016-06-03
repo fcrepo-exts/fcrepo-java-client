@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.client;
 
 import java.net.URI;
@@ -27,7 +28,13 @@ import org.apache.http.client.methods.HttpRequestBase;
 public class HeadBuilder<T extends HeadBuilder<T>> extends
         RequestBuilder<HeadBuilder<T>> {
 
-    public HeadBuilder(URI uri, FcrepoClient client) {
+    /**
+     * Instantiate builder
+     * 
+     * @param uri uri request will be issued to
+     * @param client the client
+     */
+    public HeadBuilder(final URI uri, final FcrepoClient client) {
         super(uri, client);
     }
 
