@@ -16,20 +16,20 @@
 package org.fcrepo.client;
 
 import static java.net.URI.create;
+import static org.fcrepo.client.TestUtils.RDF_XML;
+import static org.fcrepo.client.TestUtils.SPARQL_UPDATE;
+import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.fcrepo.client.TestUtils.rdfXml;
 import static org.fcrepo.client.TestUtils.setField;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
-import static org.fcrepo.client.TestUtils.RDF_XML;
-import static org.fcrepo.client.TestUtils.SPARQL_UPDATE;
-import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.commons.io.IOUtils;

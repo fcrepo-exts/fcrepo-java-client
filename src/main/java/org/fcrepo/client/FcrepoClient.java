@@ -308,6 +308,17 @@ public class FcrepoClient {
     }
     
     /**
+     * Make a OPTIONS request to output information about the supported HTTP methods, etc.
+     * 
+     * @param url the URL of the resource to make the OPTIONS request on.
+     * @return a OPTIONS request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public OptionsBuilder<?> options(final URI url) throws FcrepoOperationFailedException {
+        return new OptionsBuilder<>(url, this);
+    }
+    
+    /**
      * Make a GET request
      * @param url the URL of the resource to fetch
      * @param accept the requested MIMEType of the resource to be retrieved
