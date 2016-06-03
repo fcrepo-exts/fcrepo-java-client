@@ -42,7 +42,8 @@ public enum HttpMethods {
     DELETE(HttpDelete.class),
     HEAD(HttpHead.class),
     OPTIONS(HttpOptions.class),
-    MOVE(HttpMove.class);
+    MOVE(HttpMove.class),
+    COPY(HttpCopy.class);
 
     final Class<? extends HttpRequestBase> clazz;
     final boolean entity;
@@ -76,6 +77,26 @@ public enum HttpMethods {
         public final static String METHOD_NAME = "MOVE";
 
         public HttpMove(final URI uri) {
+            super();
+            setURI(uri);
+        }
+
+        @Override
+        public String getMethod() {
+            return METHOD_NAME;
+        }
+    }
+    
+    /**
+     * HTTP COPY method.
+     * 
+     * @author bbpennel
+     */
+    public class HttpCopy extends HttpRequestBase {
+
+        public final static String METHOD_NAME = "COPY";
+
+        public HttpCopy(final URI uri) {
             super();
             setURI(uri);
         }
