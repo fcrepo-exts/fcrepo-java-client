@@ -17,3 +17,4 @@ velocity.log
 .project
 .settings/
 /examples/*/target/
+transaction.log
