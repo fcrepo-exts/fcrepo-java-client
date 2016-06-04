@@ -50,6 +50,8 @@ public class FedoraHeaderConstants {
     public static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
 
     public static final String DESTINATION = "Destination";
+    
+    public static final String LINK = "Link";
 
     private FedoraHeaderConstants() {
     }

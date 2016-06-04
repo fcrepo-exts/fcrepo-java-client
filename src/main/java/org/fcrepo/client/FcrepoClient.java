@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -382,27 +384,6 @@ public class FcrepoClient {
         LOGGER.debug("Fcrepo {} request to resource {}", request.getMethod(), url);
         final CloseableHttpResponse response = executeRequest(request);
 
-        if (request.getMethod() == "GET" || request.getMethod() == "HEAD") {
-            final int status = response.getStatusLine().getStatusCode();
-            final String contentType = getContentTypeHeader(response);
-
-            LOGGER.debug("Fcrepo {} request returned status [{}]", request.getMethod(), status);
-
-            if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
-                URI describedBy = null;
-                final List<URI> links = getLinkHeaders(response, DESCRIBED_BY);
-                if (links.size() == 1) {
-                    describedBy = links.get(0);
-                }
-                return new FcrepoResponse(url, status, contentType, describedBy,
-                        getEntityContent(response));
-            } else {
-                free(response);
-                throw new FcrepoOperationFailedException(url, status,
-                        response.getStatusLine().getReasonPhrase());
-            }
-        }
-
         return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
 
@@ -425,11 +406,10 @@ public class FcrepoClient {
     private FcrepoResponse fcrepoGenericResponse(final URI url, final CloseableHttpResponse response,
             final Boolean throwExceptionOnFailure) throws FcrepoOperationFailedException {
         final int status = response.getStatusLine().getStatusCode();
-        final URI locationHeader = getLocationHeader(response);
-        final String contentTypeHeader = getContentTypeHeader(response);
+        final Map<String, List<String>> headers = getHeaders(response);
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !throwExceptionOnFailure) {
-            return new FcrepoResponse(url, status, contentTypeHeader, locationHeader, getEntityContent(response));
+            return new FcrepoResponse(url, status, headers, getEntityContent(response));
         } else {
             free(response);
             throw new FcrepoOperationFailedException(url, status,
@@ -479,6 +459,27 @@ public class FcrepoClient {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Retrieve all header values
+     * 
+     * @param response response from request
+     * @return Map of all values for all response headers
+     */
+    private static Map<String, List<String>> getHeaders(final HttpResponse response) {
+        Map<String, List<String>> headers = new HashMap<>();
+
+        for (Header header : response.getAllHeaders()) {
+            List<String> values;
+            if (headers.containsKey(header.getName())) {
+                values = headers.get(header.getName());
+            } else {
+                values = new ArrayList<>();
+            }
+            values.add(header.getValue());
+        }
+        return headers;
     }
 
     /**
