@@ -44,7 +44,7 @@ import org.slf4j.Logger;
  * </p>
  * <pre>
  * FcrepoClient client = ...;
- * try (FcrepoResponse res = client.get(...)) {
+ * try (FcrepoResponse res = client.get(...).perform()) {
  *     // do something with the response
  * } catch (FcrepoOperationFailedException|IOException e) {
  *     // handle any exceptions
