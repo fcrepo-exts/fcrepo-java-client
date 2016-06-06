@@ -178,7 +178,7 @@ public class FcrepoResponse implements Closeable {
      * @param name name of the header to retrieve
      * @return All values of the specified header, or null if not present
      */
-    public List<String> getHeaderValues(String name) {
+    public List<String> getHeaderValues(final String name) {
         if (headers == null) {
             return null;
         }
@@ -192,7 +192,7 @@ public class FcrepoResponse implements Closeable {
      * @param name name of the header to retrieve
      * @return First value of the header, or null if not present
      */
-    public String getHeaderValue(String name) {
+    public String getHeaderValue(final String name) {
         final List<String> values = getHeaderValues(name);
         if (values == null || values.size() == 0) {
             return null;
@@ -209,7 +209,7 @@ public class FcrepoResponse implements Closeable {
     public void setHeaders(final Map<String, List<String>> headers) {
         this.headers = headers;
     }
-    
+
     /**
      * Retrieve link header values matching the given relationship
      * 
@@ -222,14 +222,14 @@ public class FcrepoResponse implements Closeable {
         if (linkStrings == null) {
             return null;
         }
-        
+
         for (String linkString : linkStrings) {
             final FcrepoLink link = new FcrepoLink(linkString);
             if (link.getRel().equals(relationship)) {
                 uris.add(link.getUri());
             }
         }
-        
+
         return uris;
     }
 
@@ -248,12 +248,12 @@ public class FcrepoResponse implements Closeable {
             // Fall back to retrieving from the described by link
             if (location == null) {
                 final List<URI> links = getLinkHeaders(DESCRIBED_BY);
-                if (links.size() == 1) {
+                if (links != null && links.size() == 1) {
                     location = links.get(0);
                 }
             }
         }
-        
+
         return location;
     }
 

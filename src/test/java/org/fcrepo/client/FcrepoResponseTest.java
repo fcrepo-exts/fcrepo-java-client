@@ -61,10 +61,10 @@ public class FcrepoResponseTest {
     public void testResponse() throws IOException {
         final URI uri = create("http://localhost/path/a/b");
         final int status = 200;
-        Map<String, List<String>> headers = new HashMap<>();
-        String contentType = "text/plain";
+        final Map<String, List<String>> headers = new HashMap<>();
+        final String contentType = "text/plain";
         headers.put(CONTENT_TYPE, Arrays.asList(contentType));
-        String location = "http://localhost/path/a/b/c";
+        final String location = "http://localhost/path/a/b/c";
         headers.put(LOCATION, Arrays.asList(location));
         final String body = "Text response";
         final InputStream bodyStream = new ByteArrayInputStream(body.getBytes(UTF_8));
@@ -106,10 +106,10 @@ public class FcrepoResponseTest {
     @Test
     public void testClosableReleasesResources() throws IOException {
         final InputStream mockBody = mock(InputStream.class);
-        Map<String, List<String>> headers = new HashMap<>();
-        String contentType = "text/plain";
+        final Map<String, List<String>> headers = new HashMap<>();
+        final String contentType = "text/plain";
         headers.put(CONTENT_TYPE, Arrays.asList(contentType));
-        String location = "http://localhost/bar";
+        final String location = "http://localhost/bar";
         headers.put(LOCATION, Arrays.asList(location));
         final FcrepoResponse underTest = new FcrepoResponse(
                 URI.create("http://localhost/foo"), 201, headers, mockBody);
@@ -139,10 +139,10 @@ public class FcrepoResponseTest {
         final IOException suppressed = new IOException("Suppressed");
         doThrow(suppressed).when(mockBody).close();
 
-        Map<String, List<String>> headers = new HashMap<>();
-        String contentType = "text/plain";
+        final Map<String, List<String>> headers = new HashMap<>();
+        final String contentType = "text/plain";
         headers.put(CONTENT_TYPE, Arrays.asList(contentType));
-        String location = "http://localhost/bar";
+        final String location = "http://localhost/bar";
         headers.put(LOCATION, Arrays.asList(location));
 
         try (FcrepoResponse underTest = new FcrepoResponse(URI.create("http://localhost/foo"), 201,
@@ -165,16 +165,18 @@ public class FcrepoResponseTest {
      *
      * @throws FcrepoOperationFailedException if something exceptional happens
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testIdiomaticInvokation() throws FcrepoOperationFailedException {
         final String content = "Hello World!";
         final ByteArrayInputStream entityBody = new ByteArrayInputStream(content.getBytes());
         final FcrepoClient client = mock(FcrepoClient.class);
+        final GetBuilder getBuilder = mock(GetBuilder.class);
 
-        when(client.get(any(URI.class), any(String.class), any(String.class))).thenReturn(
-                new FcrepoResponse(null, 200, null, entityBody));
+        when(client.get(any(URI.class))).thenReturn(getBuilder);
+        when(getBuilder.perform()).thenReturn(new FcrepoResponse(null, 200, null, entityBody));
 
-        try (FcrepoResponse res = client.get(URI.create("foo"), "", "")) {
+        try (FcrepoResponse res = client.get(URI.create("foo")).perform()) {
             assertEquals(content, IOUtils.toString(res.getBody()));
         } catch (IOException e) {
             fail("Unexpected exception: " + e);
@@ -186,6 +188,7 @@ public class FcrepoResponseTest {
      *
      * @throws Exception if something exceptional happens
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testIdiomaticInvokationThrowsException() throws Exception {
         final InputStream mockBody = mock(InputStream.class);
@@ -193,10 +196,12 @@ public class FcrepoResponseTest {
         when(mockBody.read(any(byte[].class))).thenThrow(ioe);
 
         final FcrepoClient client = mock(FcrepoClient.class);
-        when(client.get(any(URI.class), any(String.class), any(String.class))).thenReturn(
-                new FcrepoResponse(null, 200, null, mockBody));
+        final GetBuilder getBuilder = mock(GetBuilder.class);
 
-        try (FcrepoResponse res = client.get(URI.create("foo"), "", "")) {
+        when(client.get(any(URI.class))).thenReturn(getBuilder);
+        when(getBuilder.perform()).thenReturn(new FcrepoResponse(null, 200, null, mockBody));
+
+        try (FcrepoResponse res = client.get(URI.create("foo")).perform()) {
             ByteStreams.copy(res.getBody(), NullOutputStream.NULL_OUTPUT_STREAM);
             fail("Expected an IOException to be thrown.");
         } catch (IOException e) {
@@ -208,10 +213,10 @@ public class FcrepoResponseTest {
 
     @Test
     public void testLocationFromDescribedBy() throws Exception {
-        Map<String, List<String>> headers = new HashMap<>();
-        String contentType = "text/plain";
+        final Map<String, List<String>> headers = new HashMap<>();
+        final String contentType = "text/plain";
         headers.put(CONTENT_TYPE, Arrays.asList(contentType));
-        String describedBy = "http://localhost/bar/file/fcr:metadata";
+        final String describedBy = "http://localhost/bar/file/fcr:metadata";
         headers.put(LINK, Arrays.asList(
                 "<http://www.w3.org/ns/ldp#Resource>;rel=\"type\"",
                 "<" + describedBy + ">; rel=\"describedby\""));
@@ -224,12 +229,12 @@ public class FcrepoResponseTest {
 
     @Test
     public void testLocationOverDescribedBy() throws Exception {
-        Map<String, List<String>> headers = new HashMap<>();
-        String contentType = "text/plain";
+        final Map<String, List<String>> headers = new HashMap<>();
+        final String contentType = "text/plain";
         headers.put(CONTENT_TYPE, Arrays.asList(contentType));
-        String location = "http://localhost/bar/file";
+        final String location = "http://localhost/bar/file";
         headers.put(LOCATION, Arrays.asList(location));
-        String describedBy = "http://localhost/bar/file/fcr:metadata";
+        final String describedBy = "http://localhost/bar/file/fcr:metadata";
         headers.put(LINK, Arrays.asList(
                 "<http://www.w3.org/ns/ldp#Resource>;rel=\"type\"",
                 "<" + describedBy + ">; rel=\"describedby\""));

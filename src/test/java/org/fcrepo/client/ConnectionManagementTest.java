@@ -15,34 +15,6 @@
  */
 package org.fcrepo.client;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.NullInputStream;
-import org.apache.commons.io.output.NullOutputStream;
-import org.apache.http.HttpClientConnection;
-import org.apache.http.HttpStatus;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockserver.client.server.MockServerClient;
-import org.mockserver.junit.MockServerRule;
-
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-
 import static org.fcrepo.client.MockHttpExpectations.host;
 import static org.fcrepo.client.MockHttpExpectations.port;
 import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
@@ -55,12 +27,37 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.NullInputStream;
+import org.apache.commons.io.output.NullOutputStream;
+import org.apache.http.HttpClientConnection;
+import org.apache.http.HttpStatus;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.conn.routing.HttpRoute;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockserver.client.server.MockServerClient;
+import org.mockserver.junit.MockServerRule;
+
 /**
  * Integration test used to demonstrate connection management issues with the FcrepoClient.
  *
  * @author esm
  */
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class ConnectionManagementTest {
 
@@ -195,14 +192,14 @@ public class ConnectionManagementTest {
      */
     @Test
     public void connectionReleasedOnException() {
-        // Hard-coded 6 b/c HttpMethods lists Options, which isn't supported by the FcrepoClient.
-        final int expectedCount = 6;
+        // Removing MOVE and COPY operations as the mock server does not handle them
+        final int expectedCount = HttpMethods.values().length - 2;
         final AtomicInteger actualCount = new AtomicInteger(0);
         final MockHttpExpectations.Uris uri = uris.uri500;
 
         Stream.of(HttpMethods.values())
-                // OPTIONS not supported by FcrepoClient
-                .filter(method -> HttpMethods.OPTIONS != method)
+                // MOVE and COPY do not appear to be supported in the mock server
+                .filter(method -> HttpMethods.MOVE != method && HttpMethods.COPY != method)
                 .forEach(method -> {
                     connect(client, uri, method, null);
                     actualCount.getAndIncrement();
@@ -299,39 +296,39 @@ public class ConnectionManagementTest {
             switch (method) {
 
                 case OPTIONS:
-                    // not currently supported by the FcrepoClient
-                    // intentionally throws an exception if the FcrepoClient implements OPTIONS in the future, to
-                    // insure that it gets test coverage.
-                    for (Method m : client.getClass().getDeclaredMethods()) {
-                        if (m.getName().contains(method.name().toLowerCase())) {
-                            fail("Untested method " + FcrepoClient.class.getName() + "#" + m.getName());
-                        }
-                    }
-
-                    return;
+                    response = client.options(uri.asUri()).perform();
+                    break;
 
                 case DELETE:
-                    response = client.delete(uri.asUri());
+                    response = client.delete(uri.asUri()).perform();
                     break;
 
                 case GET:
-                    response = client.get(uri.asUri(), null, TEXT_TURTLE);
+                    response = client.get(uri.asUri()).accept(TEXT_TURTLE).perform();
                     break;
 
                 case HEAD:
-                    response = client.head(uri.asUri());
+                    response = client.head(uri.asUri()).perform();
                     break;
 
                 case PATCH:
-                    response = client.patch(uri.asUri(), nullIn);
+                    response = client.patch(uri.asUri()).perform();
                     break;
 
                 case POST:
-                    response = client.post(uri.asUri(), nullIn, TEXT_TURTLE);
+                    response = client.post(uri.asUri()).body(nullIn, TEXT_TURTLE).perform();
                     break;
 
                 case PUT:
-                    response = client.put(uri.asUri(), nullIn, TEXT_TURTLE);
+                    response = client.put(uri.asUri()).body(nullIn, TEXT_TURTLE).perform();
+                    break;
+
+                case MOVE:
+                    response = client.move(uri.asUri(), uri.asUri()).perform();
+                    break;
+
+                case COPY:
+                    response = client.copy(uri.asUri(), uri.asUri()).perform();
                     break;
 
                 default:
@@ -344,7 +341,7 @@ public class ConnectionManagementTest {
         } catch (FcrepoOperationFailedException e) {
             assertEquals(
                     "Expected request for " + uri.asUri() + " to return a " + uri.statusCode + ".  " +
-                            "Was: " + e.getStatusCode(),
+                            "Was: " + e.getStatusCode() + " Method:" + method,
                     uri.statusCode, e.getStatusCode());
         } finally {
             if (responseHandler != null) {

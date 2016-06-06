@@ -19,6 +19,7 @@ package org.fcrepo.client;
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.util.Args;
 
 /**
  * @author bbpennel
@@ -32,12 +33,16 @@ public abstract class RequestBuilder<T extends RequestBuilder<T>> {
     protected URI targetUri;
 
     /**
-     * Instantiate builder
+     * Instantiate builder.  Throws an IllegalArgumentException if either the uri or
+     * client are null.
      * 
      * @param uri uri of the resource this request is being made to
      * @param client the client
      */
     protected RequestBuilder(final URI uri, final FcrepoClient client) {
+        Args.notNull(uri, "uri");
+        Args.notNull(client, "client");
+
         this.targetUri = uri;
         this.client = client;
     }

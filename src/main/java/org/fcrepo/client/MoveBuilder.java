@@ -21,6 +21,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.DESTINATION;
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.util.Args;
 
 /**
  * Builds a request to move a resource (and its subtree) to a new location
@@ -40,6 +41,7 @@ public class MoveBuilder<T extends MoveBuilder<T>> extends RequestBuilder<MoveBu
      */
     protected MoveBuilder(final URI sourceUrl, final URI destinationUrl, final FcrepoClient client) {
         super(sourceUrl, client);
+        Args.notNull(destinationUrl, "Destination URL");
         this.destinationUrl = destinationUrl;
     }
 

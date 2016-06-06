@@ -19,6 +19,7 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.fcrepo.client.TestUtils.SPARQL_UPDATE;
 import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.rdfTtl;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
@@ -30,11 +31,10 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
-import org.fcrepo.client.FcrepoClient;
-import org.fcrepo.client.FcrepoResponse;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.fcrepo.client.FcrepoClient;
+import org.fcrepo.client.FcrepoResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -77,7 +77,9 @@ public class FcrepoAuthenticationIT {
     public void testAuthUserCanPut() throws Exception {
 
         final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
-        final FcrepoResponse response = authClient.put(new URI(serverAddress + "testobj1"), body, TEXT_TURTLE);
+        final FcrepoResponse response = authClient.put(new URI(serverAddress + "testobj1"))
+                .body(body, TEXT_TURTLE)
+                .perform();
         final String content = IOUtils.toString(response.getBody(), "UTF-8");
         final int status = response.getStatusCode();
         assertEquals("Didn't get a CREATED response! Got content:\n" + content,
@@ -87,7 +89,9 @@ public class FcrepoAuthenticationIT {
     @Test
     public void testUnAuthUserCannotPut() throws Exception {
         final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
-        final FcrepoResponse response = client.put(new URI(serverAddress + "testobj2"), body, TEXT_TURTLE);
+        final FcrepoResponse response = client.put(new URI(serverAddress + "testobj2"))
+                .body(body, TEXT_TURTLE)
+                .perform();
         final String content = IOUtils.toString(response.getBody(), "UTF-8");
         final int status = response.getStatusCode();
         assertEquals("Unauthenticated user should be forbidden! Got content:\n" + content,
@@ -97,7 +101,9 @@ public class FcrepoAuthenticationIT {
     @Test
     public void testAuthUserCanPatch() throws Exception {
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-        final FcrepoResponse response = authClient.patch(new URI(serverAddress + "testobj1"), body);
+        final FcrepoResponse response = authClient.patch(new URI(serverAddress + "testobj1"))
+                .body(body, SPARQL_UPDATE)
+                .perform();
         final int status = response.getStatusCode();
         assertEquals("Didn't get a successful PATCH response! Got content:\n",
                 NO_CONTENT.getStatusCode(), status);
@@ -106,7 +112,9 @@ public class FcrepoAuthenticationIT {
     @Test
     public void testUnAuthUserCannotPatch() throws Exception {
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-        final FcrepoResponse response = client.patch(new URI(serverAddress + "testobj1"), body);
+        final FcrepoResponse response = client.patch(new URI(serverAddress + "testobj1"))
+                .body(body, SPARQL_UPDATE)
+                .perform();
         final String content = IOUtils.toString(response.getBody(), "UTF-8");
         final int status = response.getStatusCode();
         assertEquals("Unauthenticated user should be forbidden! Got content:\n" + content,
@@ -116,7 +124,9 @@ public class FcrepoAuthenticationIT {
     @Test
     public void testAuthUserCanPost() throws Exception {
         final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
-        final FcrepoResponse response = authClient.post(new URI(serverAddress), body, TEXT_TURTLE);
+        final FcrepoResponse response = authClient.post(new URI(serverAddress))
+                .body(body, TEXT_TURTLE)
+                .perform();
         final String content = IOUtils.toString(response.getBody(), "UTF-8");
         final int status = response.getStatusCode();
         assertEquals("Didn't get a CREATED response! Got content:\n" + content,
@@ -126,7 +136,9 @@ public class FcrepoAuthenticationIT {
     @Test
     public void testUnAuthUserCannotPost() throws Exception {
         final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
-        final FcrepoResponse response = client.post(new URI(serverAddress), body, TEXT_TURTLE);
+        final FcrepoResponse response = client.post(new URI(serverAddress))
+                .body(body, TEXT_TURTLE)
+                .perform();
         final String content = IOUtils.toString(response.getBody(), "UTF-8");
         final int status = response.getStatusCode();
         assertEquals("Unauthenticated user should be forbidden! Got content:\n" + content,
@@ -136,7 +148,7 @@ public class FcrepoAuthenticationIT {
     @Test
     public void testAuthUserCanGet()
             throws Exception {
-        final FcrepoResponse response = authClient.get(new URI(serverAddress), null, null);
+        final FcrepoResponse response = authClient.get(new URI(serverAddress)).perform();
         final int status = response.getStatusCode();
         assertEquals("Authenticated user can not read root!", OK
                 .getStatusCode(), status);
@@ -145,7 +157,7 @@ public class FcrepoAuthenticationIT {
     @Test
     public void testUnAuthUserCannotGet()
             throws Exception {
-        final FcrepoResponse response = client.get(new URI(serverAddress), null, null);
+        final FcrepoResponse response = client.get(new URI(serverAddress)).perform();
         final int status = response.getStatusCode();
         assertEquals("Unauthenticated user should be forbidden!", FORBIDDEN
                 .getStatusCode(), status);

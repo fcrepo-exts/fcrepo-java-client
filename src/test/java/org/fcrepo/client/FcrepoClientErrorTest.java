@@ -15,21 +15,23 @@
  */
 package org.fcrepo.client;
 
+import static java.net.URI.create;
+import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
+import static org.fcrepo.client.FedoraHeaderConstants.LOCATION;
+import static org.fcrepo.client.TestUtils.RDF_XML;
+import static org.fcrepo.client.TestUtils.SPARQL_UPDATE;
+import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.fcrepo.client.TestUtils.rdfXml;
 import static org.fcrepo.client.TestUtils.setField;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
-import static org.fcrepo.client.TestUtils.RDF_XML;
-import static org.fcrepo.client.TestUtils.SPARQL_UPDATE;
-import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static java.net.URI.create;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.commons.io.IOUtils;
@@ -43,8 +45,8 @@ import org.apache.http.message.BasicHeader;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * @author acoburn
@@ -78,7 +80,7 @@ public class FcrepoClientErrorTest {
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FcrepoResponse response = testClient.get(uri, RDF_XML, null);
+        final FcrepoResponse response = testClient.get(uri).accept(RDF_XML).perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -96,7 +98,10 @@ public class FcrepoClientErrorTest {
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FcrepoResponse response = testClient.get(uri, RDF_XML, "return=representation;");
+        final FcrepoResponse response = testClient.get(uri)
+                .accept(RDF_XML)
+                .preferRepresentation()
+                .perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -112,7 +117,7 @@ public class FcrepoClientErrorTest {
 
         doSetupMockRequest(TEXT_TURTLE, null, status);
 
-        final FcrepoResponse response = testClient.head(uri);
+        final FcrepoResponse response = testClient.head(uri).perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -128,7 +133,7 @@ public class FcrepoClientErrorTest {
 
         doSetupMockRequest(TEXT_TURTLE, null, status);
 
-        final FcrepoResponse response = testClient.head(uri);
+        final FcrepoResponse response = testClient.head(uri).perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -145,7 +150,9 @@ public class FcrepoClientErrorTest {
 
         doSetupMockRequest(RDF_XML, null, status);
 
-        final FcrepoResponse response = testClient.put(uri, body, RDF_XML);
+        final FcrepoResponse response = testClient.put(uri)
+                .body(body, RDF_XML)
+                .perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -162,7 +169,9 @@ public class FcrepoClientErrorTest {
 
         doSetupMockRequest(RDF_XML, null, status);
 
-        final FcrepoResponse response = testClient.put(uri, body, RDF_XML);
+        final FcrepoResponse response = testClient.put(uri)
+                .body(body, RDF_XML)
+                .perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -178,7 +187,7 @@ public class FcrepoClientErrorTest {
 
         doSetupMockRequest(null, null, status);
 
-        final FcrepoResponse response = testClient.delete(uri);
+        final FcrepoResponse response = testClient.delete(uri).perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -194,7 +203,7 @@ public class FcrepoClientErrorTest {
 
         doSetupMockRequest(null, null, status);
 
-        final FcrepoResponse response = testClient.delete(uri);
+        final FcrepoResponse response = testClient.delete(uri).perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -211,7 +220,9 @@ public class FcrepoClientErrorTest {
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
 
-        final FcrepoResponse response = testClient.patch(uri, body);
+        final FcrepoResponse response = testClient.patch(uri)
+                .body(body)
+                .perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -228,7 +239,9 @@ public class FcrepoClientErrorTest {
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
 
-        final FcrepoResponse response = testClient.patch(uri, body);
+        final FcrepoResponse response = testClient.patch(uri)
+                .body(body)
+                .perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -245,7 +258,9 @@ public class FcrepoClientErrorTest {
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
 
-        final FcrepoResponse response = testClient.post(uri, body, SPARQL_UPDATE);
+        final FcrepoResponse response = testClient.post(uri)
+                .body(body, SPARQL_UPDATE)
+                .perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -262,7 +277,9 @@ public class FcrepoClientErrorTest {
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
 
-        final FcrepoResponse response = testClient.post(uri, body, SPARQL_UPDATE);
+        final FcrepoResponse response = testClient.post(uri)
+                .body(body, SPARQL_UPDATE)
+                .perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -275,19 +292,18 @@ public class FcrepoClientErrorTest {
     public void testHeaders() throws IOException, FcrepoOperationFailedException {
         final int status = 100;
         final URI uri = create(baseUrl);
+        final Header locationHeader = new BasicHeader(LOCATION, null);
         final Header contentTypeHeader = new BasicHeader("Content-Type", TEXT_TURTLE);
         final Header linkHeader = new BasicHeader("Link", "<" + baseUrl + "/bar>; rel=\"describedby\"");
         final Header linkFooHeader = new BasicHeader("Link" ,"<" + baseUrl + "/bar>; rel=\"foo\"");
-        final Header[] linkHeaders = new Header[]{ linkHeader, linkFooHeader };
+        final Header[] headers = new Header[]{ locationHeader, contentTypeHeader, linkHeader, linkFooHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
-        when(mockResponse.getFirstHeader("Location")).thenReturn(null);
-        when(mockResponse.getFirstHeader("Content-Type")).thenReturn(contentTypeHeader);
-        when(mockResponse.getHeaders("Link")).thenReturn(linkHeaders);
+        when(mockResponse.getAllHeaders()).thenReturn(headers);
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);
         when(mockStatus.getStatusCode()).thenReturn(status);
 
-        final FcrepoResponse response = testClient.head(uri);
+        final FcrepoResponse response = testClient.head(uri).perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -300,18 +316,18 @@ public class FcrepoClientErrorTest {
     public void testHeadersWithoutContentType() throws IOException, FcrepoOperationFailedException {
         final int status = 100;
         final URI uri = create(baseUrl);
+        final Header locationHeader = new BasicHeader(LOCATION, null);
+        final Header contentTypeHeader = new BasicHeader(CONTENT_TYPE, null);
         final Header linkHeader = new BasicHeader("Link", "<" + baseUrl + "/bar>; rel=\"describedby\"");
         final Header linkFooHeader = new BasicHeader("Link" ,"<" + baseUrl + "/bar>; rel=\"foo\"");
-        final Header[] linkHeaders = new Header[]{ linkHeader, linkFooHeader };
+        final Header[] headers = new Header[]{ locationHeader, contentTypeHeader, linkHeader, linkFooHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
-        when(mockResponse.getFirstHeader("Location")).thenReturn(null);
-        when(mockResponse.getFirstHeader("Content-Type")).thenReturn(null);
-        when(mockResponse.getHeaders("Link")).thenReturn(linkHeaders);
+        when(mockResponse.getAllHeaders()).thenReturn(headers);
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);
         when(mockStatus.getStatusCode()).thenReturn(status);
 
-        final FcrepoResponse response = testClient.head(uri);
+        final FcrepoResponse response = testClient.head(uri).perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -323,14 +339,11 @@ public class FcrepoClientErrorTest {
     private void doSetupMockRequest(final String contentType, final ByteArrayEntity entity, final int status)
             throws IOException {
 
-        final Header contentTypeHeader = new BasicHeader("Content-Type", contentType);
-        final Header[] linkHeaders = new Header[]{};
-        final Header[] responseHeaders = new Header[] { contentTypeHeader };
+        final Header contentTypeHeader = new BasicHeader(CONTENT_TYPE, contentType);
+        final Header locationHeader = new BasicHeader(LOCATION, null);
+        final Header[] responseHeaders = new Header[] { contentTypeHeader, locationHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
-        when(mockResponse.getFirstHeader("Location")).thenReturn(null);
-        when(mockResponse.getFirstHeader("Content-Type")).thenReturn(contentTypeHeader);
-        when(mockResponse.getHeaders("Link")).thenReturn(linkHeaders);
         when(mockResponse.getEntity()).thenReturn(entity);
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);
         when(mockStatus.getStatusCode()).thenReturn(status);
