@@ -16,6 +16,7 @@
 
 package org.fcrepo.client;
 
+import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -28,6 +29,8 @@ import org.apache.http.client.methods.HttpRequestBase;
  * @author bbpennel
  */
 public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<PatchBuilder<T>> {
+
+    private static final String SPARQL_UPDATE = "application/sparql-update";
 
     /**
      * Instantiate builder
@@ -48,6 +51,14 @@ public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<
     protected HttpRequestBase createRequest() {
         final HttpMethods method = HttpMethods.PATCH;
         return (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);
+    }
+
+    /**
+     * Patch defaults to a sparql update
+     */
+    @Override
+    public PatchBuilder<T> body(final InputStream stream) {
+        return super.body(stream, SPARQL_UPDATE);
     }
 
     /**

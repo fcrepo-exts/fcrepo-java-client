@@ -19,7 +19,6 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.fcrepo.client.TestUtils.SPARQL_UPDATE;
 import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.rdfTtl;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
@@ -102,7 +101,7 @@ public class FcrepoAuthenticationIT {
     public void testAuthUserCanPatch() throws Exception {
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
         final FcrepoResponse response = authClient.patch(new URI(serverAddress + "testobj1"))
-                .body(body, SPARQL_UPDATE)
+                .body(body)
                 .perform();
         final int status = response.getStatusCode();
         assertEquals("Didn't get a successful PATCH response! Got content:\n",
@@ -113,7 +112,7 @@ public class FcrepoAuthenticationIT {
     public void testUnAuthUserCannotPatch() throws Exception {
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
         final FcrepoResponse response = client.patch(new URI(serverAddress + "testobj1"))
-                .body(body, SPARQL_UPDATE)
+                .body(body)
                 .perform();
         final String content = IOUtils.toString(response.getBody(), "UTF-8");
         final int status = response.getStatusCode();
