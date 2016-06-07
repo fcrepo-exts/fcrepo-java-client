@@ -20,7 +20,6 @@ import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,9 +28,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
-import org.slf4j.Logger;
 
 /**
  * Request builder which includes a body component
@@ -40,18 +37,6 @@ import org.slf4j.Logger;
  */
 public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extends
         RequestBuilder<BodyRequestBuilder<T>> {
-
-    private static final Logger LOGGER = getLogger(PatchBuilder.class);
-
-    protected InputStream bodyStream;
-
-    protected String contentType;
-
-    protected String digest;
-
-    protected String etag;
-
-    protected String unmodifiedSince;
 
     /**
      * Instantiate builder
@@ -66,18 +51,6 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
     @SuppressWarnings("unchecked")
     protected T self() {
         return (T) this;
-    }
-
-    @Override
-    protected void populateRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {
-        addBody((HttpEntityEnclosingRequestBase) request);
-
-        addIfUnmodifiedSince(request);
-        addIfMatch(request);
-
-        addDigest(request);
-
-        LOGGER.debug("Fcrepo {} request headers: {}", request.getMethod(), (Object[]) request.getAllHeaders());
     }
 
     /**
@@ -98,11 +71,14 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
      * @return this builder
      */
     public T body(final InputStream stream, final String contentType) {
-        this.bodyStream = stream;
-        if (contentType == null) {
-            this.contentType = "application/octet-stream";
-        } else {
-            this.contentType = contentType;
+        if (stream != null) {
+            String type = contentType;
+            if (type == null) {
+                type = "application/octet-stream";
+            }
+
+            ((HttpEntityEnclosingRequestBase) request).setEntity(new InputStreamEntity(stream));
+            request.addHeader(CONTENT_TYPE, type);
         }
 
         return self();
@@ -120,26 +96,19 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
         return body(new FileInputStream(file), contentType);
     }
 
-    protected void addBody(final HttpEntityEnclosingRequestBase request) {
-        if (bodyStream != null) {
-            request.setEntity(new InputStreamEntity(bodyStream));
-            request.addHeader(CONTENT_TYPE, contentType);
-        }
-    }
-
-    protected void addDigest(final HttpRequestBase request) {
+    protected void addDigest(final String digest) {
         if (digest != null) {
             request.addHeader(DIGEST, "sha1=" + digest);
         }
     }
 
-    protected void addIfUnmodifiedSince(final HttpRequestBase request) {
+    protected void addIfUnmodifiedSince(final String unmodifiedSince) {
         if (unmodifiedSince != null) {
             request.setHeader(IF_UNMODIFIED_SINCE, unmodifiedSince);
         }
     }
 
-    protected void addIfMatch(final HttpRequestBase request) {
+    protected void addIfMatch(final String etag) {
         if (etag != null) {
             request.setHeader(IF_MATCH, etag);
         }

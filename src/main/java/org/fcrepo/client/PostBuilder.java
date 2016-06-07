@@ -23,7 +23,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**
@@ -33,10 +32,6 @@ import org.apache.http.client.methods.HttpRequestBase;
  * @author bbpennel
  */
 public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<PostBuilder<T>> {
-
-    protected String filename;
-
-    protected String slug;
 
     /**
      * Instantiate builder
@@ -48,6 +43,11 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
         super(uri, client);
     }
 
+    @Override
+    protected HttpRequestBase createRequest() {
+        return HttpMethods.POST.createRequest(targetUri);
+    }
+
     /**
      * Provide a SHA-1 checksum for the body of this request
      * 
@@ -55,16 +55,18 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
      * @return this builder
      */
     public PostBuilder<T> digest(final String digest) {
-        this.digest = digest;
+        addDigest(digest);
         return self();
     }
 
-    @Override
-    protected void populateRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {
-        if (slug != null) {
-            request.addHeader(SLUG, slug);
-        }
-
+    /**
+     * Provide a content disposition header which will be used as the filename
+     * 
+     * @param filename the name of the file being provided in the body of the request
+     * @return this builder
+     * @throws FcrepoOperationFailedException if unable to encode filename
+     */
+    public PostBuilder<T> filename(final String filename) throws FcrepoOperationFailedException {
         if (filename != null) {
             try {
                 final String encodedFilename = URLEncoder.encode(filename, "utf-8");
@@ -75,24 +77,6 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
             }
 
         }
-
-        super.populateRequest(request);
-    }
-
-    @Override
-    protected HttpRequestBase createRequest() {
-        final HttpMethods method = HttpMethods.POST;
-        return (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);
-    }
-
-    /**
-     * Provide a content disposition header which will be used as the filename
-     * 
-     * @param filename the name of the file being provided in the body of the request
-     * @return this builder
-     */
-    public PostBuilder<T> filename(final String filename) {
-        this.filename = filename;
         return self();
     }
 
@@ -103,7 +87,9 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
      * @return this builder
      */
     public PostBuilder<T> slug(final String slug) {
-        this.slug = slug;
+        if (slug != null) {
+            request.addHeader(SLUG, slug);
+        }
         return self();
     }
 }

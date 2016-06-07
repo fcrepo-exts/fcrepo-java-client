@@ -30,8 +30,6 @@ import org.apache.http.util.Args;
  */
 public class MoveBuilder<T extends MoveBuilder<T>> extends RequestBuilder<MoveBuilder<T>> {
 
-    protected URI destinationUrl;
-
     /**
      * Instantiate builder
      * 
@@ -42,18 +40,12 @@ public class MoveBuilder<T extends MoveBuilder<T>> extends RequestBuilder<MoveBu
     protected MoveBuilder(final URI sourceUrl, final URI destinationUrl, final FcrepoClient client) {
         super(sourceUrl, client);
         Args.notNull(destinationUrl, "Destination URL");
-        this.destinationUrl = destinationUrl;
+        // Add the required destination header to the request
+        request.addHeader(DESTINATION, destinationUrl.toString());
     }
 
     @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.MOVE.createRequest(targetUri);
-    }
-
-    @Override
-    protected void populateRequest(final HttpRequestBase request) {
-        if (destinationUrl != null) {
-            request.addHeader(DESTINATION, destinationUrl.toString());
-        }
     }
 }

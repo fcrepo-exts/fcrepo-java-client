@@ -36,6 +36,7 @@ public class HeadBuilder<T extends HeadBuilder<T>> extends
      */
     public HeadBuilder(final URI uri, final FcrepoClient client) {
         super(uri, client);
+        this.request = HttpMethods.HEAD.createRequest(targetUri);
     }
 
     @Override

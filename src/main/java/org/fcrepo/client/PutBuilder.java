@@ -18,7 +18,6 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**
@@ -41,8 +40,7 @@ public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutB
 
     @Override
     protected HttpRequestBase createRequest() {
-        final HttpMethods method = HttpMethods.PUT;
-        return (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);
+        return HttpMethods.PUT.createRequest(targetUri);
     }
 
     /**
@@ -52,7 +50,7 @@ public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutB
      * @return this builder
      */
     public PutBuilder<T> ifMatch(final String etag) {
-        this.etag = etag;
+        addIfMatch(etag);
         return self();
     }
 
@@ -63,7 +61,7 @@ public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutB
      * @return this builder
      */
     public PutBuilder<T> ifUnmodifiedSince(final String modified) {
-        this.unmodifiedSince = modified;
+        addIfUnmodifiedSince(modified);
         return self();
     }
 
@@ -74,7 +72,7 @@ public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutB
      * @return this builder
      */
     public PutBuilder<T> digest(final String digest) {
-        this.digest = digest;
+        addDigest(digest);
         return self();
     }
 }

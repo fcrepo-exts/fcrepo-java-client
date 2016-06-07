@@ -19,7 +19,6 @@ package org.fcrepo.client;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**
@@ -44,8 +43,7 @@ public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<
 
     @Override
     protected HttpRequestBase createRequest() {
-        final HttpMethods method = HttpMethods.PATCH;
-        return (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);
+        return HttpMethods.PATCH.createRequest(targetUri);
     }
 
     /**
@@ -63,7 +61,7 @@ public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<
      * @return this builder
      */
     public PatchBuilder<T> ifMatch(final String etag) {
-        this.etag = etag;
+        addIfMatch(etag);
         return self();
     }
 
@@ -74,7 +72,7 @@ public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<
      * @return this builder
      */
     public PatchBuilder<T> ifUnmodifiedSince(final String modified) {
-        this.unmodifiedSince = modified;
+        addIfUnmodifiedSince(modified);
         return self();
     }
 }

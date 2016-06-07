@@ -21,7 +21,6 @@ import static org.fcrepo.client.FedoraHeaderConstants.IF_MODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_NONE_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.FedoraHeaderConstants.RANGE;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import java.net.URI;
 import java.util.List;
@@ -29,7 +28,6 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.apache.http.client.methods.HttpRequestBase;
-import org.slf4j.Logger;
 
 /**
  * Builds a GET request to retrieve the content of a resource from the Fedora HTTP API
@@ -38,24 +36,6 @@ import org.slf4j.Logger;
  */
 public class GetBuilder<T extends GetBuilder<T>> extends
         RequestBuilder<GetBuilder<T>> {
-
-    private static final Logger LOGGER = getLogger(GetBuilder.class);
-
-    protected Long rangeStart;
-
-    protected Long rangeEnd;
-
-    protected String acceptType;
-
-    protected String prefer;
-
-    protected List<URI> includeUris;
-
-    protected List<URI> omitUris;
-
-    protected String etag;
-
-    protected String lastModified;
 
     /**
      * Construct a GetBuilder
@@ -72,35 +52,28 @@ public class GetBuilder<T extends GetBuilder<T>> extends
         return HttpMethods.GET.createRequest(targetUri);
     }
 
-    @Override
-    protected void populateRequest(final HttpRequestBase request) {
-        if (acceptType != null) {
-            request.setHeader(ACCEPT, acceptType);
+    /**
+     * Add the accept header to this request to negotiate the response format.
+     * 
+     * @param mediaType media type to set as the accept header. It should be a value from one of the allowed RDF
+     *        source formats supported by Fedora.
+     * @return this builder
+     */
+    public GetBuilder<T> accept(final String mediaType) {
+        if (mediaType != null) {
+            request.setHeader(ACCEPT, mediaType);
         }
+        return self();
+    }
 
-        // Construct the prefer header, with include and omit parameters if available.
-        if (prefer != null) {
-            final StringJoiner preferJoin = new StringJoiner("; ");
-            preferJoin.add("return=" + prefer);
-
-            if (includeUris != null) {
-                final String include = includeUris.stream().map(URI::toString).collect(Collectors.joining(" "));
-                if (include.length() > 0) {
-                    preferJoin.add("include=\"" + include + "\"");
-                }
-            }
-
-            if (omitUris != null) {
-                final String omit = omitUris.stream().map(URI::toString).collect(Collectors.joining(" "));
-                if (omit.length() > 0) {
-                    preferJoin.add("omit=\"" + omit + "\"");
-                }
-            }
-
-            request.setHeader(PREFER, preferJoin.toString());
-        }
-
-        // Compute and add the range header
+    /**
+     * Set the byte range of content to retrieve
+     * 
+     * @param rangeStart beginning byte index
+     * @param rangeEnd ending byte index
+     * @return this builder
+     */
+    public GetBuilder<T> range(final Long rangeStart, final Long rangeEnd) {
         if (rangeStart != null || rangeEnd != null) {
             String range = "bytes=";
             if (rangeStart != null && rangeStart.longValue() > -1L) {
@@ -112,40 +85,6 @@ public class GetBuilder<T extends GetBuilder<T>> extends
             }
             request.setHeader(RANGE, range);
         }
-
-        // Add modification check headers
-        if (etag != null) {
-            request.setHeader(IF_NONE_MATCH, etag);
-        }
-        if (lastModified != null) {
-            request.setHeader(IF_MODIFIED_SINCE, lastModified);
-        }
-
-        LOGGER.debug("Fcrepo GET request headers: {}", (Object[]) request.getAllHeaders());
-    }
-
-    /**
-     * Add the accept header to this request to negotiate the response format.
-     * 
-     * @param mediaType media type to set as the accept header. It should be a value from one of the allowed RDF
-     *        source formats supported by Fedora.
-     * @return this builder
-     */
-    public GetBuilder<T> accept(final String mediaType) {
-        this.acceptType = mediaType;
-        return self();
-    }
-
-    /**
-     * Set the byte range of content to retrieve
-     * 
-     * @param start beginning byte index
-     * @param end ending byte index
-     * @return this builder
-     */
-    public GetBuilder<T> range(final Long start, final Long end) {
-        this.rangeStart = start;
-        this.rangeEnd = end;
         return self();
     }
 
@@ -156,7 +95,7 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * @return this builder
      */
     public GetBuilder<T> preferMinimal() {
-        this.prefer = "minimal";
+        request.setHeader(PREFER, buildPrefer("minimal", null, null));
         return self();
     }
 
@@ -167,7 +106,7 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * @return this builder
      */
     public GetBuilder<T> preferRepresentation() {
-        this.prefer = "representation";
+        request.setHeader(PREFER, buildPrefer("representation", null, null));
         return self();
     }
 
@@ -181,10 +120,29 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * @return this builder
      */
     public GetBuilder<T> preferRepresentation(final List<URI> includeUris, final List<URI> omitUris) {
-        this.preferRepresentation();
-        this.includeUris = includeUris;
-        this.omitUris = omitUris;
+        request.setHeader(PREFER, buildPrefer("representation", includeUris, omitUris));
         return self();
+    }
+
+    private String buildPrefer(final String prefer, final List<URI> includeUris, final List<URI> omitUris) {
+        final StringJoiner preferJoin = new StringJoiner("; ");
+        preferJoin.add("return=" + prefer);
+
+        if (includeUris != null) {
+            final String include = includeUris.stream().map(URI::toString).collect(Collectors.joining(" "));
+            if (include.length() > 0) {
+                preferJoin.add("include=\"" + include + "\"");
+            }
+        }
+
+        if (omitUris != null) {
+            final String omit = omitUris.stream().map(URI::toString).collect(Collectors.joining(" "));
+            if (omit.length() > 0) {
+                preferJoin.add("omit=\"" + omit + "\"");
+            }
+        }
+
+        return preferJoin.toString();
     }
 
     /**
@@ -194,7 +152,9 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * @return this builder
      */
     public GetBuilder<T> ifNoneMatch(final String etag) {
-        this.etag = etag;
+        if (etag != null) {
+            request.setHeader(IF_NONE_MATCH, etag);
+        }
         return self();
     }
 
@@ -205,7 +165,9 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * @return this builder
      */
     public GetBuilder<T> ifModifiedSince(final String lastModified) {
-        this.lastModified = lastModified;
+        if (lastModified != null) {
+            request.setHeader(IF_MODIFIED_SINCE, lastModified);
+        }
         return self();
     }
 }
