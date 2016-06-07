@@ -42,9 +42,4 @@ public class CopyBuilder<T extends CopyBuilder<T>> extends MoveBuilder<CopyBuild
     protected HttpRequestBase createRequest() {
         return HttpMethods.COPY.createRequest(targetUri);
     }
-
-    @Override
-    protected CopyBuilder<T> self() {
-        return this;
-    }
 }

@@ -48,11 +48,6 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
         super(uri, client);
     }
 
-    @Override
-    protected PostBuilder<T> self() {
-        return this;
-    }
-
     /**
      * Provide a SHA-1 checksum for the body of this request
      * 

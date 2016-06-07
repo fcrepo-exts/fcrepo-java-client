@@ -68,11 +68,6 @@ public class GetBuilder<T extends GetBuilder<T>> extends
     }
 
     @Override
-    protected GetBuilder<T> self() {
-        return this;
-    }
-
-    @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.GET.createRequest(targetUri);
     }

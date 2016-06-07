@@ -66,5 +66,13 @@ public abstract class RequestBuilder<T extends RequestBuilder<T>> {
     protected void populateRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {
     }
 
-    protected abstract T self();
+    /**
+     * Get reference to this builder with the correct type
+     * 
+     * @return this builder
+     */
+    @SuppressWarnings("unchecked")
+    protected T self() {
+        return (T) this;
+    }
 }

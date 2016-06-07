@@ -39,11 +39,6 @@ public class HeadBuilder<T extends HeadBuilder<T>> extends
     }
 
     @Override
-    protected HeadBuilder<T> self() {
-        return this;
-    }
-
-    @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.HEAD.createRequest(targetUri);
     }

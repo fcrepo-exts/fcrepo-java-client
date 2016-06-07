@@ -63,7 +63,10 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
         super(uri, client);
     }
 
-    protected abstract T self();
+    @SuppressWarnings("unchecked")
+    protected T self() {
+        return (T) this;
+    }
 
     @Override
     protected void populateRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {

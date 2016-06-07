@@ -43,11 +43,6 @@ public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<
     }
 
     @Override
-    protected PatchBuilder<T> self() {
-        return this;
-    }
-
-    @Override
     protected HttpRequestBase createRequest() {
         final HttpMethods method = HttpMethods.PATCH;
         return (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);

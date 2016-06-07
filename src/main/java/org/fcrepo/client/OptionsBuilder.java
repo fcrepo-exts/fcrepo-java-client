@@ -39,11 +39,6 @@ public class OptionsBuilder<T extends OptionsBuilder<T>> extends
     }
 
     @Override
-    protected OptionsBuilder<T> self() {
-        return this;
-    }
-
-    @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.OPTIONS.createRequest(targetUri);
     }

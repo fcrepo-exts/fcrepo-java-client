@@ -40,11 +40,6 @@ public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutB
     }
 
     @Override
-    protected PutBuilder<T> self() {
-        return this;
-    }
-
-    @Override
     protected HttpRequestBase createRequest() {
         final HttpMethods method = HttpMethods.PUT;
         return (HttpEntityEnclosingRequestBase) method.createRequest(targetUri);

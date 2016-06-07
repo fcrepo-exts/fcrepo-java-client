@@ -41,9 +41,4 @@ public class DeleteBuilder<T extends DeleteBuilder<T>> extends RequestBuilder<De
     protected HttpRequestBase createRequest() {
         return HttpMethods.DELETE.createRequest(targetUri);
     }
-
-    @Override
-    protected DeleteBuilder<T> self() {
-        return this;
-    }
 }

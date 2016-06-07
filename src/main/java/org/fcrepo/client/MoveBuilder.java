@@ -46,11 +46,6 @@ public class MoveBuilder<T extends MoveBuilder<T>> extends RequestBuilder<MoveBu
     }
 
     @Override
-    protected MoveBuilder<T> self() {
-        return this;
-    }
-
-    @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.MOVE.createRequest(targetUri);
     }
