@@ -18,3 +18,7 @@ velocity.log*
 .settings/
 /examples/*/target/
 transaction.log*
+
+# IDE files
+.idea/
+*.iml

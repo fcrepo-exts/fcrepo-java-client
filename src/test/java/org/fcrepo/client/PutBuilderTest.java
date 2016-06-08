@@ -55,7 +55,7 @@ public class PutBuilderTest {
     @Mock
     private FcrepoResponse fcrepoResponse;
 
-    private PutBuilder<?> testBuilder;
+    private PutBuilder testBuilder;
 
     private URI uri;
 
@@ -65,7 +65,7 @@ public class PutBuilderTest {
                 .thenReturn(fcrepoResponse);
 
         uri = create(baseUrl);
-        testBuilder = new PutBuilder<>(uri, client);
+        testBuilder = new PutBuilder(uri, client);
     }
 
     @Test

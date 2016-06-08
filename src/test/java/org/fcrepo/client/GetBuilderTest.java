@@ -53,7 +53,7 @@ public class GetBuilderTest {
     @Mock
     private FcrepoResponse fcrepoResponse;
 
-    private GetBuilder<?> testBuilder;
+    private GetBuilder testBuilder;
 
     private URI uri;
 
@@ -63,7 +63,7 @@ public class GetBuilderTest {
                 .thenReturn(fcrepoResponse);
 
         uri = create(baseUrl);
-        testBuilder = new GetBuilder<>(uri, client);
+        testBuilder = new GetBuilder(uri, client);
     }
 
     @Test

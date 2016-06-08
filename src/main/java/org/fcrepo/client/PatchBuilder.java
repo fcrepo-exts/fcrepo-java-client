@@ -27,7 +27,7 @@ import org.apache.http.client.methods.HttpRequestBase;
  * 
  * @author bbpennel
  */
-public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<PatchBuilder<T>> {
+public class PatchBuilder extends BodyRequestBuilder {
 
     private static final String SPARQL_UPDATE = "application/sparql-update";
 
@@ -50,7 +50,7 @@ public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<
      * Patch defaults to a sparql update
      */
     @Override
-    public PatchBuilder<T> body(final InputStream stream) {
+    public BodyRequestBuilder body(final InputStream stream) {
         return super.body(stream, SPARQL_UPDATE);
     }
 
@@ -60,9 +60,9 @@ public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<
      * @param etag etag to provide as the if-match header
      * @return this builder
      */
-    public PatchBuilder<T> ifMatch(final String etag) {
+    public PatchBuilder ifMatch(final String etag) {
         addIfMatch(etag);
-        return self();
+        return this;
     }
 
     /**
@@ -71,8 +71,8 @@ public class PatchBuilder<T extends PatchBuilder<T>> extends BodyRequestBuilder<
      * @param modified date to provide as the if-unmodified-since header
      * @return this builder
      */
-    public PatchBuilder<T> ifUnmodifiedSince(final String modified) {
+    public PatchBuilder ifUnmodifiedSince(final String modified) {
         addIfUnmodifiedSince(modified);
-        return self();
+        return this;
     }
 }

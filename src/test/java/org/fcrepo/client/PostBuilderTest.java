@@ -55,7 +55,7 @@ public class PostBuilderTest {
     @Mock
     private FcrepoResponse fcrepoResponse;
 
-    private PostBuilder<?> testBuilder;
+    private PostBuilder testBuilder;
 
     private URI uri;
 
@@ -65,7 +65,7 @@ public class PostBuilderTest {
                 .thenReturn(fcrepoResponse);
 
         uri = create(baseUrl);
-        testBuilder = new PostBuilder<>(uri, client);
+        testBuilder = new PostBuilder(uri, client);
     }
 
     @Test

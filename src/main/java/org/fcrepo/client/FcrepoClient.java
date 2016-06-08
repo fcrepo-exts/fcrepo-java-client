@@ -87,8 +87,8 @@ public class FcrepoClient {
      * @return a put request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public PutBuilder<?> put(final URI url) throws FcrepoOperationFailedException {
-        return new PutBuilder<>(url, this);
+    public PutBuilder put(final URI url) throws FcrepoOperationFailedException {
+        return new PutBuilder(url, this);
     }
 
     /**
@@ -98,8 +98,8 @@ public class FcrepoClient {
      * @return a patch request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public PatchBuilder<?> patch(final URI url) throws FcrepoOperationFailedException {
-        return new PatchBuilder<>(url, this);
+    public PatchBuilder patch(final URI url) throws FcrepoOperationFailedException {
+        return new PatchBuilder(url, this);
     }
 
     /**
@@ -109,8 +109,8 @@ public class FcrepoClient {
      * @return a post request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public PostBuilder<?> post(final URI url) throws FcrepoOperationFailedException {
-        return new PostBuilder<>(url, this);
+    public PostBuilder post(final URI url) throws FcrepoOperationFailedException {
+        return new PostBuilder(url, this);
     }
 
     /**
@@ -120,8 +120,8 @@ public class FcrepoClient {
      * @return a delete request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-     public DeleteBuilder<?> delete(final URI url) throws FcrepoOperationFailedException {
-     return new DeleteBuilder<>(url, this);
+     public DeleteBuilder delete(final URI url) throws FcrepoOperationFailedException {
+     return new DeleteBuilder(url, this);
      }
 
     /**
@@ -132,8 +132,8 @@ public class FcrepoClient {
      * @return a copy request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public CopyBuilder<?> copy(final URI source, final URI destination) throws FcrepoOperationFailedException {
-        return new CopyBuilder<>(source, destination, this);
+    public CopyBuilder copy(final URI source, final URI destination) throws FcrepoOperationFailedException {
+        return new CopyBuilder(source, destination, this);
     }
 
     /**
@@ -144,8 +144,8 @@ public class FcrepoClient {
      * @return a move request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public MoveBuilder<?> move(final URI source, final URI destination) throws FcrepoOperationFailedException {
-        return new MoveBuilder<>(source, destination, this);
+    public MoveBuilder move(final URI source, final URI destination) throws FcrepoOperationFailedException {
+        return new MoveBuilder(source, destination, this);
     }
 
     /**
@@ -155,8 +155,8 @@ public class FcrepoClient {
      * @return a get request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public GetBuilder<?> get(final URI url) throws FcrepoOperationFailedException {
-        return new GetBuilder<>(url, this);
+    public GetBuilder get(final URI url) throws FcrepoOperationFailedException {
+        return new GetBuilder(url, this);
     }
 
     /**
@@ -166,8 +166,8 @@ public class FcrepoClient {
      * @return a HEAD request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public HeadBuilder<?> head(final URI url) throws FcrepoOperationFailedException {
-        return new HeadBuilder<>(url, this);
+    public HeadBuilder head(final URI url) throws FcrepoOperationFailedException {
+        return new HeadBuilder(url, this);
     }
 
     /**
@@ -177,8 +177,8 @@ public class FcrepoClient {
      * @return a OPTIONS request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public OptionsBuilder<?> options(final URI url) throws FcrepoOperationFailedException {
-        return new OptionsBuilder<>(url, this);
+    public OptionsBuilder options(final URI url) throws FcrepoOperationFailedException {
+        return new OptionsBuilder(url, this);
     }
 
     /**

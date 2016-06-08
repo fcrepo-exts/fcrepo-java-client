@@ -25,8 +25,8 @@ import org.apache.http.client.methods.HttpRequestBase;
  * 
  * @author bbpennel
  */
-public class HeadBuilder<T extends HeadBuilder<T>> extends
-        RequestBuilder<HeadBuilder<T>> {
+public class HeadBuilder extends
+        RequestBuilder {
 
     /**
      * Instantiate builder
