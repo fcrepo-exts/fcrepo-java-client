@@ -72,8 +72,8 @@ public class FcrepoAuthenticationIT {
 
         client = FcrepoClient.client().build();
         authClient = FcrepoClient.client()
-                .withCredentials("fedoraAdmin", "password")
-                .withAuthScope("localhost")
+                .credentials("fedoraAdmin", "password")
+                .authScope("localhost")
                 .build();
     }
 

@@ -312,7 +312,7 @@ public class FcrepoClient {
          * @param password
          * @return
          */
-        public FcrepoClientBuilder withCredentials(final String username, final String password) {
+        public FcrepoClientBuilder credentials(final String username, final String password) {
             this.authUser = username;
             this.authPassword = password;
             return this;
@@ -324,7 +324,7 @@ public class FcrepoClient {
          * @param authHost authentication scope value
          * @return this builder
          */
-        public FcrepoClientBuilder withAuthScope(final String authHost) {
+        public FcrepoClientBuilder authScope(final String authHost) {
             this.authHost = authHost;
 
             return this;

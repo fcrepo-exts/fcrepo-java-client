@@ -65,7 +65,7 @@ public class FcrepoClientAuthTest {
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
         testClient = FcrepoClient.client()
-                .withCredentials("user", "pass")
+                .credentials("user", "pass")
                 .throwExceptionOnFailure()
                 .build();
         setField(testClient, "httpclient", mockHttpclient);
@@ -90,8 +90,8 @@ public class FcrepoClientAuthTest {
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
         testClient = FcrepoClient.client()
-                .withCredentials("user", "pass")
-                .withAuthScope("localhost")
+                .credentials("user", "pass")
+                .authScope("localhost")
                 .throwExceptionOnFailure()
                 .build();
         setField(testClient, "httpclient", mockHttpclient);
@@ -116,7 +116,7 @@ public class FcrepoClientAuthTest {
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
         testClient = FcrepoClient.client()
-                .withCredentials("user", null)
+                .credentials("user", null)
                 .throwExceptionOnFailure()
                 .build();
         setField(testClient, "httpclient", mockHttpclient);
