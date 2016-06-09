@@ -29,7 +29,7 @@ import org.slf4j.Logger;
  * 
  * @author bbpennel
  */
-public abstract class RequestBuilder<T extends RequestBuilder<T>> {
+public abstract class RequestBuilder {
 
     private static final Logger LOGGER = getLogger(RequestBuilder.class);
 
@@ -72,18 +72,9 @@ public abstract class RequestBuilder<T extends RequestBuilder<T>> {
      */
     public FcrepoResponse perform() throws FcrepoOperationFailedException {
         LOGGER.debug("Fcrepo {} request to {} with headers: {}", request.getMethod(), targetUri,
-                (Object[]) request.getAllHeaders());
+                request.getAllHeaders());
 
         return client.executeRequest(targetUri, request);
     }
 
-    /**
-     * Get reference to this builder with the correct type
-     * 
-     * @return this builder
-     */
-    @SuppressWarnings("unchecked")
-    protected T self() {
-        return (T) this;
-    }
 }

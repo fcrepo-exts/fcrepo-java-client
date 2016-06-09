@@ -25,8 +25,8 @@ import org.apache.http.client.methods.HttpRequestBase;
  * 
  * @author bbpennel
  */
-public class OptionsBuilder<T extends OptionsBuilder<T>> extends
-        RequestBuilder<OptionsBuilder<T>> {
+public class OptionsBuilder extends
+        RequestBuilder {
 
     /**
      * Instantiate builder

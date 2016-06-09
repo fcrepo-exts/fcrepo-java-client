@@ -25,7 +25,7 @@ import org.apache.http.client.methods.HttpRequestBase;
  * 
  * @author bbpennel
  */
-public class DeleteBuilder<T extends DeleteBuilder<T>> extends RequestBuilder<DeleteBuilder<T>> {
+public class DeleteBuilder extends RequestBuilder {
 
     /**
      * Instantiate builder

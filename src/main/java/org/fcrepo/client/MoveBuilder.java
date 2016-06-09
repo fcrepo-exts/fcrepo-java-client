@@ -28,7 +28,7 @@ import org.apache.http.util.Args;
  * 
  * @author bbpennel
  */
-public class MoveBuilder<T extends MoveBuilder<T>> extends RequestBuilder<MoveBuilder<T>> {
+public class MoveBuilder extends RequestBuilder {
 
     /**
      * Instantiate builder

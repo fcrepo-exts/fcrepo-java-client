@@ -16,6 +16,7 @@
 
 package org.fcrepo.client;
 
+import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
@@ -26,7 +27,7 @@ import org.apache.http.client.methods.HttpRequestBase;
  * 
  * @author bbpennel
  */
-public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutBuilder<T>> {
+public class PutBuilder extends BodyRequestBuilder {
 
     /**
      * Instantiate builder
@@ -44,14 +45,25 @@ public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutB
     }
 
     /**
-     * Provide an etag for the if-match header for this request
-     * 
-     * @param etag etag to provide as the if-match header
+     * Add a body to this request as a stream with the given content type
+     *
+     * @param stream InputStream of the content to be sent to the server
+     * @param contentType the Content-Type of the body
      * @return this builder
      */
-    public PutBuilder<T> ifMatch(final String etag) {
+    public PutBuilder body(final InputStream stream, final String contentType) {
+        return (PutBuilder) super.body(stream, contentType);
+    }
+
+        /**
+         * Provide an etag for the if-match header for this request
+         *
+         * @param etag etag to provide as the if-match header
+         * @return this builder
+         */
+    public PutBuilder ifMatch(final String etag) {
         addIfMatch(etag);
-        return self();
+        return this;
     }
 
     /**
@@ -60,9 +72,9 @@ public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutB
      * @param modified date to provide as the if-unmodified-since header
      * @return this builder
      */
-    public PutBuilder<T> ifUnmodifiedSince(final String modified) {
+    public PutBuilder ifUnmodifiedSince(final String modified) {
         addIfUnmodifiedSince(modified);
-        return self();
+        return this;
     }
 
     /**
@@ -71,8 +83,8 @@ public class PutBuilder<T extends PutBuilder<T>> extends BodyRequestBuilder<PutB
      * @param digest sha-1 checksum to provide as the digest for the request body
      * @return this builder
      */
-    public PutBuilder<T> digest(final String digest) {
+    public PutBuilder digest(final String digest) {
         addDigest(digest);
-        return self();
+        return this;
     }
 }

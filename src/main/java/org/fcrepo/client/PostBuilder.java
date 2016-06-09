@@ -19,6 +19,7 @@ package org.fcrepo.client;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.SLUG;
 
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -31,7 +32,7 @@ import org.apache.http.client.methods.HttpRequestBase;
  * 
  * @author bbpennel
  */
-public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<PostBuilder<T>> {
+public class PostBuilder extends BodyRequestBuilder {
 
     /**
      * Instantiate builder
@@ -49,14 +50,25 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
     }
 
     /**
+     * Add a body to this request as a stream with the given content type
+     *
+     * @param stream InputStream of the content to be sent to the server
+     * @param contentType the Content-Type of the body
+     * @return this builder
+     */
+    public PostBuilder body(final InputStream stream, final String contentType) {
+        return (PostBuilder) super.body(stream, contentType);
+    }
+
+    /**
      * Provide a SHA-1 checksum for the body of this request
      * 
      * @param digest sha-1 checksum to provide as the digest for the request body
      * @return this builder
      */
-    public PostBuilder<T> digest(final String digest) {
+    public PostBuilder digest(final String digest) {
         addDigest(digest);
-        return self();
+        return this;
     }
 
     /**
@@ -66,7 +78,7 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
      * @return this builder
      * @throws FcrepoOperationFailedException if unable to encode filename
      */
-    public PostBuilder<T> filename(final String filename) throws FcrepoOperationFailedException {
+    public PostBuilder filename(final String filename) throws FcrepoOperationFailedException {
         if (filename != null) {
             try {
                 final String encodedFilename = URLEncoder.encode(filename, "utf-8");
@@ -77,7 +89,7 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
             }
 
         }
-        return self();
+        return this;
     }
 
     /**
@@ -86,10 +98,10 @@ public class PostBuilder<T extends PostBuilder<T>> extends BodyRequestBuilder<Po
      * @param slug value to supply as the slug header
      * @return this builder
      */
-    public PostBuilder<T> slug(final String slug) {
+    public PostBuilder slug(final String slug) {
         if (slug != null) {
             request.addHeader(SLUG, slug);
         }
-        return self();
+        return this;
     }
 }

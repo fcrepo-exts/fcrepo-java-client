@@ -34,8 +34,8 @@ import org.apache.http.client.methods.HttpRequestBase;
  * 
  * @author bbpennel
  */
-public class GetBuilder<T extends GetBuilder<T>> extends
-        RequestBuilder<GetBuilder<T>> {
+public class GetBuilder extends
+        RequestBuilder {
 
     /**
      * Construct a GetBuilder
@@ -59,11 +59,11 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      *        source formats supported by Fedora.
      * @return this builder
      */
-    public GetBuilder<T> accept(final String mediaType) {
+    public GetBuilder accept(final String mediaType) {
         if (mediaType != null) {
             request.setHeader(ACCEPT, mediaType);
         }
-        return self();
+        return this;
     }
 
     /**
@@ -73,7 +73,7 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * @param rangeEnd ending byte index
      * @return this builder
      */
-    public GetBuilder<T> range(final Long rangeStart, final Long rangeEnd) {
+    public GetBuilder range(final Long rangeStart, final Long rangeEnd) {
         if (rangeStart != null || rangeEnd != null) {
             String range = "bytes=";
             if (rangeStart != null && rangeStart.longValue() > -1L) {
@@ -85,7 +85,7 @@ public class GetBuilder<T extends GetBuilder<T>> extends
             }
             request.setHeader(RANGE, range);
         }
-        return self();
+        return this;
     }
 
     /**
@@ -94,9 +94,9 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * 
      * @return this builder
      */
-    public GetBuilder<T> preferMinimal() {
+    public GetBuilder preferMinimal() {
         request.setHeader(PREFER, buildPrefer("minimal", null, null));
-        return self();
+        return this;
     }
 
     /**
@@ -105,9 +105,9 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * 
      * @return this builder
      */
-    public GetBuilder<T> preferRepresentation() {
+    public GetBuilder preferRepresentation() {
         request.setHeader(PREFER, buildPrefer("representation", null, null));
-        return self();
+        return this;
     }
 
     /**
@@ -119,9 +119,9 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * @param omitUris URIs of LDP defined preferences to omit
      * @return this builder
      */
-    public GetBuilder<T> preferRepresentation(final List<URI> includeUris, final List<URI> omitUris) {
+    public GetBuilder preferRepresentation(final List<URI> includeUris, final List<URI> omitUris) {
         request.setHeader(PREFER, buildPrefer("representation", includeUris, omitUris));
-        return self();
+        return this;
     }
 
     private String buildPrefer(final String prefer, final List<URI> includeUris, final List<URI> omitUris) {
@@ -151,11 +151,11 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * @param etag etag to provide as the if-none-match header
      * @return this builder
      */
-    public GetBuilder<T> ifNoneMatch(final String etag) {
+    public GetBuilder ifNoneMatch(final String etag) {
         if (etag != null) {
             request.setHeader(IF_NONE_MATCH, etag);
         }
-        return self();
+        return this;
     }
 
     /**
@@ -164,10 +164,10 @@ public class GetBuilder<T extends GetBuilder<T>> extends
      * @param lastModified date to provided as the if-modified-since header
      * @return this builder
      */
-    public GetBuilder<T> ifModifiedSince(final String lastModified) {
+    public GetBuilder ifModifiedSince(final String lastModified) {
         if (lastModified != null) {
             request.setHeader(IF_MODIFIED_SINCE, lastModified);
         }
-        return self();
+        return this;
     }
 }

@@ -47,7 +47,7 @@ public class MoveBuilderTest {
     @Mock
     private FcrepoResponse fcrepoResponse;
 
-    private MoveBuilder<?> testBuilder;
+    private MoveBuilder testBuilder;
 
     private URI uri;
 
@@ -62,7 +62,7 @@ public class MoveBuilderTest {
 
         uri = create(baseUrl);
         destUri = create(destUrl);
-        testBuilder = new MoveBuilder<>(uri, destUri, client);
+        testBuilder = new MoveBuilder(uri, destUri, client);
     }
 
     @Test

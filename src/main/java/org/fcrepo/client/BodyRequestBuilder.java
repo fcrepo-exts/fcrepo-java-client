@@ -35,8 +35,8 @@ import org.apache.http.entity.InputStreamEntity;
  * 
  * @author bbpennel
  */
-public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extends
-        RequestBuilder<BodyRequestBuilder<T>> {
+public abstract class BodyRequestBuilder extends
+        RequestBuilder {
 
     /**
      * Instantiate builder
@@ -48,18 +48,13 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
         super(uri, client);
     }
 
-    @SuppressWarnings("unchecked")
-    protected T self() {
-        return (T) this;
-    }
-
     /**
      * Add a body to this request from a stream, with application/octet-stream as its content type
      * 
      * @param stream InputStream of the content to be sent to the server
      * @return this builder
      */
-    public T body(final InputStream stream) {
+    protected BodyRequestBuilder body(final InputStream stream) {
         return body(stream, null);
     }
 
@@ -70,7 +65,7 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
      * @param contentType the Content-Type of the body
      * @return this builder
      */
-    public T body(final InputStream stream, final String contentType) {
+    protected BodyRequestBuilder body(final InputStream stream, final String contentType) {
         if (stream != null) {
             String type = contentType;
             if (type == null) {
@@ -81,7 +76,7 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
             request.addHeader(CONTENT_TYPE, type);
         }
 
-        return self();
+        return this;
     }
 
     /**
@@ -92,7 +87,7 @@ public abstract class BodyRequestBuilder<T extends BodyRequestBuilder<T>> extend
      * @return this builder
      * @throws IOException when unable to stream the body file
      */
-    public T body(final File file, final String contentType) throws IOException {
+    protected BodyRequestBuilder body(final File file, final String contentType) throws IOException {
         return body(new FileInputStream(file), contentType);
     }
 

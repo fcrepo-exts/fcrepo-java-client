@@ -25,7 +25,7 @@ import org.apache.http.client.methods.HttpRequestBase;
  * 
  * @author bbpennel
  */
-public class CopyBuilder<T extends CopyBuilder<T>> extends MoveBuilder<CopyBuilder<T>> {
+public class CopyBuilder extends MoveBuilder {
 
     /**
      * Instantiate builder
