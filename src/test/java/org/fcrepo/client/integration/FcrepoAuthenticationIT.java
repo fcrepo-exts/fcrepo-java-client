@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.client.integration;
 
 import static javax.ws.rs.core.Response.Status.CREATED;
@@ -68,8 +69,12 @@ public class FcrepoAuthenticationIT {
         connectionManager.setMaxTotal(Integer.MAX_VALUE);
         connectionManager.setDefaultMaxPerRoute(20);
         connectionManager.closeIdleConnections(3, TimeUnit.SECONDS);
-        client = new FcrepoClient(null, null, null, false);
-        authClient = new FcrepoClient("fedoraAdmin", "password", "localhost", false);
+
+        client = FcrepoClient.client().build();
+        authClient = FcrepoClient.client()
+                .withCredentials("fedoraAdmin", "password")
+                .withAuthScope("localhost")
+                .build();
     }
 
     @Test

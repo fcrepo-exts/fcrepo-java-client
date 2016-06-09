@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.client;
 
 import static java.net.URI.create;
@@ -63,7 +64,10 @@ public class FcrepoClientAuthTest {
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
-        testClient = new FcrepoClient("user", "pass", null, true);
+        testClient = FcrepoClient.client()
+                .withCredentials("user", "pass")
+                .throwExceptionOnFailure()
+                .build();
         setField(testClient, "httpclient", mockHttpclient);
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
@@ -85,7 +89,11 @@ public class FcrepoClientAuthTest {
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
-        testClient = new FcrepoClient("user", "pass", "localhost", true);
+        testClient = FcrepoClient.client()
+                .withCredentials("user", "pass")
+                .withAuthScope("localhost")
+                .throwExceptionOnFailure()
+                .build();
         setField(testClient, "httpclient", mockHttpclient);
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
@@ -107,7 +115,10 @@ public class FcrepoClientAuthTest {
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
-        testClient = new FcrepoClient("user", null, null, true);
+        testClient = FcrepoClient.client()
+                .withCredentials("user", null)
+                .throwExceptionOnFailure()
+                .build();
         setField(testClient, "httpclient", mockHttpclient);
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
@@ -126,7 +137,7 @@ public class FcrepoClientAuthTest {
     private void doSetupMockRequest(final String contentType, final ByteArrayEntity entity, final int status)
             throws IOException {
         final Header contentTypeHeader = new BasicHeader("Content-Type", contentType);
-        final Header[] headers = new Header[]{ contentTypeHeader };
+        final Header[] headers = new Header[] { contentTypeHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
         when(mockResponse.getAllHeaders()).thenReturn(headers);

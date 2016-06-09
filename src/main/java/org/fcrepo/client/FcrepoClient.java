@@ -63,6 +63,15 @@ public class FcrepoClient {
     private static final Logger LOGGER = getLogger(FcrepoClient.class);
 
     /**
+     * Build a FcrepoClient
+     * 
+     * @return
+     */
+    public static FcrepoClientBuilder client() {
+        return new FcrepoClientBuilder();
+    }
+
+    /**
      * Create a FcrepoClient with a set of authentication values.
      * 
      * @param username the username for the repository
@@ -70,7 +79,7 @@ public class FcrepoClient {
      * @param host the authentication hostname (realm) for the repository
      * @param throwExceptionOnFailure whether to throw an exception on any non-2xx or 3xx HTTP responses
      */
-    public FcrepoClient(final String username, final String password, final String host,
+    protected FcrepoClient(final String username, final String password, final String host,
             final Boolean throwExceptionOnFailure) {
 
         final FcrepoHttpClientBuilder client = new FcrepoHttpClientBuilder(username, password, host);
@@ -120,9 +129,9 @@ public class FcrepoClient {
      * @return a delete request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-     public DeleteBuilder delete(final URI url) throws FcrepoOperationFailedException {
-     return new DeleteBuilder(url, this);
-     }
+    public DeleteBuilder delete(final URI url) throws FcrepoOperationFailedException {
+        return new DeleteBuilder(url, this);
+    }
 
     /**
      * Make a MOVE request to copy a resource (and its subtree) to a new location.
@@ -279,5 +288,65 @@ public class FcrepoClient {
             values.add(header.getValue());
         }
         return headers;
+    }
+
+    /**
+     * Builds an FcrepoClient
+     * 
+     * @author bbpennel
+     */
+    public static class FcrepoClientBuilder {
+
+        private String authUser;
+
+        private String authPassword;
+
+        private String authHost;
+
+        private boolean throwExceptionOnFailure;
+
+        /**
+         * Add basic authentication credentials to this client
+         * 
+         * @param username username
+         * @param password
+         * @return
+         */
+        public FcrepoClientBuilder withCredentials(final String username, final String password) {
+            this.authUser = username;
+            this.authPassword = password;
+            return this;
+        }
+
+        /**
+         * Add an authentication scope to this client
+         * 
+         * @param authHost authentication scope value
+         * @return this builder
+         */
+        public FcrepoClientBuilder withAuthScope(final String authHost) {
+            this.authHost = authHost;
+
+            return this;
+        }
+
+        /**
+         * Client should throw exceptions when failures occur
+         * 
+         * @return this builder
+         */
+        public FcrepoClientBuilder throwExceptionOnFailure() {
+            this.throwExceptionOnFailure = true;
+            return this;
+        }
+
+        /**
+         * Get the client
+         * 
+         * @return the client constructed by this builder
+         */
+        public FcrepoClient build() {
+            return new FcrepoClient(authUser, authPassword, authHost, this.throwExceptionOnFailure);
+        }
     }
 }
