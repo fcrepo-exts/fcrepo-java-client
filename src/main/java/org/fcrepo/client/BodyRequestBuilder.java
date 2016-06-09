@@ -91,21 +91,42 @@ public abstract class BodyRequestBuilder extends
         return body(new FileInputStream(file), contentType);
     }
 
-    protected void addDigest(final String digest) {
+    /**
+     * Provide a SHA-1 checksum for the body of this request
+     * 
+     * @param digest sha-1 checksum to provide as the digest for the request body
+     * @return this builder
+     */
+    protected BodyRequestBuilder digest(final String digest) {
         if (digest != null) {
             request.addHeader(DIGEST, "sha1=" + digest);
         }
+        return this;
     }
 
-    protected void addIfUnmodifiedSince(final String unmodifiedSince) {
-        if (unmodifiedSince != null) {
-            request.setHeader(IF_UNMODIFIED_SINCE, unmodifiedSince);
+    /**
+     * Provide a if-unmodified-since header for this request
+     * 
+     * @param modified date to provide as the if-unmodified-since header
+     * @return this builder
+     */
+    public BodyRequestBuilder ifUnmodifiedSince(final String modified) {
+        if (modified != null) {
+            request.setHeader(IF_UNMODIFIED_SINCE, modified);
         }
+        return this;
     }
 
-    protected void addIfMatch(final String etag) {
+    /**
+     * Provide an etag for the if-match header for this request
+     * 
+     * @param etag etag to provide as the if-match header
+     * @return this builder
+     */
+    protected BodyRequestBuilder ifMatch(final String etag) {
         if (etag != null) {
             request.setHeader(IF_MATCH, etag);
         }
+        return this;
     }
 }

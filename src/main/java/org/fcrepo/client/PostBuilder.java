@@ -19,6 +19,8 @@ package org.fcrepo.client;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.SLUG;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -49,26 +51,24 @@ public class PostBuilder extends BodyRequestBuilder {
         return HttpMethods.POST.createRequest(targetUri);
     }
 
-    /**
-     * Add a body to this request as a stream with the given content type
-     *
-     * @param stream InputStream of the content to be sent to the server
-     * @param contentType the Content-Type of the body
-     * @return this builder
-     */
+    @Override
     public PostBuilder body(final InputStream stream, final String contentType) {
         return (PostBuilder) super.body(stream, contentType);
     }
 
-    /**
-     * Provide a SHA-1 checksum for the body of this request
-     * 
-     * @param digest sha-1 checksum to provide as the digest for the request body
-     * @return this builder
-     */
+    @Override
+    public PostBuilder body(final File file, final String contentType) throws IOException {
+        return (PostBuilder) super.body(file, contentType);
+    }
+
+    @Override
+    public PostBuilder body(final InputStream stream) {
+        return (PostBuilder) super.body(stream);
+    }
+
+    @Override
     public PostBuilder digest(final String digest) {
-        addDigest(digest);
-        return this;
+        return (PostBuilder) super.digest(digest);
     }
 
     /**

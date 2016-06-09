@@ -49,30 +49,17 @@ public class PatchBuilder extends BodyRequestBuilder {
     /**
      * Patch defaults to a sparql update
      */
+    public PatchBuilder body(final InputStream stream) {
+        return (PatchBuilder) super.body(stream, SPARQL_UPDATE);
+    }
+
     @Override
-    public BodyRequestBuilder body(final InputStream stream) {
-        return super.body(stream, SPARQL_UPDATE);
-    }
-
-    /**
-     * Provide an etag for the if-match header for this request
-     * 
-     * @param etag etag to provide as the if-match header
-     * @return this builder
-     */
     public PatchBuilder ifMatch(final String etag) {
-        addIfMatch(etag);
-        return this;
+        return (PatchBuilder) super.ifMatch(etag);
     }
 
-    /**
-     * Provide a if-unmodified-since header for this request
-     * 
-     * @param modified date to provide as the if-unmodified-since header
-     * @return this builder
-     */
+    @Override
     public PatchBuilder ifUnmodifiedSince(final String modified) {
-        addIfUnmodifiedSince(modified);
-        return this;
+        return (PatchBuilder) super.ifUnmodifiedSince(modified);
     }
 }
