@@ -22,3 +22,6 @@ transaction.log*
 # IDE files
 .idea/
 *.iml
+
+# integration test temps
+fcrepo4-data
