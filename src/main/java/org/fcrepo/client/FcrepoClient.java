@@ -65,7 +65,7 @@ public class FcrepoClient {
     /**
      * Build a FcrepoClient
      * 
-     * @return
+     * @return a client builder
      */
     public static FcrepoClientBuilder client() {
         return new FcrepoClientBuilder();
@@ -308,9 +308,9 @@ public class FcrepoClient {
         /**
          * Add basic authentication credentials to this client
          * 
-         * @param username username
-         * @param password
-         * @return
+         * @param username username for authentication
+         * @param password password for authentication
+         * @return the client builder
          */
         public FcrepoClientBuilder credentials(final String username, final String password) {
             this.authUser = username;
@@ -346,7 +346,7 @@ public class FcrepoClient {
          * @return the client constructed by this builder
          */
         public FcrepoClient build() {
-            return new FcrepoClient(authUser, authPassword, authHost, this.throwExceptionOnFailure);
+            return new FcrepoClient(authUser, authPassword, authHost, throwExceptionOnFailure);
         }
     }
 }
