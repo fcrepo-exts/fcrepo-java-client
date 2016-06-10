@@ -29,6 +29,14 @@ public class FedoraHeaderConstants {
 
     public static final String CONTENT_DISPOSITION = "Content-Disposition";
 
+    public static final String CONTENT_DISPOSITION_FILENAME = "filename";
+
+    public static final String CONTENT_DISPOSITION_CREATION_DATE = "creation-date";
+
+    public static final String CONTENT_DISPOSITION_MODIFICATION_DATE = "modification-date";
+
+    public static final String CONTENT_DISPOSITION_SIZE = "size";
+
     public static final String SLUG = "Slug";
 
     public static final String DIGEST = "digest";

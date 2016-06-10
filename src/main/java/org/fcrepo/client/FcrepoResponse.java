@@ -16,6 +16,7 @@
 
 package org.fcrepo.client;
 
+import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DESCRIBED_BY;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
@@ -26,8 +27,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.http.HeaderElement;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicHeader;
 
 /**
  * Represents a response from a fedora repository using a {@link FcrepoClient}.
@@ -56,6 +62,8 @@ public class FcrepoResponse implements Closeable {
     private URI location;
 
     private Map<String, List<String>> headers;
+
+    private Map<String, String> contentDisposition;
 
     private InputStream body;
 
@@ -285,5 +293,29 @@ public class FcrepoResponse implements Closeable {
      */
     public void setContentType(final String contentType) {
         this.contentType = contentType;
+    }
+
+    /**
+     * Get a map of parameters from the Content-Disposition header if present
+     * 
+     * @return map of Content-Disposition parameters or null
+     */
+    public Map<String, String> getContentDisposition() {
+        if (contentDisposition == null && headers.containsKey(CONTENT_DISPOSITION)) {
+            List<String> values = headers.get(CONTENT_DISPOSITION);
+            if (values.isEmpty()) {
+                return null;
+            }
+
+            contentDisposition = new HashMap<>();
+            String value = values.get(0);
+            BasicHeader header = new BasicHeader(CONTENT_DISPOSITION, value);
+            for (HeaderElement headEl : header.getElements()) {
+                for (NameValuePair pair : headEl.getParameters()) {
+                    contentDisposition.put(pair.getName(), pair.getValue());
+                }
+            }
+        }
+        return contentDisposition;
     }
 }

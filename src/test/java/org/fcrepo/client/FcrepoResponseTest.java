@@ -18,6 +18,10 @@ package org.fcrepo.client;
 
 import static java.net.URI.create;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
+import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION_FILENAME;
+import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION_MODIFICATION_DATE;
+import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION_SIZE;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DESCRIBED_BY;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
@@ -165,7 +169,6 @@ public class FcrepoResponseTest {
      *
      * @throws FcrepoOperationFailedException if something exceptional happens
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testIdiomaticInvokation() throws FcrepoOperationFailedException {
         final String content = "Hello World!";
@@ -188,7 +191,6 @@ public class FcrepoResponseTest {
      *
      * @throws Exception if something exceptional happens
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testIdiomaticInvokationThrowsException() throws Exception {
         final InputStream mockBody = mock(InputStream.class);
@@ -246,4 +248,25 @@ public class FcrepoResponseTest {
         }
     }
 
+    @Test
+    public void testContentDisposition() throws Exception {
+        final Map<String, List<String>> headers = new HashMap<>();
+        final String filename = "file.txt";
+        final String createDate = "Fri, 10 Jun 2016 14:52:46 GMT";
+        final String modDate = "Fri, 10 Jun 2016 18:52:46 GMT";
+        final long size = 5320;
+
+        headers.put(CONTENT_DISPOSITION, Arrays.asList("attachment; filename=\"" + filename + "\";" +
+                " creation-date=\"" + createDate + "\";" +
+                " modification-date=\"" + modDate + "\";" +
+                " size=" + size));
+
+        try (FcrepoResponse response = new FcrepoResponse(URI.create("http://localhost/foo"), 201,
+                headers, null)) {
+            Map<String, String> disp = response.getContentDisposition();
+            assertEquals(disp.get(CONTENT_DISPOSITION_FILENAME), filename);
+            assertEquals(disp.get(CONTENT_DISPOSITION_MODIFICATION_DATE), modDate);
+            assertEquals(Long.parseLong(disp.get(CONTENT_DISPOSITION_SIZE)), size);
+        }
+    }
 }
