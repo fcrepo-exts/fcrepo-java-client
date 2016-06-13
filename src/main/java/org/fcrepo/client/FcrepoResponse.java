@@ -302,16 +302,16 @@ public class FcrepoResponse implements Closeable {
      */
     public Map<String, String> getContentDisposition() {
         if (contentDisposition == null && headers.containsKey(CONTENT_DISPOSITION)) {
-            List<String> values = headers.get(CONTENT_DISPOSITION);
+            final List<String> values = headers.get(CONTENT_DISPOSITION);
             if (values.isEmpty()) {
                 return null;
             }
 
             contentDisposition = new HashMap<>();
-            String value = values.get(0);
-            BasicHeader header = new BasicHeader(CONTENT_DISPOSITION, value);
-            for (HeaderElement headEl : header.getElements()) {
-                for (NameValuePair pair : headEl.getParameters()) {
+            final String value = values.get(0);
+            final BasicHeader header = new BasicHeader(CONTENT_DISPOSITION, value);
+            for (final HeaderElement headEl : header.getElements()) {
+                for (final NameValuePair pair : headEl.getParameters()) {
                     contentDisposition.put(pair.getName(), pair.getValue());
                 }
             }

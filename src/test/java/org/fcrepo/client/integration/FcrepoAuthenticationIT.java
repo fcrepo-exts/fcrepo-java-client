@@ -24,51 +24,25 @@ import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.rdfTtl;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
 import static org.junit.Assert.assertEquals;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoResponse;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * @author mohideen
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("/spring-test/test-container.xml")
-public class FcrepoAuthenticationIT {
-
-    private static Logger logger = getLogger(FcrepoAuthenticationIT.class);
-
-    protected static final int SERVER_PORT = Integer.parseInt(System
-            .getProperty("fcrepo.dynamic.test.port", "8080"));
-
-    protected static final String HOSTNAME = "localhost";
-
-    protected static final String serverAddress = "http://" + HOSTNAME + ":" +
-            SERVER_PORT + "/rest/";
-
-    protected final PoolingHttpClientConnectionManager connectionManager =
-            new PoolingHttpClientConnectionManager();
-
-    protected static FcrepoClient client;
+public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     protected static FcrepoClient authClient;
 
     public FcrepoAuthenticationIT() throws Exception {
-        connectionManager.setMaxTotal(Integer.MAX_VALUE);
-        connectionManager.setDefaultMaxPerRoute(20);
-        connectionManager.closeIdleConnections(3, TimeUnit.SECONDS);
+        super();
 
         client = FcrepoClient.client().build();
         authClient = FcrepoClient.client()

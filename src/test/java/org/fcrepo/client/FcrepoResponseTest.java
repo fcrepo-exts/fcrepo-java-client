@@ -263,7 +263,7 @@ public class FcrepoResponseTest {
 
         try (FcrepoResponse response = new FcrepoResponse(URI.create("http://localhost/foo"), 201,
                 headers, null)) {
-            Map<String, String> disp = response.getContentDisposition();
+            final Map<String, String> disp = response.getContentDisposition();
             assertEquals(disp.get(CONTENT_DISPOSITION_FILENAME), filename);
             assertEquals(disp.get(CONTENT_DISPOSITION_MODIFICATION_DATE), modDate);
             assertEquals(Long.parseLong(disp.get(CONTENT_DISPOSITION_SIZE)), size);
