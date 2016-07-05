@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.client;
 
+import static java.net.URI.create;
+import static org.fcrepo.client.TestUtils.RDF_XML;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.fcrepo.client.TestUtils.rdfXml;
 import static org.fcrepo.client.TestUtils.setField;
-import static org.fcrepo.client.TestUtils.RDF_XML;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static java.net.URI.create;
 
 import java.io.IOException;
 import java.net.URI;
@@ -63,12 +64,17 @@ public class FcrepoClientAuthTest {
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
-        testClient = new FcrepoClient("user", "pass", null, true);
+        testClient = FcrepoClient.client()
+                .credentials("user", "pass")
+                .throwExceptionOnFailure()
+                .build();
         setField(testClient, "httpclient", mockHttpclient);
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FcrepoResponse response = testClient.get(uri, RDF_XML, null);
+        final FcrepoResponse response = testClient.get(uri)
+                .accept(RDF_XML)
+                .perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -83,12 +89,18 @@ public class FcrepoClientAuthTest {
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
-        testClient = new FcrepoClient("user", "pass", "localhost", true);
+        testClient = FcrepoClient.client()
+                .credentials("user", "pass")
+                .authScope("localhost")
+                .throwExceptionOnFailure()
+                .build();
         setField(testClient, "httpclient", mockHttpclient);
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FcrepoResponse response = testClient.get(uri, RDF_XML, null);
+        final FcrepoResponse response = testClient.get(uri)
+                .accept(RDF_XML)
+                .perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -103,12 +115,17 @@ public class FcrepoClientAuthTest {
         final URI uri = create(baseUrl);
         final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
 
-        testClient = new FcrepoClient("user", null, null, true);
+        testClient = FcrepoClient.client()
+                .credentials("user", null)
+                .throwExceptionOnFailure()
+                .build();
         setField(testClient, "httpclient", mockHttpclient);
         entity.setContentType(RDF_XML);
         doSetupMockRequest(RDF_XML, entity, status);
 
-        final FcrepoResponse response = testClient.get(uri, RDF_XML, null);
+        final FcrepoResponse response = testClient.get(uri)
+                .accept(RDF_XML)
+                .perform();
 
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
@@ -120,12 +137,10 @@ public class FcrepoClientAuthTest {
     private void doSetupMockRequest(final String contentType, final ByteArrayEntity entity, final int status)
             throws IOException {
         final Header contentTypeHeader = new BasicHeader("Content-Type", contentType);
-        final Header[] linkHeaders = new Header[]{};
+        final Header[] headers = new Header[] { contentTypeHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
-        when(mockResponse.getFirstHeader("Location")).thenReturn(null);
-        when(mockResponse.getFirstHeader("Content-Type")).thenReturn(contentTypeHeader);
-        when(mockResponse.getHeaders("Link")).thenReturn(linkHeaders);
+        when(mockResponse.getAllHeaders()).thenReturn(headers);
         when(mockResponse.getEntity()).thenReturn(entity);
         when(mockResponse.getStatusLine()).thenReturn(mockStatus);
         when(mockStatus.getStatusCode()).thenReturn(status);

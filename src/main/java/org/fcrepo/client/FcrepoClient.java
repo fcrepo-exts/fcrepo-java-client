@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.fcrepo.client;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -21,29 +22,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 
 /**
  * Represents a client to interact with Fedora's HTTP API.
  * <p>
- * Users of the {@code FcrepoClient} are responsible for managing connection resources.  Specifically, the underlying
- * HTTP connections of this client must be freed.  Suggested usage is to create the {@code FcrepoResponse} within
- * a {@code try-with-resources} block, insuring that any resources held by the response are freed automatically.
+ * Users of the {@code FcrepoClient} are responsible for managing connection resources. Specifically, the underlying
+ * HTTP connections of this client must be freed. Suggested usage is to create the {@code FcrepoResponse} within a
+ * {@code try-with-resources} block, insuring that any resources held by the response are freed automatically.
  * </p>
  * <pre>
  * FcrepoClient client = ...;
- * try (FcrepoResponse res = client.get(...)) {
+ * try (FcrepoResponse res = client.get(...).perform()) {
  *     // do something with the response
  * } catch (FcrepoOperationFailedException|IOException e) {
  *     // handle any exceptions
@@ -55,12 +56,6 @@ import org.slf4j.Logger;
  */
 public class FcrepoClient {
 
-    private static final String DESCRIBED_BY = "describedby";
-
-    private static final String CONTENT_TYPE = "Content-Type";
-
-    private static final String LOCATION = "Location";
-
     private CloseableHttpClient httpclient;
 
     private Boolean throwExceptionOnFailure = true;
@@ -68,13 +63,23 @@ public class FcrepoClient {
     private static final Logger LOGGER = getLogger(FcrepoClient.class);
 
     /**
+     * Build a FcrepoClient
+     * 
+     * @return a client builder
+     */
+    public static FcrepoClientBuilder client() {
+        return new FcrepoClientBuilder();
+    }
+
+    /**
      * Create a FcrepoClient with a set of authentication values.
+     * 
      * @param username the username for the repository
      * @param password the password for the repository
      * @param host the authentication hostname (realm) for the repository
      * @param throwExceptionOnFailure whether to throw an exception on any non-2xx or 3xx HTTP responses
      */
-    public FcrepoClient(final String username, final String password, final String host,
+    protected FcrepoClient(final String username, final String password, final String host,
             final Boolean throwExceptionOnFailure) {
 
         final FcrepoHttpClientBuilder client = new FcrepoHttpClientBuilder(username, password, host);
@@ -84,186 +89,128 @@ public class FcrepoClient {
     }
 
     /**
-     * Make a HEAD response
-     * @param url the URL of the resource to check
-     * @return the repository response
+     * Make a PUT request to create a resource with a specified path, or replace the triples associated with a
+     * resource with the triples provided in the request body.
+     * 
+     * @param url the URL of the resource to which to PUT
+     * @return a put request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public FcrepoResponse head(final URI url)
-            throws FcrepoOperationFailedException {
-
-        final HttpRequestBase request = HttpMethods.HEAD.createRequest(url);
-        final CloseableHttpResponse response = executeRequest(request);
-        final int status = response.getStatusLine().getStatusCode();
-        final String contentType = getContentTypeHeader(response);
-
-        LOGGER.debug("Fcrepo HEAD request returned status [{}]", status);
-
-        if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
-            URI describedBy = null;
-            final List<URI> links = getLinkHeaders(response, DESCRIBED_BY);
-            if (links.size() == 1) {
-                describedBy = links.get(0);
-            }
-            return new FcrepoResponse(url, status, contentType, describedBy, null);
-        } else {
-            free(response);
-            throw new FcrepoOperationFailedException(url, status,
-                    response.getStatusLine().getReasonPhrase());
-        }
+    public PutBuilder put(final URI url) throws FcrepoOperationFailedException {
+        return new PutBuilder(url, this);
     }
 
     /**
-     * Make a PUT request
-     * @param url the URL of the resource to PUT
-     * @param body the contents of the resource to send
-     * @param contentType the MIMEType of the resource
-     * @return the repository response
+     * Make a PATCH request to modify the triples associated with a resource with SPARQL-Update.
+     * 
+     * @param url the URL of the resource to which to PATCH
+     * @return a patch request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public FcrepoResponse put(final URI url, final InputStream body, final String contentType)
-            throws FcrepoOperationFailedException {
-
-        final HttpMethods method = HttpMethods.PUT;
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);
-
-        if (contentType != null) {
-            request.addHeader(CONTENT_TYPE, contentType);
-        }
-        if (body != null) {
-            request.setEntity(new InputStreamEntity(body));
-        }
-
-        LOGGER.debug("Fcrepo PUT request headers: {}", request.getAllHeaders());
-
-        final CloseableHttpResponse response = executeRequest(request);
-
-        LOGGER.debug("Fcrepo PUT request returned status [{}]", response.getStatusLine().getStatusCode());
-
-        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
+    public PatchBuilder patch(final URI url) throws FcrepoOperationFailedException {
+        return new PatchBuilder(url, this);
     }
 
     /**
-     * Make a PATCH request
-     * Please note: the body should have an application/sparql-update content-type
-     * @param url the URL of the resource to PATCH
-     * @param body the body to be sent to the repository
-     * @return the repository response
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
-     */
-    public FcrepoResponse patch(final URI url, final InputStream body)
-            throws FcrepoOperationFailedException {
-
-        final HttpMethods method = HttpMethods.PATCH;
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);
-
-        request.addHeader(CONTENT_TYPE, "application/sparql-update");
-        request.setEntity(new InputStreamEntity(body));
-
-        LOGGER.debug("Fcrepo PATCH request headers: {}", request.getAllHeaders());
-
-        final CloseableHttpResponse response = executeRequest(request);
-
-        LOGGER.debug("Fcrepo PATCH request returned status [{}]", response.getStatusLine().getStatusCode());
-
-        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
-    }
-
-    /**
-     * Make a POST request
+     * Make a POST request to create a new resource within an LDP container.
+     * 
      * @param url the URL of the resource to which to POST
-     * @param body the content to be sent to the server
-     * @param contentType the Content-Type of the body
-     * @return the repository response
+     * @return a post request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public FcrepoResponse post(final URI url, final InputStream body, final String contentType)
-            throws FcrepoOperationFailedException {
-
-        final HttpMethods method = HttpMethods.POST;
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)method.createRequest(url);
-
-        if (contentType != null) {
-            request.addHeader(CONTENT_TYPE, contentType);
-        }
-        if (body != null) {
-            request.setEntity(new InputStreamEntity(body));
-        }
-
-        LOGGER.debug("Fcrepo POST request headers: {}", request.getAllHeaders());
-
-        final CloseableHttpResponse response = executeRequest(request);
-
-        LOGGER.debug("Fcrepo POST request returned status [{}]", response.getStatusLine().getStatusCode());
-
-        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
+    public PostBuilder post(final URI url) throws FcrepoOperationFailedException {
+        return new PostBuilder(url, this);
     }
 
     /**
-     * Make a DELETE request
-     * @param url the URL of the resource to delete
-     * @return the repository response
+     * Make a DELETE request to delete a resource
+     * 
+     * @param url the URL of the resource to which to DELETE
+     * @return a delete request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public FcrepoResponse delete(final URI url)
-            throws FcrepoOperationFailedException {
-
-        final HttpRequestBase request = HttpMethods.DELETE.createRequest(url);
-        final CloseableHttpResponse response = executeRequest(request);
-
-        LOGGER.debug("Fcrepo DELETE request returned status [{}]", response.getStatusLine().getStatusCode());
-
-        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
+    public DeleteBuilder delete(final URI url) throws FcrepoOperationFailedException {
+        return new DeleteBuilder(url, this);
     }
 
     /**
-     * Make a GET request
-     * @param url the URL of the resource to fetch
-     * @param accept the requested MIMEType of the resource to be retrieved
-     * @param prefer the value for a prefer header sent in the request
+     * Make a MOVE request to copy a resource (and its subtree) to a new location.
+     * 
+     * @param source url of the resource to copy
+     * @param destination url of the location for the copy
+     * @return a copy request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public CopyBuilder copy(final URI source, final URI destination) throws FcrepoOperationFailedException {
+        return new CopyBuilder(source, destination, this);
+    }
+
+    /**
+     * Make a COPY request to move a resource (and its subtree) to a new location.
+     * 
+     * @param source url of the resource to move
+     * @param destination url of the new location for the resource
+     * @return a move request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public MoveBuilder move(final URI source, final URI destination) throws FcrepoOperationFailedException {
+        return new MoveBuilder(source, destination, this);
+    }
+
+    /**
+     * Make a GET request to retrieve the content of a resource
+     * 
+     * @param url the URL of the resource to which to GET
+     * @return a get request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public GetBuilder get(final URI url) throws FcrepoOperationFailedException {
+        return new GetBuilder(url, this);
+    }
+
+    /**
+     * Make a HEAD request to retrieve resource headers.
+     * 
+     * @param url the URL of the resource to make the HEAD request on.
+     * @return a HEAD request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public HeadBuilder head(final URI url) throws FcrepoOperationFailedException {
+        return new HeadBuilder(url, this);
+    }
+
+    /**
+     * Make a OPTIONS request to output information about the supported HTTP methods, etc.
+     * 
+     * @param url the URL of the resource to make the OPTIONS request on.
+     * @return a OPTIONS request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public OptionsBuilder options(final URI url) throws FcrepoOperationFailedException {
+        return new OptionsBuilder(url, this);
+    }
+
+    /**
+     * Execute a HTTP request
+     * 
+     * @param url URI the request is made to
+     * @param request the request
      * @return the repository response
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public FcrepoResponse get(final URI url, final String accept, final String prefer)
+    public FcrepoResponse executeRequest(final URI url, final HttpRequestBase request)
             throws FcrepoOperationFailedException {
-
-        final HttpRequestBase request = HttpMethods.GET.createRequest(url);
-
-        if (accept != null) {
-            request.setHeader("Accept", accept);
-        }
-
-        if (prefer != null) {
-            request.setHeader("Prefer", prefer);
-        }
-
-        LOGGER.debug("Fcrepo GET request headers: {}", request.getAllHeaders());
-
+        LOGGER.debug("Fcrepo {} request to resource {}", request.getMethod(), url);
         final CloseableHttpResponse response = executeRequest(request);
-        final int status = response.getStatusLine().getStatusCode();
-        final String contentType = getContentTypeHeader(response);
 
-        LOGGER.debug("Fcrepo GET request returned status [{}]", status);
-
-        if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !this.throwExceptionOnFailure) {
-            URI describedBy = null;
-            final List<URI> links = getLinkHeaders(response, DESCRIBED_BY);
-            if (links.size() == 1) {
-                describedBy = links.get(0);
-            }
-            return new FcrepoResponse(url, status, contentType, describedBy,
-                    getEntityContent(response));
-        } else {
-            free(response);
-            throw new FcrepoOperationFailedException(url, status,
-                    response.getStatusLine().getReasonPhrase());
-        }
+        return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
 
     /**
      * Execute the HTTP request
      */
-    private CloseableHttpResponse executeRequest(final HttpRequestBase request) throws FcrepoOperationFailedException {
+    private CloseableHttpResponse executeRequest(final HttpRequestBase request)
+            throws FcrepoOperationFailedException {
         try {
             return httpclient.execute(request);
         } catch (IOException ex) {
@@ -278,11 +225,10 @@ public class FcrepoClient {
     private FcrepoResponse fcrepoGenericResponse(final URI url, final CloseableHttpResponse response,
             final Boolean throwExceptionOnFailure) throws FcrepoOperationFailedException {
         final int status = response.getStatusLine().getStatusCode();
-        final URI locationHeader = getLocationHeader(response);
-        final String contentTypeHeader = getContentTypeHeader(response);
+        final Map<String, List<String>> headers = getHeaders(response);
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !throwExceptionOnFailure) {
-            return new FcrepoResponse(url, status, contentTypeHeader, locationHeader, getEntityContent(response));
+            return new FcrepoResponse(url, status, headers, getEntityContent(response));
         } else {
             free(response);
             throw new FcrepoOperationFailedException(url, status,
@@ -291,7 +237,7 @@ public class FcrepoClient {
     }
 
     /**
-     * Frees resources associated with the HTTP response.  Specifically, closing the {@code response} frees the
+     * Frees resources associated with the HTTP response. Specifically, closing the {@code response} frees the
      * connection of the {@link org.apache.http.conn.HttpClientConnectionManager} underlying this {@link #httpclient}.
      *
      * @param response the response object to close
@@ -323,41 +269,84 @@ public class FcrepoClient {
     }
 
     /**
-     * Extract the location header value
+     * Retrieve all header values
+     * 
+     * @param response response from request
+     * @return Map of all values for all response headers
      */
-    private static URI getLocationHeader(final HttpResponse response) {
-        final Header location = response.getFirstHeader(LOCATION);
-        if (location != null) {
-            return URI.create(location.getValue());
-        } else {
-            return null;
-        }
-    }
+    private static Map<String, List<String>> getHeaders(final HttpResponse response) {
+        final Map<String, List<String>> headers = new HashMap<>();
 
-    /**
-     * Extract the content-type header value
-     */
-    private static String getContentTypeHeader(final HttpResponse response) {
-        final Header contentType = response.getFirstHeader(CONTENT_TYPE);
-        if (contentType != null) {
-            return contentType.getValue();
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Extract any Link headers
-     */
-    private static List<URI> getLinkHeaders(final HttpResponse response, final String relationship) {
-        final List<URI> uris = new ArrayList<URI>();
-        final Header[] links = response.getHeaders("Link");
-        for (Header header: links) {
-            final FcrepoLink link = new FcrepoLink(header.getValue());
-            if (link.getRel().equals(relationship)) {
-                uris.add(link.getUri());
+        for (Header header : response.getAllHeaders()) {
+            List<String> values;
+            if (headers.containsKey(header.getName())) {
+                values = headers.get(header.getName());
+            } else {
+                values = new ArrayList<>();
+                headers.put(header.getName(), values);
             }
+            values.add(header.getValue());
         }
-        return uris;
+        return headers;
     }
- }
+
+    /**
+     * Builds an FcrepoClient
+     * 
+     * @author bbpennel
+     */
+    public static class FcrepoClientBuilder {
+
+        private String authUser;
+
+        private String authPassword;
+
+        private String authHost;
+
+        private boolean throwExceptionOnFailure;
+
+        /**
+         * Add basic authentication credentials to this client
+         * 
+         * @param username username for authentication
+         * @param password password for authentication
+         * @return the client builder
+         */
+        public FcrepoClientBuilder credentials(final String username, final String password) {
+            this.authUser = username;
+            this.authPassword = password;
+            return this;
+        }
+
+        /**
+         * Add an authentication scope to this client
+         * 
+         * @param authHost authentication scope value
+         * @return this builder
+         */
+        public FcrepoClientBuilder authScope(final String authHost) {
+            this.authHost = authHost;
+
+            return this;
+        }
+
+        /**
+         * Client should throw exceptions when failures occur
+         * 
+         * @return this builder
+         */
+        public FcrepoClientBuilder throwExceptionOnFailure() {
+            this.throwExceptionOnFailure = true;
+            return this;
+        }
+
+        /**
+         * Get the client
+         * 
+         * @return the client constructed by this builder
+         */
+        public FcrepoClient build() {
+            return new FcrepoClient(authUser, authPassword, authHost, throwExceptionOnFailure);
+        }
+    }
+}
