@@ -98,6 +98,78 @@ try (FcrepoResponse response = testClient.move(source, destination)
 }
 ```
 
+Create a version:
+```java
+try (FcrepoResponse response = testClient.post("fedoraurl/fcr:versions")
+        .slug("version1").perform()) {
+  URI destinationLocation = response.getLocation();
+}
+```
+
+Delete a version:
+```java
+try (FcrepoResponse response = testClient.delete("fedoraurl/fcr:versions/version1")
+      .perform()) {
+```
+
+Revert a version:
+```java
+try (FcrepoResponse response = testClient.patch("fedoraurl/fcr:versions/version1")
+      .perform()) {
+```
+
+Fixity check:
+```java
+try (FcrepoResponse response = testClient.get("fedoraurl/fcr:fixity")
+        .perform()) {
+  String turtleContent = IOUtils.toString(response.getBody(), "UTF-8");
+}
+```
+
+Create a transaction:
+```java
+try (FcrepoResponse response = testClient.post("fedoraurl/fcr:tx")
+        .perform()) {
+  URI destinationLocation = response.getLocation();
+}
+```
+
+Get a transaction status:
+```java
+try (FcrepoResponse response = testClient.get("fedoraurl/tx:xxxx")
+        .perform()) {
+  String turtleContent = IOUtils.toString(response.getBody(), "UTF-8");
+}
+```
+
+Commit a transaction:
+```java
+try (FcrepoResponse response = testClient.post("fedoraurl/tx:xxxx/fcr:tx/fcr:commit")
+        .perform()) {
+```
+
+Rollback a transaction:
+```java
+try (FcrepoResponse response = testClient.post("fedoraurl/tx:xxxx/fcr:tx/fcr:rollback")
+        .perform()) {
+```
+
+Define a authorization
+```java
+try (FcrepoResponse response = testClient.patch(uri)
+        .body(authorizationSparqlFile, "application/sparql-update")
+        .perform()) {
+}
+```
+
+Link acl to a container
+```java
+try (FcrepoResponse response = testClient.patch(uri)
+        .body(aclSparqlFile, "application/sparql-update")
+        .perform()) {
+}
+```
+
 History
 -------
 
