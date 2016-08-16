@@ -10,9 +10,16 @@ using Java.
 Usage Examples
 --------------
 
+###Create a Fedora client
+```java
+FcrepoClient testClient = FcrepoClient.client().build();
+```
+
+###CRUD
+
 Retrieving a resource in RDF+XML format:
 ```java
-try (FcrepoResponse response = testClient.get(uri)
+try (FcrepoResponse response = new GetBuilder(uri, testClient)
         .accept("application/rdf+xml")
         .perform()) {
   String turtleContent = IOUtils.toString(response.getBody(), "UTF-8");
@@ -21,7 +28,7 @@ try (FcrepoResponse response = testClient.get(uri)
 
 Retrieving a binary/Non-RDF source:
 ```java
-try (FcrepoResponse response = testClient.get(binaryUri)
+try (FcrepoResponse response = new GetBuilder(binaryUri, testClient)
         .perform()) {
   InputStream body = response.getBody();
   String contentType = response.getContentType();
@@ -40,7 +47,7 @@ List<URI> includes = Arrays.asList(
 List<URI> omits = Arrays.asList(
       URI.create("http://www.w3.org/ns/ldp#PreferMembership"),
       URI.create("http://www.w3.org/ns/ldp#PreferContainment"));
-try (FcrepoResponse response = testClient.get(uri)
+try (FcrepoResponse response = new GetBuilder(uri, testClient)
         .preferRepresentation(includes, omits)
         .perform()) {
   // ...
@@ -57,117 +64,159 @@ try (FcrepoResponse response = testClient.get(uri).disableRedirects().perform())
 
 Create a new container with RDF properties:
 ```java
-try (FcrepoResponse response = testClient.post(uri)
+try (FcrepoResponse response = new PostBuilder(uri, testClient)
         .body(turtleFile, "text/turtle")
         .perform()) {
-  URI newResourceLocation = response.getLocation();
+  URI location = response.getLocation();
+  logger.debug("Container creation status and location: {}, {}", response.getStatusCode(), location);
 }
 ```
 
 Uploaded file with checksum mismatch:
 ```java
-try (FcrepoResponse response = testClient.post(uri)
+try (FcrepoResponse response = new PostBuilder(uri, testClient)
         .body(pictureFile, "image/jpg")
         .digest("checksumdoesntmatch")
         .perform()) {
-  assertEquals(409, response.getStatusCode());
   String errorMessage = IOUtils.toString(response.getBody(), "UTF-8");
+  logger.debug("Response status code and message: {}, {}", response.getStatusCode(), errorMessage);
 }
 ```
 
 Replace triples on resource:
 ```java
-try (FcrepoResponse response = testClient.put(uri)
+try (FcrepoResponse response = new PutBuilder(uri, testClient)
       .body(turtleFile, "text/turtle")
       .perform()) {
-  // ...
+    logger.debug("Response status code: {}", response.getStatusCode());
 }
 ```
 
 Delete a resource:
 ```java
-try (FcrepoResponse response = testClient.delete(uri)
-      .perform()) {
+try (FcrepoResponse response = new DeleteBuilder(uri, testClient).perform()) {
+    logger.debug("Resource deletion status: {}", response.getStatusCode());
+}
 ```
 
 Move a resource:
 ```java
-try (FcrepoResponse response = testClient.move(source, destination)
+try (FcrepoResponse response = new MoveBuilder(source, destination, testClient)
         .perform()) {
   URI destinationLocation = response.getLocation();
+  logger.debug("Response status code and location: {}, {}", response.getStatusCode(), destinationLocation);
 }
 ```
 
+###Versioning
+
 Create a version:
 ```java
-try (FcrepoResponse response = testClient.post("fedoraurl/fcr:versions")
-        .slug("version1").perform()) {
-  URI destinationLocation = response.getLocation();
+URI uri = URI.create("fedoraurl/fcr:versions");
+try (FcrepoResponse response = new PostBuilder(uri, testClient)
+        .slug("version1")
+        .perform()) {
+    URI location = response.getLocation();
+    logger.debug("Version creation status and location: {}, {}", response.getStatusCode(), location);
 }
 ```
 
 Delete a version:
 ```java
-try (FcrepoResponse response = testClient.delete("fedoraurl/fcr:versions/version1")
-      .perform()) {
+URI uri = URI.create("fedoraurl/fcr:versions/version1");
+try (FcrepoResponse response = new DeleteBuilder(uri, testClient).perform()) {
+    logger.debug("Version deletion status: {}", response.getStatusCode());
+}
 ```
 
 Revert a version:
 ```java
-try (FcrepoResponse response = testClient.patch("fedoraurl/fcr:versions/version1")
-      .perform()) {
-```
-
-Fixity check:
-```java
-try (FcrepoResponse response = testClient.get("fedoraurl/fcr:fixity")
-        .perform()) {
-  String turtleContent = IOUtils.toString(response.getBody(), "UTF-8");
+URI uri = URI.create("fedoraurl/fcr:versions/version1");
+try (FcrepoResponse response = new PatchBuilder(uri, testClient).perform()) {
+    logger.debug("Version reversion status: {}", response.getStatusCode());
 }
 ```
 
+###Fixity
+Fixity check:
+```java
+URI uri = URI.create("fedoraurl/fcr:fixity");
+try (FcrepoResponse response = new GetBuilder(uri, testClient).perform()) {
+    String turtleContent = IOUtils.toString(response.getBody(), "UTF-8");
+}
+```
+
+###Batch atomic operations
 Create a transaction:
 ```java
-try (FcrepoResponse response = testClient.post("fedoraurl/fcr:tx")
-        .perform()) {
-  URI destinationLocation = response.getLocation();
+URI uri = URI.create("fedoraurl/fcr:tx");
+try (FcrepoResponse response = new PostBuilder(uri, testClient).perform()) {
+    URI location = response.getLocation();
+    logger.debug("Transcation creation status and location: {}, {}", response.getStatusCode(), location);
 }
 ```
 
 Get a transaction status:
 ```java
-try (FcrepoResponse response = testClient.get("fedoraurl/tx:xxxx")
-        .perform()) {
-  String turtleContent = IOUtils.toString(response.getBody(), "UTF-8");
+URI uri = URI.create("fedoraurl/tx:xxxx");
+try (FcrepoResponse response = new GetBuilder(uri, testClient).perform()) {
+    String turtleContent = IOUtils.toString(response.getBody(), "UTF-8");
 }
 ```
 
 Commit a transaction:
 ```java
-try (FcrepoResponse response = testClient.post("fedoraurl/tx:xxxx/fcr:tx/fcr:commit")
-        .perform()) {
+URI uri = URI.create("fedoraurl/tx:xxxx/fcr:tx/fcr:commit");
+try (FcrepoResponse response = new PostBuilder(uri, testClient).perform()) {
+    logger.debug("Transcation commit status: {}", response.getStatusCode());
+}
 ```
 
 Rollback a transaction:
 ```java
-try (FcrepoResponse response = testClient.post("fedoraurl/tx:xxxx/fcr:tx/fcr:rollback")
-        .perform()) {
+URI uri = URI.create("fedoraurl/tx:xxxx/fcr:tx/fcr:rollback");
+try (FcrepoResponse response = new PostBuilder(uri, testClient).perform()) {
+    logger.debug("Transcation rollback status: {}", response.getStatusCode());
+}
 ```
 
+###AuthZ
 Define a authorization
 ```java
-try (FcrepoResponse response = testClient.patch(uri)
+try (FcrepoResponse response = new PatchBuilder(uri, testClient)
         .body(authorizationSparqlFile, "application/sparql-update")
         .perform()) {
+    logger.debug("Response status code: {}", response.getStatusCode());
 }
 ```
 
 Link acl to a container
 ```java
-try (FcrepoResponse response = testClient.patch(uri)
+try (FcrepoResponse response = new PatchBuilder(uri, testClient)
         .body(aclSparqlFile, "application/sparql-update")
         .perform()) {
+    logger.debug("Response status code: {}", response.getStatusCode());
 }
+```
+
+Maven Project Settings
+----------------------
+
+Include this library dependency in the pom.xml:
+```
+    <dependency>
+      <groupId>org.fcrepo.client</groupId>
+      <artifactId>fcrepo-java-client</artifactId>
+      <version>${fcrepo-client.version}</version>
+    </dependency>
+```
+Include log4j logger dependency:
+```
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback.version}</version>
+    </dependency>
 ```
 
 History
@@ -207,3 +256,4 @@ Current maintainers:
 * [Aaron Coburn](https://github.com/acoburn)
 * [Daniel Lamb](https://github.com/dannylamb)
 * [Mike Durbin](https://github.com/mikedurbin)
+
