@@ -16,6 +16,8 @@
 
 package org.fcrepo.client;
 
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DESCRIBED_BY;
@@ -26,11 +28,9 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.http.HeaderElement;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicHeader;
@@ -128,7 +128,7 @@ public class FcrepoResponse implements Closeable {
 
     /**
      * url setter
-     * 
+     *
      * @param url the requested URL
      */
     public void setUrl(final URI url) {
@@ -146,7 +146,7 @@ public class FcrepoResponse implements Closeable {
 
     /**
      * statusCode setter
-     * 
+     *
      * @param statusCode the HTTP status code
      */
     public void setStatusCode(final int statusCode) {
@@ -164,7 +164,7 @@ public class FcrepoResponse implements Closeable {
 
     /**
      * body setter
-     * 
+     *
      * @param body the contents of the response body
      */
     public void setBody(final InputStream body) {
@@ -173,7 +173,7 @@ public class FcrepoResponse implements Closeable {
 
     /**
      * headers getter
-     * 
+     *
      * @return headers from the response
      */
     public Map<String, List<String>> getHeaders() {
@@ -182,21 +182,17 @@ public class FcrepoResponse implements Closeable {
 
     /**
      * Get all values for the specified header
-     * 
+     *
      * @param name name of the header to retrieve
-     * @return All values of the specified header, or null if not present
+     * @return All values of the specified header
      */
     public List<String> getHeaderValues(final String name) {
-        if (headers == null) {
-            return null;
-        }
-
-        return headers.get(name);
+        return headers == null ? emptyList() : headers.getOrDefault(name, emptyList());
     }
 
     /**
      * Get the first value for the specified header
-     * 
+     *
      * @param name name of the header to retrieve
      * @return First value of the header, or null if not present
      */
@@ -211,7 +207,7 @@ public class FcrepoResponse implements Closeable {
 
     /**
      * headers setter
-     * 
+     *
      * @param headers headers from the response
      */
     public void setHeaders(final Map<String, List<String>> headers) {
@@ -220,30 +216,18 @@ public class FcrepoResponse implements Closeable {
 
     /**
      * Retrieve link header values matching the given relationship
-     * 
+     *
      * @param relationship the relationship of links to return
      * @return list of link header URIs matching the given relationship
      */
     public List<URI> getLinkHeaders(final String relationship) {
-        final List<URI> uris = new ArrayList<URI>();
-        final List<String> linkStrings = getHeaderValues(LINK);
-        if (linkStrings == null) {
-            return null;
-        }
-
-        for (String linkString : linkStrings) {
-            final FcrepoLink link = new FcrepoLink(linkString);
-            if (link.getRel().equals(relationship)) {
-                uris.add(link.getUri());
-            }
-        }
-
-        return uris;
+        return getHeaderValues(LINK).stream().map(FcrepoLink::new).filter(link -> link.getRel().equals(relationship))
+                .map(FcrepoLink::getUri).collect(toList());
     }
 
     /**
      * location getter
-     * 
+     *
      * @return the location of a related resource
      */
     public URI getLocation() {
@@ -267,7 +251,7 @@ public class FcrepoResponse implements Closeable {
 
     /**
      * location setter
-     * 
+     *
      * @param location the value of a related resource
      */
     public void setLocation(final URI location) {
@@ -297,7 +281,7 @@ public class FcrepoResponse implements Closeable {
 
     /**
      * Get a map of parameters from the Content-Disposition header if present
-     * 
+     *
      * @return map of Content-Disposition parameters or null
      */
     public Map<String, String> getContentDisposition() {
