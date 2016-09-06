@@ -65,10 +65,13 @@ public class FcrepoLink {
     private void parse(final String link) {
         if (link != null) {
             final String[] segments = link.split(LINK_DELIM);
-            if (segments.length == 2) {
+            if (segments.length > 1) {
                 uri = getLinkPart(segments[0]);
                 if (uri != null) {
-                    rel = getRelPart(segments[1]);
+                    // inspect the remaining segments until a rel is found
+                    for (int i = 1; i < segments.length && rel == null; i++) {
+                        rel = getRelPart(segments[i]);
+                    }
                 }
             }
         }

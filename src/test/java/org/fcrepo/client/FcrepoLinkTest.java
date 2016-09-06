@@ -101,9 +101,9 @@ public class FcrepoLinkTest {
 
     @Test
     public void testMultipleSegments() {
-        final FcrepoLink link = new FcrepoLink("<a>; rel=foo; rel=bar");
-        assertEquals(null, link.getUri());
-        assertEquals(null, link.getRel());
+        final FcrepoLink link = new FcrepoLink("<a>; rel=foo; bar=bar");
+        assertEquals(URI.create("a"), link.getUri());
+        assertEquals("foo", link.getRel());
     }
 
     @Test
