@@ -108,6 +108,8 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 CREATED.getStatusCode(), status);
         assertEquals("Location did not match slug", serverAddress + slug, response.getLocation().toString());
 
+        assertNotNull("Didn't find linked description!", response.getLinkHeaders("describedby").get(0));
+
         final FcrepoResponse getResponse = client.get(response.getLocation()).perform();
         final Map<String, String> contentDisp = getResponse.getContentDisposition();
         assertEquals(filename, contentDisp.get(CONTENT_DISPOSITION_FILENAME));
