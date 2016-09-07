@@ -197,6 +197,26 @@ public class FcrepoClientIT extends AbstractResourceIT {
     }
 
     @Test
+    public void testPutLenient() throws Exception {
+        // Create object
+        final FcrepoResponse response = create();
+        final String body = "<> <http://purl.org/dc/elements/1.1/title> \"some-title\"";
+
+        // try to update without lenient header
+        final FcrepoResponse strictResponse = client.put(url)
+                .body(new ByteArrayInputStream(body.getBytes()), TEXT_TURTLE)
+                .perform();
+        assertEquals(CONFLICT.getStatusCode(), strictResponse.getStatusCode());
+
+        // try again with lenient header
+        final FcrepoResponse lenientResponse = client.put(url)
+                .body(new ByteArrayInputStream(body.getBytes()), TEXT_TURTLE)
+                .preferLenient()
+                .perform();
+        assertEquals(NO_CONTENT.getStatusCode(), lenientResponse.getStatusCode());
+    }
+
+    @Test
     public void testPatch() throws Exception {
         // Create object
         final FcrepoResponse createResp = create();

@@ -16,6 +16,8 @@
 
 package org.fcrepo.client;
 
+import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,5 +76,16 @@ public class PutBuilder extends BodyRequestBuilder {
     @Override
     public PutBuilder digest(final String digest) {
         return (PutBuilder) super.digest(digest);
+    }
+
+    /**
+     * Set the prefer header for this request to lenient handling, to indicate that server-managed triples will not
+     * be included in the request body.
+     *
+     * @return this builder
+     */
+    public BodyRequestBuilder preferLenient() {
+        request.setHeader(PREFER, "handling=lenient; received=\"minimal\"");
+        return this;
     }
 }

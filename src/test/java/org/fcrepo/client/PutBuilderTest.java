@@ -21,6 +21,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
+import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -128,5 +129,16 @@ public class PutBuilderTest {
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
         assertEquals(etag, request.getFirstHeader(IF_MATCH).getValue());
         assertEquals(lastModified, request.getFirstHeader(IF_UNMODIFIED_SINCE).getValue());
+    }
+
+    @Test
+    public void testPreferLenient() throws Exception {
+        testBuilder.preferLenient().perform();
+
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        assertEquals("handling=lenient; received=\"minimal\"", request.getFirstHeader(PREFER).getValue());
     }
 }
