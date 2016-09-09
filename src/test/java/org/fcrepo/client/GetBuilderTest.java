@@ -24,6 +24,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.FedoraHeaderConstants.RANGE;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -148,6 +149,12 @@ public class GetBuilderTest {
 
         final HttpRequestBase request = getRequest();
         assertEquals("text/turtle", request.getFirstHeader(ACCEPT).getValue());
+    }
+
+    @Test
+    public void testDisableRedirects() throws Exception {
+        testBuilder.disableRedirects();
+        assertFalse(testBuilder.request.getConfig().isRedirectsEnabled());
     }
 
     private HttpRequestBase getRequest() throws FcrepoOperationFailedException {

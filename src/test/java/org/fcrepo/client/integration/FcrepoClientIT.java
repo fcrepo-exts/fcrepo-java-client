@@ -345,6 +345,23 @@ public class FcrepoClientIT extends AbstractResourceIT {
     }
 
     @Test
+    public void testGetDisableRedirects() throws Exception {
+        // Creating a binary with external content for retrieval
+        final String mimetype = "message/external-body; access-type=URL; URL=\"http://www.example.com/file\"";
+        final FcrepoResponse response = client.post(new URI(serverAddress))
+                .body(new ByteArrayInputStream(new byte[]{}), mimetype)
+                .perform();
+
+        final URI url = response.getLocation();
+
+        // Make sure the response is the redirect itself, not the URL being redirected to
+        final FcrepoResponse getResponse = client.get(url).disableRedirects().perform();
+        assertEquals(307, getResponse.getStatusCode());
+        assertEquals(url, getResponse.getUrl());
+        assertEquals(URI.create("http://www.example.com/file"), getResponse.getLocation());
+    }
+
+    @Test
     public void testHead() throws Exception {
         final FcrepoResponse response = create();
         final FcrepoResponse headResp = client.head(url).perform();
