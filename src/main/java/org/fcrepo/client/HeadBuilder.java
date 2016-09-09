@@ -18,6 +18,7 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**
@@ -42,5 +43,15 @@ public class HeadBuilder extends
     @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.HEAD.createRequest(targetUri);
+    }
+
+    /**
+     * Disable following redirects.
+     *
+     * @return this builder
+     */
+    public HeadBuilder disableRedirects() {
+        request.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build());
+        return this;
     }
 }

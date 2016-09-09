@@ -44,6 +44,14 @@ try (FcrepoResponse response = testClient.get(uri)
 }
 ```
 
+Retrieving a resource with external content (which redirects to the URL specified in the
+`message/external-body` Content-Type property by default):
+```java
+try (FcrepoResponse response = testClient.get(uri).disableRedirects().perform()) {
+  // ...
+}
+```
+
 Create a new container with RDF properties:
 ```java
 try (FcrepoResponse response = testClient.post(uri)

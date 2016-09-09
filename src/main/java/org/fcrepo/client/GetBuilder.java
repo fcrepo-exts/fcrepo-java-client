@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**
@@ -96,6 +97,16 @@ public class GetBuilder extends
      */
     public GetBuilder preferMinimal() {
         request.setHeader(PREFER, buildPrefer("minimal", null, null));
+        return this;
+    }
+
+    /**
+     * Disable following redirects.
+     *
+     * @return this builder
+     */
+    public GetBuilder disableRedirects() {
+        request.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build());
         return this;
     }
 
