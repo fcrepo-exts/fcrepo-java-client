@@ -13,7 +13,7 @@
   <artifactId>fcrepo-java-client</artifactId>
   <packaging>bundle</packaging>
 
-  <version>0.2.1-SNAPSHOT</version>
+  <version>0.2.1</version>
 
   <name>Fedora 4 Java Client Libraries</name>
   <description>Java libraries for interacting with a Fedora 4 Repository</description>
@@ -58,7 +58,7 @@
     <connection>scm:git:git://github.com/fcrepo4-exts/${project_name}.git</connection>
     <developerConnection>scm:git:git@github.com:fcrepo4-exts/${project_name}.git</developerConnection>
     <url>https://github.com/fcrepo4-exts/fcrepo-java-client</url>
-    <tag>HEAD</tag>
+    <tag>fcrepo-java-client-0.2.1</tag>
   </scm>
 
   <repositories>
