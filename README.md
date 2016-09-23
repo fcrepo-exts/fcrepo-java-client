@@ -4,6 +4,9 @@ Java Client for fcrepo4
 This project serves as a client library for interacting with Fedora 4
 using Java.
 
+[![Build Status](https://travis-ci.org/fcrepo4-exts/fcrepo-java-client.png?branch=master)](https://travis-ci.org/fcrepo4-exts/fcrepo-java-client)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.client/fcrepo-java-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.client/fcrepo-java-client/)
+
 Usage Examples
 --------------
 
@@ -101,6 +104,29 @@ History
 The stateless core of this codebase was written as part of the 
 fcrepo-camel project but has since been extracted to be an independent
 library so that it may be used in other applications.
+
+Including in your project
+-------------------------
+
+You can include the `fcrepo-java-client` library in your project with the following coordinates:
+
+### Maven (`pom.xml`)
+
+```
+<dependency>
+  <groupId>org.fcrepo.client</groupId>
+  <artifactId>fcrepo-java-client</artifactId>
+  <version>${fcrepo-java-client.version}</version>
+</dependency>
+```
+
+### Gradle (`build.gradle`)
+
+```
+dependencies {
+    compile group: 'org.fcrepo.client', name: 'fcrepo-java-client', version: fcrepoJavaClientVersion
+}
+```
 
 Maintainers
 -----------
