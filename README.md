@@ -17,7 +17,7 @@ FcrepoClient testClient = FcrepoClient.client().build();
 
 ###CRUD
 
-Retrieving a resource in RDF+XML format:
+* Retrieving a resource in RDF+XML format:
 ```java
 try (FcrepoResponse response = new GetBuilder(uri, testClient)
         .accept("application/rdf+xml")
@@ -26,7 +26,7 @@ try (FcrepoResponse response = new GetBuilder(uri, testClient)
 }
 ```
 
-Retrieving a binary/Non-RDF source:
+* Retrieving a binary/Non-RDF source:
 ```java
 try (FcrepoResponse response = new GetBuilder(binaryUri, testClient)
         .perform()) {
@@ -39,7 +39,7 @@ try (FcrepoResponse response = new GetBuilder(binaryUri, testClient)
 }
 ```
 
-Retrieving a resource with links to other resources, including/excluding specific preferences:
+* Retrieving a resource with links to other resources, including/excluding specific preferences:
 ```java
 List<URI> includes = Arrays.asList(
       URI.create("http://fedora.info/definitions/v4/repository#InboundReferences"));
@@ -54,15 +54,17 @@ try (FcrepoResponse response = new GetBuilder(uri, testClient)
 }
 ```
 
-Retrieving a resource with external content (which redirects to the URL specified in the
+* Retrieving a resource with external content (which redirects to the URL specified in the
 `message/external-body` Content-Type property by default):
 ```java
-try (FcrepoResponse response = testClient.get(uri).disableRedirects().perform()) {
+try (FcrepoResponse response = new GetBuilder(uri, testClient)
+        .disableRedirects()
+        .perform()) {
   // ...
 }
 ```
 
-Create a new container with RDF properties:
+* Create a new container with RDF properties:
 ```java
 try (FcrepoResponse response = new PostBuilder(uri, testClient)
         .body(turtleFile, "text/turtle")
@@ -72,7 +74,7 @@ try (FcrepoResponse response = new PostBuilder(uri, testClient)
 }
 ```
 
-Uploaded file with checksum mismatch:
+* Uploaded file with checksum mismatch:
 ```java
 try (FcrepoResponse response = new PostBuilder(uri, testClient)
         .body(pictureFile, "image/jpg")
@@ -83,7 +85,7 @@ try (FcrepoResponse response = new PostBuilder(uri, testClient)
 }
 ```
 
-Replace triples on resource:
+* Replace triples on resource:
 ```java
 try (FcrepoResponse response = new PutBuilder(uri, testClient)
       .body(turtleFile, "text/turtle")
@@ -92,14 +94,14 @@ try (FcrepoResponse response = new PutBuilder(uri, testClient)
 }
 ```
 
-Delete a resource:
+* Delete a resource:
 ```java
 try (FcrepoResponse response = new DeleteBuilder(uri, testClient).perform()) {
     logger.debug("Resource deletion status: {}", response.getStatusCode());
 }
 ```
 
-Move a resource:
+* Move a resource:
 ```java
 try (FcrepoResponse response = new MoveBuilder(source, destination, testClient)
         .perform()) {
@@ -109,8 +111,12 @@ try (FcrepoResponse response = new MoveBuilder(source, destination, testClient)
 ```
 
 ###Versioning
+* After the first version is created on a resource, you can see a triple on the resource with predicate fedora:hasVersions like below
+```
+<fedoraurl/node1> fedora:hasVersions <fedoraurl/node1/fcr:versions>
+```
 
-Create a version:
+* Create a version:
 ```java
 URI uri = URI.create("fedoraurl/fcr:versions");
 try (FcrepoResponse response = new PostBuilder(uri, testClient)
@@ -121,7 +127,7 @@ try (FcrepoResponse response = new PostBuilder(uri, testClient)
 }
 ```
 
-Delete a version:
+* Delete a version:
 ```java
 URI uri = URI.create("fedoraurl/fcr:versions/version1");
 try (FcrepoResponse response = new DeleteBuilder(uri, testClient).perform()) {
@@ -129,7 +135,7 @@ try (FcrepoResponse response = new DeleteBuilder(uri, testClient).perform()) {
 }
 ```
 
-Revert a version:
+* Revert a version:
 ```java
 URI uri = URI.create("fedoraurl/fcr:versions/version1");
 try (FcrepoResponse response = new PatchBuilder(uri, testClient).perform()) {
@@ -138,7 +144,12 @@ try (FcrepoResponse response = new PatchBuilder(uri, testClient).perform()) {
 ```
 
 ###Fixity
-Fixity check:
+* Fixity only applies to Binary resources. You can see a triple on NonRdfSourceDescription with predicate fedora:hasFixityService like below
+```
+<fedoraurl/node1> fedora:hasFixityService <fedoraurl/node1/fcr:fixity>
+```
+
+* Fixity check:
 ```java
 URI uri = URI.create("fedoraurl/fcr:fixity");
 try (FcrepoResponse response = new GetBuilder(uri, testClient).perform()) {
@@ -147,7 +158,12 @@ try (FcrepoResponse response = new GetBuilder(uri, testClient).perform()) {
 ```
 
 ###Batch atomic operations
-Create a transaction:
+* After a transcation is created on root, you can see a triple with predicate fedora:hasTransactionProvider like below
+```
+<fedoraurl/tx:transactionid/> fedora:hasTransactionProvider <fedoraurl/fcr:tx>
+```
+
+* Create a transaction:
 ```java
 URI uri = URI.create("fedoraurl/fcr:tx");
 try (FcrepoResponse response = new PostBuilder(uri, testClient).perform()) {
@@ -156,7 +172,7 @@ try (FcrepoResponse response = new PostBuilder(uri, testClient).perform()) {
 }
 ```
 
-Get a transaction status:
+* Get a transaction status:
 ```java
 URI uri = URI.create("fedoraurl/tx:xxxx");
 try (FcrepoResponse response = new GetBuilder(uri, testClient).perform()) {
@@ -164,7 +180,7 @@ try (FcrepoResponse response = new GetBuilder(uri, testClient).perform()) {
 }
 ```
 
-Commit a transaction:
+* Commit a transaction:
 ```java
 URI uri = URI.create("fedoraurl/tx:xxxx/fcr:tx/fcr:commit");
 try (FcrepoResponse response = new PostBuilder(uri, testClient).perform()) {
@@ -172,7 +188,7 @@ try (FcrepoResponse response = new PostBuilder(uri, testClient).perform()) {
 }
 ```
 
-Rollback a transaction:
+* Rollback a transaction:
 ```java
 URI uri = URI.create("fedoraurl/tx:xxxx/fcr:tx/fcr:rollback");
 try (FcrepoResponse response = new PostBuilder(uri, testClient).perform()) {
@@ -180,43 +196,27 @@ try (FcrepoResponse response = new PostBuilder(uri, testClient).perform()) {
 }
 ```
 
-###AuthZ
-Define a authorization
+###Processing link headers:
 ```java
-try (FcrepoResponse response = new PatchBuilder(uri, testClient)
-        .body(authorizationSparqlFile, "application/sparql-update")
-        .perform()) {
-    logger.debug("Response status code: {}", response.getStatusCode());
+try (FcrepoResponse response = new GetBuilder(uri, testClient).perform()) {
+    final Map<String, List<String>> headers = response.getHeaders();
+    final List<String> Links = headers.get("Link");
 }
 ```
 
-Link acl to a container
-```java
-try (FcrepoResponse response = new PatchBuilder(uri, testClient)
-        .body(aclSparqlFile, "application/sparql-update")
-        .perform()) {
-    logger.debug("Response status code: {}", response.getStatusCode());
-}
+* Container Link Headers
+```
+<http://www.w3.org/ns/ldp#Resource>;rel="type",
+<http://www.w3.org/ns/ldp#Container>;rel="type",
+<http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
 ```
 
-Maven Project Settings
-----------------------
+* NonRDFSource Link Headers
+```
+<http://www.w3.org/ns/ldp#Resource>;rel="type",
+<http://www.w3.org/ns/ldp#NonRDFSource>;rel="type",
+<http://fedoraurl/fcr:metadata>; rel="describedby"
 
-Include this library dependency in the pom.xml:
-```
-    <dependency>
-      <groupId>org.fcrepo.client</groupId>
-      <artifactId>fcrepo-java-client</artifactId>
-      <version>${fcrepo-client.version}</version>
-    </dependency>
-```
-Include log4j logger dependency:
-```
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>${logback.version}</version>
-    </dependency>
 ```
 
 History
