@@ -79,6 +79,11 @@ public class PutBuilder extends BodyRequestBuilder {
     }
 
     @Override
+    public PutBuilder digest(final String digest, final String alg) {
+        return (PutBuilder) super.digest(digest, alg);
+    }
+
+    @Override
     public PutBuilder digestMd5(final String digest) {
         return (PutBuilder) super.digestMd5(digest);
     }

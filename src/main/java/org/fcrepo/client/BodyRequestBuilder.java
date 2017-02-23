@@ -105,14 +105,32 @@ public abstract class BodyRequestBuilder extends
     }
 
     /**
+     * Provide a checksum for the body of this request
+     * 
+     * @param digest checksum to provide as the digest for the request body
+     * @param alg abbreviated algorithm identifier for the type of checksum being
+     *      added (for example, sha1, md5, etc)
+     * @return this builder
+     */
+    protected BodyRequestBuilder digest(final String digest, final String alg) {
+        if (digest != null) {
+            if (digestJoiner == null) {
+                digestJoiner = new StringJoiner(", ");
+            }
+            digestJoiner.add(alg + "=" + digest);
+            request.setHeader(DIGEST, digestJoiner.toString());
+        }
+        return this;
+    }
+
+    /**
      * Provide a SHA-1 checksum for the body of this request
      * 
      * @param digest sha-1 checksum to provide as the digest for the request body
      * @return this builder
      */
     protected BodyRequestBuilder digestSha1(final String digest) {
-        addDigest(digest, "sha1");
-        return this;
+        return digest(digest, "sha1");
     }
 
     /**
@@ -122,8 +140,7 @@ public abstract class BodyRequestBuilder extends
      * @return this builder
      */
     protected BodyRequestBuilder digestMd5(final String digest) {
-        addDigest(digest, "md5");
-        return this;
+        return digest(digest, "md5");
     }
 
     /**
@@ -133,18 +150,7 @@ public abstract class BodyRequestBuilder extends
      * @return this builder
      */
     protected BodyRequestBuilder digestSha256(final String digest) {
-        addDigest(digest, "sha256");
-        return this;
-    }
-
-    private void addDigest(final String digest, final String alg) {
-        if (digest != null) {
-            if (digestJoiner == null) {
-                digestJoiner = new StringJoiner(", ");
-            }
-            digestJoiner.add(alg + "=" + digest);
-            request.setHeader(DIGEST, digestJoiner.toString());
-        }
+        return digest(digest, "sha256");
     }
 
     /**

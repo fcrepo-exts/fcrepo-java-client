@@ -69,6 +69,11 @@ public class PatchBuilder extends BodyRequestBuilder {
     }
 
     @Override
+    public PatchBuilder digest(final String digest, final String alg) {
+        return (PatchBuilder) super.digest(digest, alg);
+    }
+
+    @Override
     public PatchBuilder digestMd5(final String digest) {
         return (PatchBuilder) super.digestMd5(digest);
     }

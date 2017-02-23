@@ -72,6 +72,11 @@ public class PostBuilder extends BodyRequestBuilder {
     }
 
     @Override
+    public PostBuilder digest(final String digest, final String alg) {
+        return (PostBuilder) super.digest(digest, alg);
+    }
+
+    @Override
     public PostBuilder digestMd5(final String digest) {
         return (PostBuilder) super.digestMd5(digest);
     }
