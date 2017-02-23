@@ -71,6 +71,21 @@ public class PostBuilder extends BodyRequestBuilder {
         return (PostBuilder) super.digest(digest);
     }
 
+    @Override
+    public PostBuilder digestMd5(final String digest) {
+        return (PostBuilder) super.digestMd5(digest);
+    }
+
+    @Override
+    public PostBuilder digestSha1(final String digest) {
+        return (PostBuilder) super.digestSha1(digest);
+    }
+
+    @Override
+    public PostBuilder digestSha256(final String digest) {
+        return (PostBuilder) super.digestSha256(digest);
+    }
+
     /**
      * Provide a content disposition header which will be used as the filename
      * 

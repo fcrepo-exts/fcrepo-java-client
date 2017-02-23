@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.StringJoiner;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.InputStreamEntity;
@@ -37,6 +38,8 @@ import org.apache.http.entity.InputStreamEntity;
  */
 public abstract class BodyRequestBuilder extends
         RequestBuilder {
+
+    private StringJoiner digestJoiner;
 
     /**
      * Instantiate builder
@@ -98,10 +101,50 @@ public abstract class BodyRequestBuilder extends
      * @return this builder
      */
     protected BodyRequestBuilder digest(final String digest) {
-        if (digest != null) {
-            request.addHeader(DIGEST, "sha1=" + digest);
-        }
+        return digestSha1(digest);
+    }
+
+    /**
+     * Provide a SHA-1 checksum for the body of this request
+     * 
+     * @param digest sha-1 checksum to provide as the digest for the request body
+     * @return this builder
+     */
+    protected BodyRequestBuilder digestSha1(final String digest) {
+        addDigest(digest, "sha1");
         return this;
+    }
+
+    /**
+     * Provide a MD5 checksum for the body of this request
+     * 
+     * @param digest MD5 checksum to provide as the digest for the request body
+     * @return this builder
+     */
+    protected BodyRequestBuilder digestMd5(final String digest) {
+        addDigest(digest, "md5");
+        return this;
+    }
+
+    /**
+     * Provide a SHA-256 checksum for the body of this request
+     * 
+     * @param digest sha-256 checksum to provide as the digest for the request body
+     * @return this builder
+     */
+    protected BodyRequestBuilder digestSha256(final String digest) {
+        addDigest(digest, "sha256");
+        return this;
+    }
+
+    private void addDigest(final String digest, final String alg) {
+        if (digest != null) {
+            if (digestJoiner == null) {
+                digestJoiner = new StringJoiner(", ");
+            }
+            digestJoiner.add(alg + "=" + digest);
+            request.setHeader(DIGEST, digestJoiner.toString());
+        }
     }
 
     /**

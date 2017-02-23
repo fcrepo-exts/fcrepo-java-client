@@ -134,6 +134,19 @@ public class FcrepoClientIT extends AbstractResourceIT {
     }
 
     @Test
+    public void testPostDigestMultipleChecksums() throws Exception {
+        final String bodyContent = "Hello world";
+
+        final FcrepoResponse response = client.post(new URI(serverAddress))
+                .body(new ByteArrayInputStream(bodyContent.getBytes()), "text/plain")
+                .digestSha1("7b502c3a1f48c8609ae212cdfb639dee39673f5e")
+                .digestSha256("1894a19c85ba153acbf743ac4e43fc004c891604b26f8c69e1e83ea2afc7c48f")
+                .perform();
+
+        assertEquals("Checksums rejected", CREATED.getStatusCode(), response.getStatusCode());
+    }
+
+    @Test
     public void testPut() throws Exception {
         final FcrepoResponse response = create();
 
@@ -329,6 +342,8 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
         final FcrepoResponse response = client.post(new URI(serverAddress))
+                .digestMd5("f0ef7081e1539ac00ef5b761b4fb01b3")
+                .digestSha1("7b502c3a1f48c8609ae212cdfb639dee39673f5e")
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
                 .perform();
 

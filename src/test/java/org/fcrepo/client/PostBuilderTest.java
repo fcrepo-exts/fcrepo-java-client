@@ -104,6 +104,26 @@ public class PostBuilderTest {
     }
 
     @Test
+    public void testWithBodyMultipleChecksums() throws Exception {
+        final InputStream bodyStream = mock(InputStream.class);
+
+        testBuilder.body(bodyStream, "plain/text")
+                .digest("checksum")
+                .digestSha256("checksum256")
+                .perform();
+
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpEntity bodyEntity = request.getEntity();
+        assertEquals(bodyStream, bodyEntity.getContent());
+
+        assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
+        assertEquals("sha1=checksum, sha256=checksum256", request.getFirstHeader(DIGEST).getValue());
+    }
+
+    @Test
     public void testBodyNoType() throws Exception {
         final InputStream bodyStream = mock(InputStream.class);
 

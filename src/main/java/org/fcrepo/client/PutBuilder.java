@@ -78,6 +78,21 @@ public class PutBuilder extends BodyRequestBuilder {
         return (PutBuilder) super.digest(digest);
     }
 
+    @Override
+    public PutBuilder digestMd5(final String digest) {
+        return (PutBuilder) super.digestMd5(digest);
+    }
+
+    @Override
+    public PutBuilder digestSha1(final String digest) {
+        return (PutBuilder) super.digestSha1(digest);
+    }
+
+    @Override
+    public PutBuilder digestSha256(final String digest) {
+        return (PutBuilder) super.digestSha256(digest);
+    }
+
     /**
      * Set the prefer header for this request to lenient handling, to indicate that server-managed triples will not
      * be included in the request body.
