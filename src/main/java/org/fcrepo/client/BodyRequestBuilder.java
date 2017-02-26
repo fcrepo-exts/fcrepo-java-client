@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.StringJoiner;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.InputStreamEntity;
@@ -37,6 +38,8 @@ import org.apache.http.entity.InputStreamEntity;
  */
 public abstract class BodyRequestBuilder extends
         RequestBuilder {
+
+    private StringJoiner digestJoiner;
 
     /**
      * Instantiate builder
@@ -98,10 +101,56 @@ public abstract class BodyRequestBuilder extends
      * @return this builder
      */
     protected BodyRequestBuilder digest(final String digest) {
+        return digestSha1(digest);
+    }
+
+    /**
+     * Provide a checksum for the body of this request
+     * 
+     * @param digest checksum to provide as the digest for the request body
+     * @param alg abbreviated algorithm identifier for the type of checksum being
+     *      added (for example, sha1, md5, etc)
+     * @return this builder
+     */
+    protected BodyRequestBuilder digest(final String digest, final String alg) {
         if (digest != null) {
-            request.addHeader(DIGEST, "sha1=" + digest);
+            if (digestJoiner == null) {
+                digestJoiner = new StringJoiner(", ");
+            }
+            digestJoiner.add(alg + "=" + digest);
+            request.setHeader(DIGEST, digestJoiner.toString());
         }
         return this;
+    }
+
+    /**
+     * Provide a SHA-1 checksum for the body of this request
+     * 
+     * @param digest sha-1 checksum to provide as the digest for the request body
+     * @return this builder
+     */
+    protected BodyRequestBuilder digestSha1(final String digest) {
+        return digest(digest, "sha1");
+    }
+
+    /**
+     * Provide a MD5 checksum for the body of this request
+     * 
+     * @param digest MD5 checksum to provide as the digest for the request body
+     * @return this builder
+     */
+    protected BodyRequestBuilder digestMd5(final String digest) {
+        return digest(digest, "md5");
+    }
+
+    /**
+     * Provide a SHA-256 checksum for the body of this request
+     * 
+     * @param digest sha-256 checksum to provide as the digest for the request body
+     * @return this builder
+     */
+    protected BodyRequestBuilder digestSha256(final String digest) {
+        return digest(digest, "sha256");
     }
 
     /**

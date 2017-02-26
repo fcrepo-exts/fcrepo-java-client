@@ -62,4 +62,29 @@ public class PatchBuilder extends BodyRequestBuilder {
     public PatchBuilder ifUnmodifiedSince(final String modified) {
         return (PatchBuilder) super.ifUnmodifiedSince(modified);
     }
+
+    @Override
+    public PatchBuilder digest(final String digest) {
+        return (PatchBuilder) super.digest(digest);
+    }
+
+    @Override
+    public PatchBuilder digest(final String digest, final String alg) {
+        return (PatchBuilder) super.digest(digest, alg);
+    }
+
+    @Override
+    public PatchBuilder digestMd5(final String digest) {
+        return (PatchBuilder) super.digestMd5(digest);
+    }
+
+    @Override
+    public PatchBuilder digestSha1(final String digest) {
+        return (PatchBuilder) super.digestSha1(digest);
+    }
+
+    @Override
+    public PatchBuilder digestSha256(final String digest) {
+        return (PatchBuilder) super.digestSha256(digest);
+    }
 }
