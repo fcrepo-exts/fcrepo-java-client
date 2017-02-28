@@ -73,6 +73,7 @@ public class PutBuilder extends BodyRequestBuilder {
         return (PutBuilder) super.ifUnmodifiedSince(modified);
     }
 
+    @Deprecated
     @Override
     public PutBuilder digest(final String digest) {
         return (PutBuilder) super.digest(digest);

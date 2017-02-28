@@ -66,6 +66,7 @@ public class PostBuilder extends BodyRequestBuilder {
         return (PostBuilder) super.body(stream);
     }
 
+    @Deprecated
     @Override
     public PostBuilder digest(final String digest) {
         return (PostBuilder) super.digest(digest);

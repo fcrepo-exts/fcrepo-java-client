@@ -95,11 +95,13 @@ public abstract class BodyRequestBuilder extends
     }
 
     /**
-     * Provide a SHA-1 checksum for the body of this request
+     * Provide a SHA-1 checksum for the body of this request.
      * 
+     * @deprecated Use {@link #digestSha1(java.lang.String)}.
      * @param digest sha-1 checksum to provide as the digest for the request body
      * @return this builder
      */
+    @Deprecated
     protected BodyRequestBuilder digest(final String digest) {
         return digestSha1(digest);
     }
@@ -124,7 +126,7 @@ public abstract class BodyRequestBuilder extends
     }
 
     /**
-     * Provide a SHA-1 checksum for the body of this request
+     * Provide a SHA-1 checksum for the body of this request.
      * 
      * @param digest sha-1 checksum to provide as the digest for the request body
      * @return this builder

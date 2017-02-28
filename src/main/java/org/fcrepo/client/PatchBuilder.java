@@ -63,6 +63,7 @@ public class PatchBuilder extends BodyRequestBuilder {
         return (PatchBuilder) super.ifUnmodifiedSince(modified);
     }
 
+    @Deprecated
     @Override
     public PatchBuilder digest(final String digest) {
         return (PatchBuilder) super.digest(digest);
