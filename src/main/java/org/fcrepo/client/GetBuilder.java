@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.core.EntityTag;
+
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
 
@@ -166,6 +168,19 @@ public class GetBuilder extends
     public GetBuilder ifNoneMatch(final String etag) {
         if (etag != null) {
             request.setHeader(IF_NONE_MATCH, etag);
+        }
+        return this;
+    }
+
+    /**
+     * Provide an etag for the if-none-match header for this request
+     * 
+     * @param etag EntityTag to provide as the if-none-match header
+     * @return this builder
+     */
+    public GetBuilder ifNoneMatch(final EntityTag etag) {
+        if (etag != null) {
+            request.setHeader(IF_NONE_MATCH, "\"" + etag.getValue() + "\"");
         }
         return this;
     }

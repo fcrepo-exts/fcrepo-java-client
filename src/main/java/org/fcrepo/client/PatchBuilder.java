@@ -20,6 +20,8 @@ package org.fcrepo.client;
 import java.io.InputStream;
 import java.net.URI;
 
+import javax.ws.rs.core.EntityTag;
+
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**
@@ -56,6 +58,11 @@ public class PatchBuilder extends BodyRequestBuilder {
 
     @Override
     public PatchBuilder ifMatch(final String etag) {
+        return (PatchBuilder) super.ifMatch(etag);
+    }
+
+    @Override
+    public PatchBuilder ifMatch(final EntityTag etag) {
         return (PatchBuilder) super.ifMatch(etag);
     }
 

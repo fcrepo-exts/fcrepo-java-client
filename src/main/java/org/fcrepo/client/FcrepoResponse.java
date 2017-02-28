@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toList;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DESCRIBED_BY;
+import static org.fcrepo.client.FedoraHeaderConstants.ETAG;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.FedoraHeaderConstants.LOCATION;
 
@@ -32,6 +33,9 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.core.EntityTag;
+
 import org.apache.http.HeaderElement;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicHeader;
@@ -257,6 +261,19 @@ public class FcrepoResponse implements Closeable {
      */
     public void setLocation(final URI location) {
         this.location = location;
+    }
+
+    /**
+     * Get the entity tag for this response
+     * 
+     * @return the entity tag object
+     */
+    public EntityTag getEtag() {
+        String etagValue = getHeaderValue(ETAG);
+        if (etagValue == null) {
+            return null;
+        }
+        return EntityTag.valueOf(etagValue);
     }
 
     /**

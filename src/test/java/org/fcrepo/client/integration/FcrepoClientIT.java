@@ -45,6 +45,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
+import javax.ws.rs.core.EntityTag;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.DateUtils;
 import org.fcrepo.client.FcrepoClient;
@@ -177,8 +179,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final FcrepoResponse response = create();
 
         // Get the etag of the nearly created object
-        String etag = response.getHeaderValue(ETAG);
-        etag = etag.substring(2, etag.length());
+        final EntityTag etag = response.getEtag();
 
         // Retrieve the body of the resource so we can modify it
         String body = getTurtle(url);
@@ -266,8 +267,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
     public void testPatchEtagUpdated() throws Exception {
         // Create object
         final FcrepoResponse createResp = create();
-        String createdEtag = createResp.getHeaderValue(ETAG);
-        createdEtag = createdEtag.substring(2, createdEtag.length());
+        final EntityTag createdEtag = createResp.getEtag();
 
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
@@ -277,11 +277,11 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .ifMatch(createdEtag)
                 .perform();
 
-        String updateEtag = response.getHeaderValue(ETAG);
-        updateEtag = updateEtag.substring(2, updateEtag.length());
+        final EntityTag updatedEtag = EntityTag.valueOf(response.getHeaderValue(ETAG));
 
         assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
-        assertNotEquals("Etag did not change after patch", createdEtag, updateEtag);
+        assertNotEquals("Etag did not change after patch",
+                createdEtag, updatedEtag);
     }
 
     @Test
@@ -338,7 +338,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         assertEquals(NOT_MODIFIED.getStatusCode(), modResp.getStatusCode());
 
-        final String originalEtag = response.getHeaderValue(ETAG);
+        final EntityTag originalEtag = response.getEtag();
         final FcrepoResponse etagResp = client.get(url)
                 .ifNoneMatch(originalEtag)
                 .perform();

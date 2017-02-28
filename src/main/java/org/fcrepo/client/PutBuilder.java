@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
+import javax.ws.rs.core.EntityTag;
+
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**
@@ -66,6 +68,11 @@ public class PutBuilder extends BodyRequestBuilder {
 
     @Override
     public PutBuilder ifMatch(final String etag) {
+        return (PutBuilder) super.ifMatch(etag);
+    }
+
+    @Override
+    public PutBuilder ifMatch(final EntityTag etag) {
         return (PutBuilder) super.ifMatch(etag);
     }
 

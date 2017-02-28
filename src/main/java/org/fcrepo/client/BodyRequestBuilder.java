@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.StringJoiner;
 
+import javax.ws.rs.core.EntityTag;
+
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.InputStreamEntity;
 
@@ -178,6 +180,19 @@ public abstract class BodyRequestBuilder extends
     protected BodyRequestBuilder ifMatch(final String etag) {
         if (etag != null) {
             request.setHeader(IF_MATCH, etag);
+        }
+        return this;
+    }
+
+    /**
+     * Provide an etag for the if-match header for this request
+     * 
+     * @param etag EntityTag to provide as the if-match header
+     * @return this builder
+     */
+    protected BodyRequestBuilder ifMatch(final EntityTag etag) {
+        if (etag != null) {
+            request.setHeader(IF_MATCH, "\"" + etag.getValue() + "\"");
         }
         return this;
     }
