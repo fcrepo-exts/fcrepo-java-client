@@ -87,7 +87,7 @@ public class PutBuilderTest {
         final InputStream bodyStream = mock(InputStream.class);
 
         testBuilder.body(bodyStream, "plain/text")
-                .digest("checksum")
+                .digestSha1("checksum")
                 .perform();
 
         final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);

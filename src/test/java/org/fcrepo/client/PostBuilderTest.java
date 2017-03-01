@@ -86,7 +86,7 @@ public class PostBuilderTest {
         final InputStream bodyStream = mock(InputStream.class);
 
         testBuilder.body(bodyStream, "plain/text")
-                .digest("checksum")
+                .digestSha1("checksum")
                 .filename("file.txt")
                 .slug("slug_value")
                 .perform();
@@ -109,7 +109,7 @@ public class PostBuilderTest {
         final InputStream bodyStream = mock(InputStream.class);
 
         testBuilder.body(bodyStream, "plain/text")
-                .digest("checksum")
+                .digestSha1("checksum")
                 .digestSha256("checksum256")
                 .perform();
 

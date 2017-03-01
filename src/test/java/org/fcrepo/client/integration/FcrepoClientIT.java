@@ -45,6 +45,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
+import javax.ws.rs.core.EntityTag;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.DateUtils;
 import org.fcrepo.client.FcrepoClient;
@@ -128,7 +130,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         final FcrepoResponse response = client.post(new URI(serverAddress))
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), "text/plain")
-                .digest(invalidDigest)
+                .digestSha1(invalidDigest)
                 .perform();
 
         assertEquals("Invalid checksum was not rejected", CONFLICT.getStatusCode(), response.getStatusCode());
@@ -177,8 +179,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final FcrepoResponse response = create();
 
         // Get the etag of the nearly created object
-        String etag = response.getHeaderValue(ETAG);
-        etag = etag.substring(2, etag.length());
+        final EntityTag etag = EntityTag.valueOf(response.getHeaderValue(ETAG));
 
         // Retrieve the body of the resource so we can modify it
         String body = getTurtle(url);
@@ -195,7 +196,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         // Verify that etag is retrieved and resubmitted correctly
         final FcrepoResponse validResp = client.put(url)
                 .body(new ByteArrayInputStream(body.getBytes()), TEXT_TURTLE)
-                .ifMatch(etag)
+                .ifMatch("\"" + etag.getValue() + "\"")
                 .perform();
         assertEquals(NO_CONTENT.getStatusCode(), validResp.getStatusCode());
     }
@@ -230,7 +231,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
     @Test
     public void testPutLenient() throws Exception {
         // Create object
-        final FcrepoResponse response = create();
+        create();
         final String body = "<> <http://purl.org/dc/elements/1.1/title> \"some-title\"";
 
         // try to update without lenient header
@@ -266,19 +267,17 @@ public class FcrepoClientIT extends AbstractResourceIT {
     public void testPatchEtagUpdated() throws Exception {
         // Create object
         final FcrepoResponse createResp = create();
-        String createdEtag = createResp.getHeaderValue(ETAG);
-        createdEtag = createdEtag.substring(2, createdEtag.length());
+        final EntityTag createdEtag = EntityTag.valueOf(createResp.getHeaderValue(ETAG));
 
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
         // Update triples with sparql update
         final FcrepoResponse response = client.patch(url)
                 .body(body)
-                .ifMatch(createdEtag)
+                .ifMatch("\"" + createdEtag.getValue() + "\"")
                 .perform();
 
-        String updateEtag = response.getHeaderValue(ETAG);
-        updateEtag = updateEtag.substring(2, updateEtag.length());
+        final EntityTag updateEtag = EntityTag.valueOf(response.getHeaderValue(ETAG));
 
         assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
         assertNotEquals("Etag did not change after patch", createdEtag, updateEtag);
@@ -338,9 +337,9 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         assertEquals(NOT_MODIFIED.getStatusCode(), modResp.getStatusCode());
 
-        final String originalEtag = response.getHeaderValue(ETAG);
+        final EntityTag originalEtag = EntityTag.valueOf(response.getHeaderValue(ETAG));
         final FcrepoResponse etagResp = client.get(url)
-                .ifNoneMatch(originalEtag)
+                .ifNoneMatch("\"" + originalEtag.getValue() + "\"")
                 .perform();
         assertEquals(NOT_MODIFIED.getStatusCode(), etagResp.getStatusCode());
     }
