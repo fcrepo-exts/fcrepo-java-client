@@ -1,9 +1,11 @@
-/**
- * Copyright 2015 DuraSpace, Inc.
+/*
+ * Licensed to DuraSpace under one or more contributor license agreements.
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * DuraSpace licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.fcrepo.client.integration;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
@@ -127,7 +128,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         final FcrepoResponse response = client.post(new URI(serverAddress))
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), "text/plain")
-                .digest(invalidDigest)
+                .digestSha1(invalidDigest)
                 .perform();
 
         assertEquals("Invalid checksum was not rejected", CONFLICT.getStatusCode(), response.getStatusCode());
@@ -139,11 +140,27 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         final FcrepoResponse response = client.post(new URI(serverAddress))
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), "text/plain")
+                .digestMd5("3e25960a79dbc69b674cd4ec67a72c62")
                 .digestSha1("7b502c3a1f48c8609ae212cdfb639dee39673f5e")
-                .digestSha256("1894a19c85ba153acbf743ac4e43fc004c891604b26f8c69e1e83ea2afc7c48f")
+                .digestSha256("64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c")
                 .perform();
 
         assertEquals("Checksums rejected", CREATED.getStatusCode(), response.getStatusCode());
+    }
+
+    @Test
+    public void testPostDigestMultipleChecksumsOneMismatch() throws Exception {
+        final String bodyContent = "Hello world";
+
+        final FcrepoResponse response = client.post(new URI(serverAddress))
+                .body(new ByteArrayInputStream(bodyContent.getBytes()), "text/plain")
+                .digestMd5("3e25960a79dbc69b674cd4ec67a72c62")
+                .digestSha1("7b502c3a1f48c8609ae212cdfb639dee39673f5e")
+                // Incorrect sha256
+                .digestSha256("123488ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c")
+                .perform();
+
+        assertEquals("Invalid checksum was not rejected", CONFLICT.getStatusCode(), response.getStatusCode());
     }
 
     @Test
@@ -169,7 +186,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         // Check that etag is making it through and being rejected
         final FcrepoResponse updateResp = client.put(url)
                 .body(new ByteArrayInputStream(body.getBytes()), TEXT_TURTLE)
-                .ifMatch("\"bad-etag\"")
+                .ifMatch("bad-etag")
                 .perform();
 
         assertEquals(PRECONDITION_FAILED.getStatusCode(), updateResp.getStatusCode());
@@ -212,7 +229,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
     @Test
     public void testPutLenient() throws Exception {
         // Create object
-        final FcrepoResponse response = create();
+        create();
         final String body = "<> <http://purl.org/dc/elements/1.1/title> \"some-title\"";
 
         // try to update without lenient header
@@ -231,6 +248,21 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
     @Test
     public void testPatch() throws Exception {
+        // Create object
+        create();
+
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+
+        // Update triples with sparql update
+        final FcrepoResponse response = client.patch(url)
+                .body(body)
+                .perform();
+
+        assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
+    }
+
+    @Test
+    public void testPatchEtagUpdated() throws Exception {
         // Create object
         final FcrepoResponse createResp = create();
         final String createdEtag = createResp.getHeaderValue(ETAG);
@@ -342,8 +374,6 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
         final FcrepoResponse response = client.post(new URI(serverAddress))
-                .digestMd5("f0ef7081e1539ac00ef5b761b4fb01b3")
-                .digestSha1("7b502c3a1f48c8609ae212cdfb639dee39673f5e")
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
                 .perform();
 

@@ -1,9 +1,11 @@
-/**
- * Copyright 2015 DuraSpace, Inc.
+/*
+ * Licensed to DuraSpace under one or more contributor license agreements.
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * DuraSpace licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -13,12 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.fcrepo.client;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.Args;
@@ -41,6 +44,8 @@ public abstract class RequestBuilder {
 
     // The request being built
     protected HttpRequestBase request;
+
+    private final static Pattern ETAG_PATTERN = Pattern.compile("(W/)?\"?([^\"]+)\"?");
 
     /**
      * Instantiate builder. Throws an IllegalArgumentException if either the uri or client are null.
@@ -77,4 +82,11 @@ public abstract class RequestBuilder {
         return client.executeRequest(targetUri, request);
     }
 
+    protected String formatEtag(final String etag) {
+        final Matcher matcher = ETAG_PATTERN.matcher(etag);
+        if (matcher.matches()) {
+            return "\"" + matcher.group(2) + "\"";
+        }
+        return etag;
+    }
 }

@@ -1,9 +1,11 @@
-/**
- * Copyright 2015 DuraSpace, Inc.
+/*
+ * Licensed to DuraSpace under one or more contributor license agreements.
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * DuraSpace licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -219,7 +221,7 @@ public class ConnectionManagementTest {
     public void connectionReleasedOnEntityBodyClose() {
         final int expectedCount = (int) Stream.of(HttpMethods.values()).filter(m -> m.entity).count();
         final AtomicInteger actualCount = new AtomicInteger(0);
-        final MockHttpExpectations.Uris uri = uris.uri200;
+        final MockHttpExpectations.Uris uri = uris.uri200RespBody;
 
         Stream.of(HttpMethods.values())
                 .filter(method -> method.entity)
@@ -240,7 +242,7 @@ public class ConnectionManagementTest {
     public void connectionReleasedOnEntityBodyRead() {
         final int expectedCount = (int) Stream.of(HttpMethods.values()).filter(m -> m.entity).count();
         final AtomicInteger actualCount = new AtomicInteger(0);
-        final MockHttpExpectations.Uris uri = uris.uri200;
+        final MockHttpExpectations.Uris uri = uris.uri200RespBody;
 
         Stream.of(HttpMethods.values())
                 .filter(method -> method.entity)
@@ -262,7 +264,7 @@ public class ConnectionManagementTest {
     public void connectionNotReleasedWhenEntityBodyIgnored() {
         final int expectedCount = (int) Stream.of(HttpMethods.values()).filter(m -> m.entity).count();
         final AtomicInteger actualCount = new AtomicInteger(0);
-        final MockHttpExpectations.Uris uri = uris.uri200;
+        final MockHttpExpectations.Uris uri = uris.uri200RespBody;
 
         Stream.of(HttpMethods.values())
                 .filter(method -> method.entity)
@@ -274,6 +276,27 @@ public class ConnectionManagementTest {
         assertEquals("Expected to make " + expectedCount + " connections; made " + actualCount.get(),
                 expectedCount, actualCount.get());
         verifyConnectionRequestedButNotClosed(actualCount.get(), connectionManager);
+    }
+
+    /**
+     * Demonstrates that are connections are released when the FcrepoClient receives an empty response body.
+     */
+    @Test
+    public void connectionReleasedOnEmptyBody() {
+        final int expectedCount = (int) Stream.of(HttpMethods.values()).filter(m -> m.entity).count();
+        final AtomicInteger actualCount = new AtomicInteger(0);
+        final MockHttpExpectations.Uris uri = uris.uri200;
+
+        Stream.of(HttpMethods.values())
+                .filter(method -> method.entity)
+                .forEach(method -> {
+                    connect(client, uri, method, null);
+                    actualCount.getAndIncrement();
+                });
+
+        assertEquals("Expected to make " + expectedCount + " connections; made " + actualCount.get(),
+                expectedCount, actualCount.get());
+        verifyConnectionRequestedAndClosed(actualCount.get(), connectionManager);
     }
 
     /**

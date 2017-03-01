@@ -1,9 +1,11 @@
-/**
- * Copyright 2015 DuraSpace, Inc.
+/*
+ * Licensed to DuraSpace under one or more contributor license agreements.
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * DuraSpace licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.fcrepo.client;
 
 import static java.net.URI.create;
@@ -33,6 +34,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.net.URI;
+
+import javax.ws.rs.core.EntityTag;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -86,7 +89,7 @@ public class PutBuilderTest {
         final InputStream bodyStream = mock(InputStream.class);
 
         testBuilder.body(bodyStream, "plain/text")
-                .digest("checksum")
+                .digestSha1("checksum")
                 .perform();
 
         final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
@@ -127,7 +130,7 @@ public class PutBuilderTest {
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
-        assertEquals(etag, request.getFirstHeader(IF_MATCH).getValue());
+        assertEquals(etag, EntityTag.valueOf(request.getFirstHeader(IF_MATCH).getValue()).getValue());
         assertEquals(lastModified, request.getFirstHeader(IF_UNMODIFIED_SINCE).getValue());
     }
 

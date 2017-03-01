@@ -1,9 +1,11 @@
-/**
- * Copyright 2015 DuraSpace, Inc.
+/*
+ * Licensed to DuraSpace under one or more contributor license agreements.
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * DuraSpace licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.fcrepo.client;
 
 import static java.net.URI.create;
@@ -33,6 +34,8 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.ws.rs.core.EntityTag;
 
 import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.Before;
@@ -115,7 +118,7 @@ public class GetBuilderTest {
         testBuilder.ifNoneMatch(etag).ifModifiedSince(lastModified).perform();
 
         final HttpRequestBase request = getRequest();
-        assertEquals(etag, request.getFirstHeader(IF_NONE_MATCH).getValue());
+        assertEquals(etag, EntityTag.valueOf(request.getFirstHeader(IF_NONE_MATCH).getValue()).getValue());
         assertEquals(lastModified, request.getFirstHeader(IF_MODIFIED_SINCE).getValue());
     }
 
