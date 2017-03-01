@@ -35,6 +35,8 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ws.rs.core.EntityTag;
+
 import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.Before;
 import org.junit.Test;
@@ -116,7 +118,7 @@ public class GetBuilderTest {
         testBuilder.ifNoneMatch(etag).ifModifiedSince(lastModified).perform();
 
         final HttpRequestBase request = getRequest();
-        assertEquals(etag, request.getFirstHeader(IF_NONE_MATCH).getValue());
+        assertEquals(etag, EntityTag.valueOf(request.getFirstHeader(IF_NONE_MATCH).getValue()).getValue());
         assertEquals(lastModified, request.getFirstHeader(IF_MODIFIED_SINCE).getValue());
     }
 

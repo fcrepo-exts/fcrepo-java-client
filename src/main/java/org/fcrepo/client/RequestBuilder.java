@@ -20,6 +20,8 @@ package org.fcrepo.client;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.Args;
@@ -42,6 +44,8 @@ public abstract class RequestBuilder {
 
     // The request being built
     protected HttpRequestBase request;
+
+    private final static Pattern ETAG_PATTERN = Pattern.compile("(W/)?\"?([^\"]+)\"?");
 
     /**
      * Instantiate builder. Throws an IllegalArgumentException if either the uri or client are null.
@@ -78,4 +82,11 @@ public abstract class RequestBuilder {
         return client.executeRequest(targetUri, request);
     }
 
+    protected String formatEtag(final String etag) {
+        final Matcher matcher = ETAG_PATTERN.matcher(etag);
+        if (matcher.matches()) {
+            return "\"" + matcher.group(2) + "\"";
+        }
+        return etag;
+    }
 }

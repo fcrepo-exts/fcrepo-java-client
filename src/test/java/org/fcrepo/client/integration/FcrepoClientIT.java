@@ -128,7 +128,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         final FcrepoResponse response = client.post(new URI(serverAddress))
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), "text/plain")
-                .digest(invalidDigest)
+                .digestSha1(invalidDigest)
                 .perform();
 
         assertEquals("Invalid checksum was not rejected", CONFLICT.getStatusCode(), response.getStatusCode());
@@ -177,8 +177,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final FcrepoResponse response = create();
 
         // Get the etag of the nearly created object
-        String etag = response.getHeaderValue(ETAG);
-        etag = etag.substring(2, etag.length());
+        final String etag = response.getHeaderValue(ETAG);
 
         // Retrieve the body of the resource so we can modify it
         String body = getTurtle(url);
@@ -187,7 +186,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         // Check that etag is making it through and being rejected
         final FcrepoResponse updateResp = client.put(url)
                 .body(new ByteArrayInputStream(body.getBytes()), TEXT_TURTLE)
-                .ifMatch("\"bad-etag\"")
+                .ifMatch("bad-etag")
                 .perform();
 
         assertEquals(PRECONDITION_FAILED.getStatusCode(), updateResp.getStatusCode());
@@ -230,7 +229,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
     @Test
     public void testPutLenient() throws Exception {
         // Create object
-        final FcrepoResponse response = create();
+        create();
         final String body = "<> <http://purl.org/dc/elements/1.1/title> \"some-title\"";
 
         // try to update without lenient header
@@ -266,8 +265,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
     public void testPatchEtagUpdated() throws Exception {
         // Create object
         final FcrepoResponse createResp = create();
-        String createdEtag = createResp.getHeaderValue(ETAG);
-        createdEtag = createdEtag.substring(2, createdEtag.length());
+        final String createdEtag = createResp.getHeaderValue(ETAG);
 
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
@@ -277,8 +275,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .ifMatch(createdEtag)
                 .perform();
 
-        String updateEtag = response.getHeaderValue(ETAG);
-        updateEtag = updateEtag.substring(2, updateEtag.length());
+        final String updateEtag = response.getHeaderValue(ETAG);
 
         assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
         assertNotEquals("Etag did not change after patch", createdEtag, updateEtag);

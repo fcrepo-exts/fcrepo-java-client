@@ -177,7 +177,7 @@ public abstract class BodyRequestBuilder extends
      */
     protected BodyRequestBuilder ifMatch(final String etag) {
         if (etag != null) {
-            request.setHeader(IF_MATCH, etag);
+            request.setHeader(IF_MATCH, formatEtag(etag));
         }
         return this;
     }

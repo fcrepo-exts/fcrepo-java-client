@@ -35,6 +35,8 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import java.net.URI;
 
+import javax.ws.rs.core.EntityTag;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -87,7 +89,7 @@ public class PutBuilderTest {
         final InputStream bodyStream = mock(InputStream.class);
 
         testBuilder.body(bodyStream, "plain/text")
-                .digest("checksum")
+                .digestSha1("checksum")
                 .perform();
 
         final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
@@ -128,7 +130,7 @@ public class PutBuilderTest {
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
-        assertEquals(etag, request.getFirstHeader(IF_MATCH).getValue());
+        assertEquals(etag, EntityTag.valueOf(request.getFirstHeader(IF_MATCH).getValue()).getValue());
         assertEquals(lastModified, request.getFirstHeader(IF_UNMODIFIED_SINCE).getValue());
     }
 

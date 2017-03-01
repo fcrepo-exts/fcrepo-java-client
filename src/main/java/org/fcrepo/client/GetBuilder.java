@@ -165,7 +165,7 @@ public class GetBuilder extends
      */
     public GetBuilder ifNoneMatch(final String etag) {
         if (etag != null) {
-            request.setHeader(IF_NONE_MATCH, etag);
+            request.setHeader(IF_NONE_MATCH, formatEtag(etag));
         }
         return this;
     }
