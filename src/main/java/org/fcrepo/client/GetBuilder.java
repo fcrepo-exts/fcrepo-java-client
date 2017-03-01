@@ -1,9 +1,11 @@
-/**
- * Copyright 2015 DuraSpace, Inc.
+/*
+ * Licensed to DuraSpace under one or more contributor license agreements.
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * DuraSpace licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.fcrepo.client;
 
 import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT;
@@ -26,6 +27,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+
+import javax.ws.rs.core.EntityTag;
 
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -165,6 +168,19 @@ public class GetBuilder extends
     public GetBuilder ifNoneMatch(final String etag) {
         if (etag != null) {
             request.setHeader(IF_NONE_MATCH, etag);
+        }
+        return this;
+    }
+
+    /**
+     * Provide an etag for the if-none-match header for this request
+     * 
+     * @param etag EntityTag to provide as the if-none-match header
+     * @return this builder
+     */
+    public GetBuilder ifNoneMatch(final EntityTag etag) {
+        if (etag != null) {
+            request.setHeader(IF_NONE_MATCH, "\"" + etag.getValue() + "\"");
         }
         return this;
     }

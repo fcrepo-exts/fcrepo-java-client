@@ -1,9 +1,11 @@
-/**
- * Copyright 2015 DuraSpace, Inc.
+/*
+ * Licensed to DuraSpace under one or more contributor license agreements.
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * DuraSpace licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -15,13 +17,13 @@
  */
 package org.fcrepo.client;
 
-import org.apache.http.HttpStatus;
-import org.mockserver.client.server.MockServerClient;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 import java.net.URI;
 
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
+import org.apache.http.HttpStatus;
+import org.mockserver.client.server.MockServerClient;
 
 /**
  * Expectations for the Mock Http Server
@@ -42,11 +44,18 @@ public final class MockHttpExpectations {
 
     final static class Uris {
         int statusCode;
+        String suffix;
         String path;
 
         Uris(final int statusCode) {
             this.statusCode = statusCode;
             this.path = "/uri/" + statusCode;
+        }
+
+        Uris(final int statusCode, final String suffix) {
+            this.statusCode = statusCode;
+            this.suffix = suffix;
+            this.path = "/uri/" + statusCode + suffix;
         }
 
         URI asUri() {
@@ -59,7 +68,7 @@ public final class MockHttpExpectations {
         }
     }
 
-    final static class SupportedUris {
+    public final static class SupportedUris {
 
         /**
          * A request URI that will return a 500.
@@ -76,6 +85,10 @@ public final class MockHttpExpectations {
          */
         final Uris uri200 = new Uris(200);
 
+        /**
+         * A request URI that will return a 200 with a text response body.
+         */
+        final public Uris uri200RespBody = new Uris(200, "RespBody");
     }
 
     /**
@@ -112,6 +125,13 @@ public final class MockHttpExpectations {
                         .withStatusCode(HttpStatus.SC_OK)
         );
 
+        mockServerClient.when(
+                request()
+                        .withPath("/uri/200RespBody")
+        ).respond(
+                response("Response body")
+                        .withStatusCode(HttpStatus.SC_OK)
+        );
     }
 
 }
