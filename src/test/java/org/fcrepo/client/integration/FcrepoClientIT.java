@@ -277,8 +277,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .ifMatch("\"" + createdEtag.getValue() + "\"")
                 .perform();
 
-        String updateEtag = response.getHeaderValue(ETAG);
-        updateEtag = updateEtag.substring(2, updateEtag.length());
+        final EntityTag updateEtag = EntityTag.valueOf(response.getHeaderValue(ETAG));
 
         assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
         assertNotEquals("Etag did not change after patch", createdEtag, updateEtag);
