@@ -36,6 +36,7 @@ import static org.fcrepo.client.TestUtils.sparqlUpdate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -321,7 +322,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
     @Test
     public void testGetUnmodified() throws Exception {
-        // Check that get returns a 304 if the item hasn't changed according to last-modified/etag
+        // Check that get returns a 304 if the item hasn't changed according to last-modified
         final FcrepoResponse response = create();
 
         // Get tomorrows date to provide as the modified-since date
@@ -336,12 +337,27 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .perform();
 
         assertEquals(NOT_MODIFIED.getStatusCode(), modResp.getStatusCode());
+        assertNull("Response body should not be returned when unmodified", modResp.getBody());
+    }
 
-        final EntityTag originalEtag = EntityTag.valueOf(response.getHeaderValue(ETAG));
-        final FcrepoResponse etagResp = client.get(url)
-                .ifNoneMatch("\"" + originalEtag.getValue() + "\"")
+    @Test
+    public void testGetModified() throws Exception {
+        // Check that get returns a 200 if the item has changed according to last-modified
+        final FcrepoResponse response = create();
+
+        // Get yesterdays date to provide as the modified-since date
+        final String lastModified = response.getHeaderValue(LAST_MODIFIED);
+        final Date modDate = DateUtils.parseDate(lastModified);
+        final Calendar cal = Calendar.getInstance();
+        cal.setTime(modDate);
+        cal.add(Calendar.DATE, -1);
+
+        final FcrepoResponse modResp = client.get(url)
+                .ifModifiedSince(DateUtils.formatDate(cal.getTime()))
                 .perform();
-        assertEquals(NOT_MODIFIED.getStatusCode(), etagResp.getStatusCode());
+
+        assertEquals(OK.getStatusCode(), modResp.getStatusCode());
+        assertNotNull("GET response body should be normal when modified", modResp.getBody());
     }
 
     @Test
