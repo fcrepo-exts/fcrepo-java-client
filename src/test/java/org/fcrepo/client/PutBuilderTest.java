@@ -18,6 +18,7 @@
 package org.fcrepo.client;
 
 import static java.net.URI.create;
+import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MATCH;
@@ -88,6 +89,7 @@ public class PutBuilderTest {
 
         testBuilder.body(bodyStream, "plain/text")
                 .digestSha1("checksum")
+                .filename("file.txt")
                 .perform();
 
         final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
@@ -99,6 +101,21 @@ public class PutBuilderTest {
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
         assertEquals("sha1=checksum", request.getFirstHeader(DIGEST).getValue());
+        assertEquals("attachment; filename=\"file.txt\"", request.getFirstHeader(CONTENT_DISPOSITION).getValue());
+    }
+
+    @Test
+    public void testDisposition() throws Exception {
+        final InputStream bodyStream = mock(InputStream.class);
+        testBuilder.body(bodyStream, "plain/text").disposition("attachment").perform();
+
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpEntity bodyEntity = request.getEntity();
+        assertEquals(bodyStream, bodyEntity.getContent());
+        assertEquals("attachment", request.getFirstHeader(CONTENT_DISPOSITION).getValue());
     }
 
     @Test(expected = FcrepoOperationFailedException.class)

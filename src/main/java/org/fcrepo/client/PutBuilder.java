@@ -17,12 +17,15 @@
  */
 package org.fcrepo.client;
 
+import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 
 import org.apache.http.client.methods.HttpRequestBase;
 
@@ -98,6 +101,38 @@ public class PutBuilder extends BodyRequestBuilder {
     @Override
     public PutBuilder digestSha256(final String digest) {
         return (PutBuilder) super.digestSha256(digest);
+    }
+
+    /**
+     * Provide a content disposition header which will be used as the filename
+     *
+     * @param filename the name of the file being provided in the body of the request
+     * @return this builder
+     * @throws FcrepoOperationFailedException if unable to encode filename
+     */
+    public PutBuilder filename(final String filename) throws FcrepoOperationFailedException {
+        if (filename != null) {
+            try {
+                final String encodedFilename = URLEncoder.encode(filename, "utf-8");
+                final String disposition = "attachment; filename=\"" + encodedFilename + "\"";
+                request.addHeader(CONTENT_DISPOSITION, disposition);
+            } catch (UnsupportedEncodingException e) {
+                throw new FcrepoOperationFailedException(request.getURI(), -1, e.getMessage());
+            }
+
+        }
+        return this;
+    }
+
+    /**
+     * Provide a content disposition header without a filename
+     *
+     * @param disposition the disposition value
+     * @return this builder
+    **/
+    public PutBuilder disposition(final String disposition) {
+        request.addHeader(CONTENT_DISPOSITION, disposition);
+        return this;
     }
 
     /**

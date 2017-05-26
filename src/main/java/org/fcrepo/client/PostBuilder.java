@@ -115,6 +115,17 @@ public class PostBuilder extends BodyRequestBuilder {
     }
 
     /**
+     * Provide a content disposition header without a filename
+     *
+     * @param disposition the disposition value
+     * @return this builder
+    **/
+    public PostBuilder disposition(final String disposition) {
+        request.addHeader(CONTENT_DISPOSITION, disposition);
+        return this;
+    }
+
+    /**
      * Provide a suggested name for the new child resource, which the repository may ignore.
      * 
      * @param slug value to supply as the slug header
