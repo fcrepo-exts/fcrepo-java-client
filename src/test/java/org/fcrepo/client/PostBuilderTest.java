@@ -105,9 +105,9 @@ public class PostBuilderTest {
     }
 
     @Test
-    public void testDisposition() throws Exception {
+    public void testAttachment() throws Exception {
         final InputStream bodyStream = mock(InputStream.class);
-        testBuilder.body(bodyStream, "plain/text").disposition("attachment").perform();
+        testBuilder.body(bodyStream, "plain/text").filename(null).perform();
 
         final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
