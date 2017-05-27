@@ -105,6 +105,20 @@ public class PostBuilderTest {
     }
 
     @Test
+    public void testAttachment() throws Exception {
+        final InputStream bodyStream = mock(InputStream.class);
+        testBuilder.body(bodyStream, "plain/text").filename(null).perform();
+
+        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpEntity bodyEntity = request.getEntity();
+        assertEquals(bodyStream, bodyEntity.getContent());
+        assertEquals("attachment", request.getFirstHeader(CONTENT_DISPOSITION).getValue());
+    }
+
+    @Test
     public void testWithBodyMultipleChecksums() throws Exception {
         final InputStream bodyStream = mock(InputStream.class);
 

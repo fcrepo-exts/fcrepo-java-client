@@ -101,15 +101,11 @@ public class PostBuilder extends BodyRequestBuilder {
      * @throws FcrepoOperationFailedException if unable to encode filename
      */
     public PostBuilder filename(final String filename) throws FcrepoOperationFailedException {
-        if (filename != null) {
-            try {
-                final String encodedFilename = URLEncoder.encode(filename, "utf-8");
-                final String disposition = "attachment; filename=\"" + encodedFilename + "\"";
-                request.addHeader(CONTENT_DISPOSITION, disposition);
-            } catch (UnsupportedEncodingException e) {
-                throw new FcrepoOperationFailedException(request.getURI(), -1, e.getMessage());
-            }
-
+        try {
+            final String f = (filename != null) ? "; filename=\"" + URLEncoder.encode(filename, "utf-8") + "\"" : "";
+            request.addHeader(CONTENT_DISPOSITION, "attachment" + f);
+        } catch (UnsupportedEncodingException e) {
+            throw new FcrepoOperationFailedException(request.getURI(), -1, e.getMessage());
         }
         return this;
     }
