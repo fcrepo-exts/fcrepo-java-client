@@ -106,7 +106,7 @@ public class PutBuilder extends BodyRequestBuilder {
      *
      * @return this builder
      */
-    public BodyRequestBuilder preferLenient() {
+    public PutBuilder preferLenient() {
         request.setHeader(PREFER, "handling=lenient; received=\"minimal\"");
         return this;
     }
