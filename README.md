@@ -239,7 +239,6 @@ Maintainers
 -----------
 
 Current maintainers:
-* [Aaron Coburn](https://github.com/acoburn)
 * [Daniel Lamb](https://github.com/dannylamb)
 * [Mike Durbin](https://github.com/mikedurbin)
 
