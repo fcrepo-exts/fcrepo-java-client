@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+  <!-- Master context for the test application. -->
+
+  <!-- Context that supports the actual ModeShape JCR itself -->
+
+  <context:annotation-config/>
+  <context:property-placeholder />
+  <context:component-scan base-package="org.fcrepo"/>
+
+  <bean name="modeshapeRepofactory"
+      class="org.fcrepo.kernel.modeshape.spring.ModeShapeRepositoryFactoryBean"
+      p:repositoryConfiguration="${fcrepo.modeshape.configuration:repository-test.json}"
+      p:serverManagedPropertiesMode="strict"
+      depends-on="authenticationProvider" />
+
+  <bean name="authenticationProvider" class="org.fcrepo.auth.common.ShiroAuthenticationProvider"/>
+
+  <bean name="accessRolesProvider" class="org.fcrepo.auth.webac.WebACRolesProvider"/>
+
+  <bean class="org.modeshape.jcr.ModeShapeEngine" init-method="start"/>
+
+  <bean id="connectionManager" class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager"/>
+
+
+  <bean class="org.fcrepo.http.commons.session.SessionFactory"/>
+
+  <!-- Identifier translation chain -->
+  <util:list id="translationChain" value-type="org.fcrepo.kernel.api.identifiers.InternalIdentifierConverter">
+    <bean class="org.fcrepo.kernel.modeshape.identifiers.HashConverter"/>
+    <bean class="org.fcrepo.kernel.modeshape.identifiers.NamespaceConverter"/>
+  </util:list>
+  
+  <!-- Configuration of namespace prefixes -->
+  <bean name="rdfNamespaceRegistry" class="org.fcrepo.kernel.api.rdf.RdfNamespaceRegistry"
+      init-method="init">
+    <property name="configPath" value="${fcrepo.namespace.registry:#{null}}" />
+    <property name="monitorForChanges" value="false" />
+  </bean>
+
+  <!-- External content configuration -->
+  <bean name="externalContentPathValidator" class="org.fcrepo.http.api.ExternalContentPathValidator"
+      init-method="init">
+    <property name="configPath" value="${fcrepo.external.content.allowed:src/test/resources/allowed_external_paths.txt}" />
+    <property name="monitorForChanges" value="false" />
+  </bean>
+
+  <bean name="externalContentHandlerFactory" class="org.fcrepo.http.api.ExternalContentHandlerFactory">
+    <property name="validator" ref="externalContentPathValidator" />
+  </bean>
+
+  <!-- Transaction handling -->
+  <task:scheduler id="taskScheduler" />
+  <task:executor id="taskExecutor" pool-size="1" />
+  <task:annotation-driven executor="taskExecutor" scheduler="taskScheduler" />
+
+  <!-- supports event management, including the internal
+    event bus (fedoraInternalEventBus) -->
+
+  <!-- listener that moves JCR Events to the Fedora internal event bus -->
+  <bean class="org.fcrepo.kernel.modeshape.observer.SimpleObserver"/>
+
+  <!-- used by bean above to filter which events get put on the bus -->
+  <bean name="fedoraEventFilter" class="org.fcrepo.kernel.modeshape.observer.DefaultFilter"/>
+
+  <!-- used by observer bean to map JCR events into Fedora events -->
+  <bean name="fedoraEventMapper" class="org.fcrepo.kernel.modeshape.observer.eventmappings.AllNodeEventsOneEvent"/>
+  
+  <!-- Fedora's lightweight internal event bus. Currently memory-resident.-->
+  <bean name="fedoraInternalEventBus" class="com.google.common.eventbus.EventBus"/>
+  
+    <!-- Shiro config -->
+
+   <bean name="headerProvider" class="org.fcrepo.auth.common.HttpHeaderPrincipalProvider">
+      <property name="headerName" value="some-header"/>
+      <property name="separator" value=","/>
+  </bean>
+
+  <bean name="delegatedPrincipalProvider" class="org.fcrepo.auth.common.DelegateHeaderPrincipalProvider"/>
+  
+  <bean id="testAuthFilter" class="org.fcrepo.http.commons.test.util.TestAuthenticationRequestFilter"/>
+  <bean id="webACFilter" class="org.fcrepo.auth.webac.WebACFilter"/>
+  <bean id="servletAuthFilter" class="org.fcrepo.auth.common.ServletContainerAuthFilter"/>
+  
+  <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+    <property name="securityManager" ref="securityManager"/>
+    <property name="filterChainDefinitions">
+      <value>
+        /** = testAuthFilter, servletAuthFilter, delegatedPrincipalProvider, headerProvider, webACFilter
+      </value>
+    </property>
+  </bean>
+  
+  <bean id="servletRealm" class="org.fcrepo.auth.common.ServletContainerAuthenticatingRealm"/>
+  <bean id="webacRealm" class="org.fcrepo.auth.webac.WebACAuthorizingRealm"/>
+  
+  <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+    <property name="realms">
+      <list>
+        <ref bean="servletRealm"/>
+        <ref bean="webacRealm"/>
+      </list>
+    </property>
+    <!-- By default the servlet container sessions will be used.  Uncomment this line
+         to use shiro's native sessions (see the JavaDoc for more): -->
+    <!-- <property name="sessionMode" value="native"/> -->
+  </bean>
+  
+  <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+  
+</beans>

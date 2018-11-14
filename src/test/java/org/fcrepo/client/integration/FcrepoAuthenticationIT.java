@@ -33,6 +33,7 @@ import java.net.URI;
 import org.apache.commons.io.IOUtils;
 import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoResponse;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -133,6 +134,7 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
                 .getStatusCode(), status);
     }
 
+    @Ignore("Pending alignment with WebAC in FCREPO-2952")
     @Test
     public void testUnAuthUserCannotGet()
             throws Exception {

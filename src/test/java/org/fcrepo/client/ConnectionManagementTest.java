@@ -119,11 +119,10 @@ public class ConnectionManagementTest {
         /**
          * Closes the InputStream that constitutes the response body.
          */
-        private static Consumer<FcrepoResponse> closeEntityBody = response ->
-        {
+        private static Consumer<FcrepoResponse> closeEntityBody = response -> {
             try {
                 response.getBody().close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // ignore
             }
         };
@@ -135,7 +134,7 @@ public class ConnectionManagementTest {
             assertNotNull("Expected a non-null InputStream.", response.getBody());
             try {
                 IOUtils.copy(response.getBody(), NullOutputStream.NULL_OUTPUT_STREAM);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // ignore
             }
         };
@@ -361,7 +360,7 @@ public class ConnectionManagementTest {
             if (uri.statusCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
                 fail("Expected a FcrepoOperationFailedException to be thrown for HTTP method " + method.name());
             }
-        } catch (FcrepoOperationFailedException e) {
+        } catch (final FcrepoOperationFailedException e) {
             assertEquals(
                     "Expected request for " + uri.asUri() + " to return a " + uri.statusCode + ".  " +
                             "Was: " + e.getStatusCode() + " Method:" + method,

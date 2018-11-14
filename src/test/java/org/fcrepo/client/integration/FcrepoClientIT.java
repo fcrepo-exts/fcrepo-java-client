@@ -55,6 +55,7 @@ import org.fcrepo.client.FcrepoOperationFailedException;
 import org.fcrepo.client.FcrepoResponse;
 import org.jgroups.util.UUID;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -124,6 +125,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals(bodyContent, getContent);
     }
 
+    @Ignore("Pending alignment with SHA1 rename")
     @Test
     public void testPostDigestMismatch() throws Exception {
         final String bodyContent = "Hello world";
@@ -137,6 +139,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals("Invalid checksum was not rejected", CONFLICT.getStatusCode(), response.getStatusCode());
     }
 
+    @Ignore("Pending alignment with SHA1 rename")
     @Test
     public void testPostDigestMultipleChecksums() throws Exception {
         final String bodyContent = "Hello world";
@@ -151,6 +154,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals("Checksums rejected", CREATED.getStatusCode(), response.getStatusCode());
     }
 
+    @Ignore("Pending alignment with SHA1 rename")
     @Test
     public void testPostDigestMultipleChecksumsOneMismatch() throws Exception {
         final String bodyContent = "Hello world";
@@ -184,7 +188,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         // Retrieve the body of the resource so we can modify it
         String body = getTurtle(url);
-        body += "\n<> dc:title \"some-title\"";
+        body += "\n<> <http://purl.org/dc/elements/1.1/title> \"some-title\"";
 
         // Check that etag is making it through and being rejected
         final FcrepoResponse updateResp = client.put(url)
@@ -209,7 +213,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         // Retrieve the body of the resource so we can modify it
         String body = getTurtle(url);
-        body += "\n<> dc:title \"some-title\"";
+        body += "\n<> <http://purl.org/dc/elements/1.1/title> \"some-title\"";
 
         // Update the body the first time, which should succeed
         final String originalModified = response.getHeaderValue(LAST_MODIFIED);
@@ -407,6 +411,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals(PARTIAL_CONTENT.getStatusCode(), rangeResp.getStatusCode());
     }
 
+    @Ignore("Pending alignment with external content changes FCREPO-2943")
     @Test
     public void testGetDisableRedirects() throws Exception {
         // Creating a binary with external content for retrieval
