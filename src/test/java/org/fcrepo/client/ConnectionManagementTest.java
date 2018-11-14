@@ -24,8 +24,8 @@ import static org.fcrepo.client.TestUtils.setField;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -51,8 +51,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockserver.client.server.MockServerClient;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 /**

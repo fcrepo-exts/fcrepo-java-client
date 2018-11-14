@@ -23,7 +23,7 @@ import static org.mockserver.model.HttpResponse.response;
 import java.net.URI;
 
 import org.apache.http.HttpStatus;
-import org.mockserver.client.server.MockServerClient;
+import org.mockserver.client.MockServerClient;
 
 /**
  * Expectations for the Mock Http Server

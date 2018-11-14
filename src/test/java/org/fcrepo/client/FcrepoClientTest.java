@@ -28,7 +28,7 @@ import static org.fcrepo.client.TestUtils.rdfXml;
 import static org.fcrepo.client.TestUtils.setField;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -50,7 +50,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * @author acoburn
@@ -429,8 +429,6 @@ public class FcrepoClientTest {
         final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
 
         doSetupMockRequest(SPARQL_UPDATE, responseBody, status, statusPhrase);
-
-        when(mockResponse.getAllHeaders()).thenReturn(null);
 
         testClient.post(null)
                 .body(body, SPARQL_UPDATE)
