@@ -81,7 +81,7 @@ public class FcrepoClientAuthTest {
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), rdfXml);
+        assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), rdfXml);
     }
 
     @Test
@@ -107,7 +107,7 @@ public class FcrepoClientAuthTest {
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), rdfXml);
+        assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), rdfXml);
     }
 
     @Test
@@ -132,7 +132,7 @@ public class FcrepoClientAuthTest {
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), rdfXml);
+        assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), rdfXml);
     }
 
     private void doSetupMockRequest(final String contentType, final ByteArrayEntity entity, final int status)

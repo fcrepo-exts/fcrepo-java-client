@@ -88,7 +88,7 @@ public class FcrepoClientErrorTest {
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), rdfXml);
+        assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), rdfXml);
     }
 
     @Test
@@ -109,7 +109,7 @@ public class FcrepoClientErrorTest {
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), rdfXml);
+        assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), rdfXml);
     }
 
     @Test

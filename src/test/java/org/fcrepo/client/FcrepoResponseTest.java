@@ -156,7 +156,7 @@ public class FcrepoResponseTest {
 
             throw notSuppressed;
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             assertSame(notSuppressed, e);
             assertTrue(e.getSuppressed() != null && e.getSuppressed().length == 1);
             assertSame(suppressed, e.getSuppressed()[0]);
@@ -181,8 +181,8 @@ public class FcrepoResponseTest {
         when(getBuilder.perform()).thenReturn(new FcrepoResponse(null, 200, null, entityBody));
 
         try (FcrepoResponse res = client.get(URI.create("foo")).perform()) {
-            assertEquals(content, IOUtils.toString(res.getBody()));
-        } catch (IOException e) {
+            assertEquals(content, IOUtils.toString(res.getBody(), "UTF-8"));
+        } catch (final IOException e) {
             fail("Unexpected exception: " + e);
         }
     }
@@ -207,7 +207,7 @@ public class FcrepoResponseTest {
         try (FcrepoResponse res = client.get(URI.create("foo")).perform()) {
             ByteStreams.copy(res.getBody(), NullOutputStream.NULL_OUTPUT_STREAM);
             fail("Expected an IOException to be thrown.");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             assertSame(ioe, e);
         }
 

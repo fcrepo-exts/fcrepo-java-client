@@ -96,7 +96,7 @@ public class FcrepoClientTest {
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), RDF_XML);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), rdfXml);
+        assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), rdfXml);
     }
 
     @Test(expected = FcrepoOperationFailedException.class)
@@ -235,7 +235,7 @@ public class FcrepoClientTest {
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), null);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), uri.toString());
+        assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), uri.toString());
     }
 
     @Test(expected = FcrepoOperationFailedException.class)
@@ -280,7 +280,7 @@ public class FcrepoClientTest {
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), null);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), responseText);
+        assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), responseText);
     }
 
     @Test(expected = FcrepoOperationFailedException.class)
@@ -337,7 +337,7 @@ public class FcrepoClientTest {
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), SPARQL_UPDATE);
-        assertEquals(IOUtils.toString(response.getBody()), responseText);
+        assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), responseText);
     }
 
     @Test(expected = FcrepoOperationFailedException.class)
@@ -388,7 +388,7 @@ public class FcrepoClientTest {
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), SPARQL_UPDATE);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), responseText);
+        assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), responseText);
     }
 
     @Test
@@ -405,7 +405,7 @@ public class FcrepoClientTest {
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), null);
         assertEquals(response.getLocation(), null);
-        assertEquals(IOUtils.toString(response.getBody()), responseText);
+        assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), responseText);
     }
 
     @Test(expected = FcrepoOperationFailedException.class)
@@ -448,7 +448,7 @@ public class FcrepoClientTest {
             testClient.post(uri)
                     .body(body, SPARQL_UPDATE)
                     .perform();
-        } catch (FcrepoOperationFailedException ex) {
+        } catch (final FcrepoOperationFailedException ex) {
             assertEquals(ex.getUrl(), uri);
             assertEquals(ex.getStatusText(), "Expected error");
             assertEquals(ex.getStatusCode(), -1);
