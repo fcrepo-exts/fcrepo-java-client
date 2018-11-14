@@ -7,6 +7,7 @@
     </encoder>
   </appender>
 
+  <logger name="org.mockserver" additivity="false" level="WARN"/>
   <logger name="org.fcrepo.client" additivity="false" level="${fcrepo-java-client.log:-INFO}">
     <appender-ref ref="STDOUT"/>
   </logger>

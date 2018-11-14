@@ -24,8 +24,8 @@ import static org.fcrepo.client.TestUtils.setField;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -51,8 +51,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockserver.client.server.MockServerClient;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 /**
@@ -119,11 +119,10 @@ public class ConnectionManagementTest {
         /**
          * Closes the InputStream that constitutes the response body.
          */
-        private static Consumer<FcrepoResponse> closeEntityBody = response ->
-        {
+        private static Consumer<FcrepoResponse> closeEntityBody = response -> {
             try {
                 response.getBody().close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // ignore
             }
         };
@@ -135,7 +134,7 @@ public class ConnectionManagementTest {
             assertNotNull("Expected a non-null InputStream.", response.getBody());
             try {
                 IOUtils.copy(response.getBody(), NullOutputStream.NULL_OUTPUT_STREAM);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // ignore
             }
         };
@@ -361,7 +360,7 @@ public class ConnectionManagementTest {
             if (uri.statusCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
                 fail("Expected a FcrepoOperationFailedException to be thrown for HTTP method " + method.name());
             }
-        } catch (FcrepoOperationFailedException e) {
+        } catch (final FcrepoOperationFailedException e) {
             assertEquals(
                     "Expected request for " + uri.asUri() + " to return a " + uri.statusCode + ".  " +
                             "Was: " + e.getStatusCode() + " Method:" + method,

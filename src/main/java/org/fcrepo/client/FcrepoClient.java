@@ -214,7 +214,7 @@ public class FcrepoClient {
             throws FcrepoOperationFailedException {
         try {
             return httpclient.execute(request);
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             LOGGER.debug("HTTP Operation failed: ", ex);
             throw new FcrepoOperationFailedException(request.getURI(), -1, ex.getMessage());
         }
@@ -247,7 +247,7 @@ public class FcrepoClient {
         // Free resources associated with the response.
         try {
             response.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOGGER.warn("Unable to close HTTP response.", e);
         }
     }
@@ -263,7 +263,7 @@ public class FcrepoClient {
             } else {
                 return entity.getContent();
             }
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             LOGGER.debug("Unable to extract HttpEntity response into an InputStream: ", ex);
             return null;
         }
@@ -278,8 +278,8 @@ public class FcrepoClient {
     private static Map<String, List<String>> getHeaders(final HttpResponse response) {
         final Map<String, List<String>> headers = new HashMap<>();
 
-        for (Header header : response.getAllHeaders()) {
-            List<String> values;
+        for (final Header header : response.getAllHeaders()) {
+            final List<String> values;
             if (headers.containsKey(header.getName())) {
                 values = headers.get(header.getName());
             } else {
