@@ -43,6 +43,7 @@
     <grizzly.version>2.4.3</grizzly.version>
     <httpclient.version>4.5.6</httpclient.version>
     <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
+    <javax.ws.rs-api.vesion>2.0.1</javax.ws.rs-api.vesion>
     <jersey.version>2.25.1</jersey.version>
     <joda-time.version>2.10.1</joda-time.version>
     <logback.version>1.2.3</logback.version>
@@ -86,6 +87,12 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>${httpclient.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
+      <version>${javax.ws.rs-api.vesion}</version>
     </dependency>
 
     <!-- logging -->

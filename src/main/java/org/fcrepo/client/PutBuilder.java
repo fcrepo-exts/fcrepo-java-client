@@ -32,14 +32,14 @@ import org.apache.http.client.methods.HttpRequestBase;
 /**
  * Builds a PUT request for interacting with the Fedora HTTP API in order to create a resource with a specified path,
  * or replace the triples associated with a resource with the triples provided in the request body.
- * 
+ *
  * @author bbpennel
  */
 public class PutBuilder extends BodyRequestBuilder {
 
     /**
      * Instantiate builder
-     * 
+     *
      * @param uri uri of the resource this request is being made to
      * @param client the client
      */
@@ -60,6 +60,11 @@ public class PutBuilder extends BodyRequestBuilder {
     @Override
     public PutBuilder body(final File file, final String contentType) throws IOException {
         return (PutBuilder) super.body(file, contentType);
+    }
+
+    @Override
+    public PutBuilder externalContent(final URI contentURI, final String contentType, final String handling) {
+        return (PutBuilder) super.externalContent(contentURI, contentType, handling);
     }
 
     @Override
@@ -114,7 +119,7 @@ public class PutBuilder extends BodyRequestBuilder {
         try {
             final String f = (filename != null) ? "; filename=\"" + URLEncoder.encode(filename, "utf-8") + "\"" : "";
             request.addHeader(CONTENT_DISPOSITION, "attachment" + f);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new FcrepoOperationFailedException(request.getURI(), -1, e.getMessage());
         }
         return this;

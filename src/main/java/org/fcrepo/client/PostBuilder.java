@@ -32,14 +32,14 @@ import org.apache.http.client.methods.HttpRequestBase;
 /**
  * Builds a post request for interacting with the Fedora HTTP API in order to create a new resource within an LDP
  * container.
- * 
+ *
  * @author bbpennel
  */
 public class PostBuilder extends BodyRequestBuilder {
 
     /**
      * Instantiate builder
-     * 
+     *
      * @param uri uri of the resource this request is being made to
      * @param client the client
      */
@@ -65,6 +65,11 @@ public class PostBuilder extends BodyRequestBuilder {
     @Override
     public PostBuilder body(final InputStream stream) {
         return (PostBuilder) super.body(stream);
+    }
+
+    @Override
+    public PostBuilder externalContent(final URI contentURI, final String contentType, final String handling) {
+        return (PostBuilder) super.externalContent(contentURI, contentType, handling);
     }
 
     @Deprecated
@@ -95,7 +100,7 @@ public class PostBuilder extends BodyRequestBuilder {
 
     /**
      * Provide a content disposition header which will be used as the filename
-     * 
+     *
      * @param filename the name of the file being provided in the body of the request
      * @return this builder
      * @throws FcrepoOperationFailedException if unable to encode filename
@@ -104,7 +109,7 @@ public class PostBuilder extends BodyRequestBuilder {
         try {
             final String f = (filename != null) ? "; filename=\"" + URLEncoder.encode(filename, "utf-8") + "\"" : "";
             request.addHeader(CONTENT_DISPOSITION, "attachment" + f);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new FcrepoOperationFailedException(request.getURI(), -1, e.getMessage());
         }
         return this;
@@ -112,7 +117,7 @@ public class PostBuilder extends BodyRequestBuilder {
 
     /**
      * Provide a suggested name for the new child resource, which the repository may ignore.
-     * 
+     *
      * @param slug value to supply as the slug header
      * @return this builder
      */
