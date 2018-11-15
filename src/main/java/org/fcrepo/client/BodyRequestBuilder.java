@@ -21,6 +21,9 @@ import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
+import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
+import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
+import static javax.ws.rs.core.HttpHeaders.LINK;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,12 +32,16 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.StringJoiner;
 
+import javax.ws.rs.core.Link;
+import javax.ws.rs.core.Link.Builder;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.InputStreamEntity;
 
 /**
  * Request builder which includes a body component
- * 
+ *
  * @author bbpennel
  */
 public abstract class BodyRequestBuilder extends
@@ -44,7 +51,7 @@ public abstract class BodyRequestBuilder extends
 
     /**
      * Instantiate builder
-     * 
+     *
      * @param uri uri request will be issued to
      * @param client the client
      */
@@ -54,7 +61,7 @@ public abstract class BodyRequestBuilder extends
 
     /**
      * Add a body to this request from a stream, with application/octet-stream as its content type
-     * 
+     *
      * @param stream InputStream of the content to be sent to the server
      * @return this builder
      */
@@ -64,7 +71,7 @@ public abstract class BodyRequestBuilder extends
 
     /**
      * Add a body to this request as a stream with the given content type
-     * 
+     *
      * @param stream InputStream of the content to be sent to the server
      * @param contentType the Content-Type of the body
      * @return this builder
@@ -85,7 +92,7 @@ public abstract class BodyRequestBuilder extends
 
     /**
      * Add the given file as the body for this request with the provided content type
-     * 
+     *
      * @param file File containing the content to be sent to the server
      * @param contentType the Content-Type of the body
      * @return this builder
@@ -96,8 +103,32 @@ public abstract class BodyRequestBuilder extends
     }
 
     /**
+     * Add the given URI to the request as the location a Non-RDF Source binary should use for external content. The
+     * handling parameter must be supplied, and informs the server of how to process the request.
+     *
+     * @param contentURI URI of the external content.
+     * @param contentType Mimetype to supply for the external content.
+     * @param handling Name of the handling method, used by the server to determine how to process the external
+     *        content URI. Standard values can be found in {@link ExternalContentHandling}.
+     * @return this builder
+     */
+    protected BodyRequestBuilder externalContent(final URI contentURI, final String contentType,
+            final String handling) {
+        final Builder linkBuilder = Link.fromUri(contentURI)
+            .rel(EXTERNAL_CONTENT_REL)
+            .param(EXTERNAL_CONTENT_HANDLING, handling);
+
+        if (StringUtils.isNotBlank(contentType)) {
+            linkBuilder.type(contentType);
+        }
+
+        request.addHeader(LINK, linkBuilder.build().toString());
+        return this;
+    }
+
+    /**
      * Provide a SHA-1 checksum for the body of this request.
-     * 
+     *
      * @deprecated Use {@link #digestSha1(java.lang.String)}.
      * @param digest sha-1 checksum to provide as the digest for the request body
      * @return this builder
@@ -109,7 +140,7 @@ public abstract class BodyRequestBuilder extends
 
     /**
      * Provide a checksum for the body of this request
-     * 
+     *
      * @param digest checksum to provide as the digest for the request body
      * @param alg abbreviated algorithm identifier for the type of checksum being
      *      added (for example, sha1, md5, etc)
@@ -128,7 +159,7 @@ public abstract class BodyRequestBuilder extends
 
     /**
      * Provide a SHA-1 checksum for the body of this request.
-     * 
+     *
      * @param digest sha-1 checksum to provide as the digest for the request body
      * @return this builder
      */
@@ -138,7 +169,7 @@ public abstract class BodyRequestBuilder extends
 
     /**
      * Provide a MD5 checksum for the body of this request
-     * 
+     *
      * @param digest MD5 checksum to provide as the digest for the request body
      * @return this builder
      */
@@ -148,7 +179,7 @@ public abstract class BodyRequestBuilder extends
 
     /**
      * Provide a SHA-256 checksum for the body of this request
-     * 
+     *
      * @param digest sha-256 checksum to provide as the digest for the request body
      * @return this builder
      */
@@ -158,7 +189,7 @@ public abstract class BodyRequestBuilder extends
 
     /**
      * Provide a if-unmodified-since header for this request
-     * 
+     *
      * @param modified date to provide as the if-unmodified-since header
      * @return this builder
      */
@@ -171,7 +202,7 @@ public abstract class BodyRequestBuilder extends
 
     /**
      * Provide an etag for the if-match header for this request
-     * 
+     *
      * @param etag etag to provide as the if-match header
      * @return this builder
      */

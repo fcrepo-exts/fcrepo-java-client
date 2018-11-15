@@ -18,10 +18,14 @@
 package org.fcrepo.client;
 
 import static java.net.URI.create;
+import static javax.ws.rs.core.HttpHeaders.LINK;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.SLUG;
+import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
+import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
+import static org.fcrepo.client.ExternalContentHandling.PROXY;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -34,6 +38,8 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import java.net.URI;
 
+import javax.ws.rs.core.Link;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -41,6 +47,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -55,6 +62,9 @@ public class PostBuilderTest {
 
     @Mock
     private FcrepoResponse fcrepoResponse;
+
+    @Captor
+    private ArgumentCaptor<HttpRequestBase> requestCaptor;
 
     private PostBuilder testBuilder;
 
@@ -73,7 +83,6 @@ public class PostBuilderTest {
     public void testPostNoBody() throws Exception {
         testBuilder.perform();
 
-        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
@@ -91,7 +100,6 @@ public class PostBuilderTest {
                 .slug("slug_value")
                 .perform();
 
-        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
@@ -109,7 +117,6 @@ public class PostBuilderTest {
         final InputStream bodyStream = mock(InputStream.class);
         testBuilder.body(bodyStream, "plain/text").filename(null).perform();
 
-        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
@@ -127,7 +134,6 @@ public class PostBuilderTest {
                 .digestSha256("checksum256")
                 .perform();
 
-        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
@@ -144,7 +150,6 @@ public class PostBuilderTest {
 
         testBuilder.body(bodyStream).perform();
 
-        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
@@ -159,5 +164,37 @@ public class PostBuilderTest {
                 .thenThrow(new FcrepoOperationFailedException(uri, 415, "status"));
 
         testBuilder.perform();
+    }
+
+    @Test
+    public void testExternalContent() throws Exception {
+        final URI contentURI = URI.create("file:///path/to/file");
+        testBuilder.externalContent(contentURI, "plain/text", PROXY)
+                .perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+
+        final Link extLink = Link.valueOf(request.getFirstHeader(LINK).getValue());
+        assertEquals(EXTERNAL_CONTENT_REL, extLink.getRel());
+        assertEquals(PROXY, extLink.getParams().get(EXTERNAL_CONTENT_HANDLING));
+        assertEquals("plain/text", extLink.getType());
+    }
+
+    @Test
+    public void testExternalContentNoType() throws Exception {
+        final URI contentURI = URI.create("file:///path/to/file");
+        testBuilder.externalContent(contentURI, null, PROXY)
+                .perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+
+        final Link extLink = Link.valueOf(request.getFirstHeader(LINK).getValue());
+        assertEquals(EXTERNAL_CONTENT_REL, extLink.getRel());
+        assertEquals(PROXY, extLink.getParams().get(EXTERNAL_CONTENT_HANDLING));
+        assertNull(extLink.getType());
     }
 }

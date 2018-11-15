@@ -27,6 +27,7 @@ import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.PARTIAL_CONTENT;
 import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
+import static javax.ws.rs.core.Response.Status.TEMPORARY_REDIRECT;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION_FILENAME;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.ETAG;
@@ -42,14 +43,18 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
 import javax.ws.rs.core.EntityTag;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.DateUtils;
+import org.fcrepo.client.ExternalContentHandling;
 import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoOperationFailedException;
 import org.fcrepo.client.FcrepoResponse;
@@ -123,6 +128,36 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         final String getContent = IOUtils.toString(getResponse.getBody(), "UTF-8");
         assertEquals(bodyContent, getContent);
+    }
+
+    @Test
+    public void testPostExternalContent() throws Exception {
+        final String filename = "hello.txt";
+        final String mimetype = "text/plain";
+        final String fileContent = "Hello post world";
+
+        final Path contentPath = Files.createTempFile(null, ".txt");
+        FileUtils.write(contentPath.toFile(), fileContent, "UTF-8");
+
+        final FcrepoResponse response = client.post(new URI(serverAddress))
+                .externalContent(contentPath.toUri(), mimetype, ExternalContentHandling.PROXY)
+                .filename(filename)
+                .perform();
+
+        final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
+
+        assertEquals("Didn't get a CREATED response! Got content:\n" + content,
+                CREATED.getStatusCode(), status);
+
+        final FcrepoResponse getResponse = client.get(response.getLocation()).perform();
+        final Map<String, String> contentDisp = getResponse.getContentDisposition();
+        assertEquals(filename, contentDisp.get(CONTENT_DISPOSITION_FILENAME));
+
+        assertEquals(mimetype, getResponse.getContentType());
+
+        final String getContent = IOUtils.toString(getResponse.getBody(), "UTF-8");
+        assertEquals(fileContent, getContent);
     }
 
     @Ignore("Pending alignment with SHA1 rename")
@@ -251,6 +286,36 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .preferLenient()
                 .perform();
         assertEquals(NO_CONTENT.getStatusCode(), lenientResponse.getStatusCode());
+    }
+
+    @Test
+    public void testPutExternalContent() throws Exception {
+        final String filename = "put.txt";
+        final String mimetype = "text/plain";
+        final String fileContent = "Hello put world";
+
+        final Path contentPath = Files.createTempFile(null, ".txt");
+        FileUtils.write(contentPath.toFile(), fileContent, "UTF-8");
+
+        final FcrepoResponse response = client.put(url)
+                .externalContent(contentPath.toUri(), mimetype, ExternalContentHandling.PROXY)
+                .filename(filename)
+                .perform();
+
+        final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
+
+        assertEquals("Didn't get a CREATED response! Got content:\n" + content,
+                CREATED.getStatusCode(), status);
+
+        final FcrepoResponse getResponse = client.get(response.getLocation()).perform();
+        final Map<String, String> contentDisp = getResponse.getContentDisposition();
+        assertEquals(filename, contentDisp.get(CONTENT_DISPOSITION_FILENAME));
+
+        assertEquals(mimetype, getResponse.getContentType());
+
+        final String getContent = IOUtils.toString(getResponse.getBody(), "UTF-8");
+        assertEquals(fileContent, getContent);
     }
 
     @Test
@@ -411,22 +476,29 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals(PARTIAL_CONTENT.getStatusCode(), rangeResp.getStatusCode());
     }
 
-    @Ignore("Pending alignment with external content changes FCREPO-2943")
     @Test
     public void testGetDisableRedirects() throws Exception {
-        // Creating a binary with external content for retrieval
-        final String mimetype = "message/external-body; access-type=URL; URL=\"http://www.example.com/file\"";
+        final String filename = "example.html";
+        final String mimetype = "text/plain";
+
+        final URI externalURI = URI.create("http://example.com/");
+
         final FcrepoResponse response = client.post(new URI(serverAddress))
-                .body(new ByteArrayInputStream(new byte[]{}), mimetype)
+                .externalContent(externalURI, mimetype, ExternalContentHandling.REDIRECT)
+                .filename(filename)
                 .perform();
 
-        final URI url = response.getLocation();
+        final FcrepoResponse getResponse = client.get(response.getLocation())
+                .disableRedirects()
+                .perform();
+        assertEquals("Didn't get a REDIRECT response!",
+                TEMPORARY_REDIRECT.getStatusCode(), getResponse.getStatusCode());
+        assertEquals(mimetype, getResponse.getContentType());
 
-        // Make sure the response is the redirect itself, not the URL being redirected to
-        final FcrepoResponse getResponse = client.get(url).disableRedirects().perform();
-        assertEquals(307, getResponse.getStatusCode());
-        assertEquals(url, getResponse.getUrl());
-        assertEquals(URI.create("http://www.example.com/file"), getResponse.getLocation());
+        final Map<String, String> contentDisp = getResponse.getContentDisposition();
+        assertEquals(filename, contentDisp.get(CONTENT_DISPOSITION_FILENAME));
+
+        assertEquals(externalURI, getResponse.getLocation());
     }
 
     @Test
