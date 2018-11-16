@@ -181,6 +181,19 @@ public class FcrepoClientTest {
         assertEquals(response.getBody(), null);
     }
 
+    @Test
+    public void testHeadersCaseInsensitive() throws Exception {
+        final int status = 200;
+        final URI uri = create(baseUrl);
+
+        doSetupMockRequest(TEXT_TURTLE, null, status);
+
+        final FcrepoResponse response = testClient.head(uri).perform();
+
+        // Verify that the case of header names returned by server doesn't impact retrieval
+        assertEquals(response.getHeaderValue("content-type"), TEXT_TURTLE);
+    }
+
     @Test(expected = FcrepoOperationFailedException.class)
     public void testHeadError() throws IOException, FcrepoOperationFailedException {
         doSetupMockRequest(TEXT_TURTLE, null, 404);

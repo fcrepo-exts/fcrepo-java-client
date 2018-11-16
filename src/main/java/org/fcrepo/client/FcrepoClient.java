@@ -22,10 +22,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -65,7 +66,7 @@ public class FcrepoClient {
 
     /**
      * Build a FcrepoClient
-     * 
+     *
      * @return a client builder
      */
     public static FcrepoClientBuilder client() {
@@ -74,7 +75,7 @@ public class FcrepoClient {
 
     /**
      * Create a FcrepoClient with a set of authentication values.
-     * 
+     *
      * @param username the username for the repository
      * @param password the password for the repository
      * @param host the authentication hostname (realm) for the repository
@@ -92,7 +93,7 @@ public class FcrepoClient {
     /**
      * Make a PUT request to create a resource with a specified path, or replace the triples associated with a
      * resource with the triples provided in the request body.
-     * 
+     *
      * @param url the URL of the resource to which to PUT
      * @return a put request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
@@ -103,7 +104,7 @@ public class FcrepoClient {
 
     /**
      * Make a PATCH request to modify the triples associated with a resource with SPARQL-Update.
-     * 
+     *
      * @param url the URL of the resource to which to PATCH
      * @return a patch request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
@@ -114,7 +115,7 @@ public class FcrepoClient {
 
     /**
      * Make a POST request to create a new resource within an LDP container.
-     * 
+     *
      * @param url the URL of the resource to which to POST
      * @return a post request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
@@ -124,8 +125,47 @@ public class FcrepoClient {
     }
 
     /**
+     * Make a POST request to create a new memento (LDPRm) within an LDPCv of the current version of a resource.
+     *
+     * @param url the URL of the LDPCv in which to create the LDPRm.
+     * @return a memento creation request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public OriginalMementoBuilder createMemento(final URI url) throws FcrepoOperationFailedException {
+        return new OriginalMementoBuilder(url, this);
+    }
+
+    /**
+     * Make a POST request to create a new memento (LDPRm) within an LDPCv using the given memento-datetime and the
+     * request body.
+     *
+     * @param url the URL of the LDPCv in which to create the LDPRm.
+     * @param mementoInstant the memento datetime as an Instant.
+     * @return a memento creation request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public HistoricMementoBuilder createMemento(final URI url, final Instant mementoInstant)
+            throws FcrepoOperationFailedException {
+        return new HistoricMementoBuilder(url, this, mementoInstant);
+    }
+
+    /**
+     * Make a POST request to create a new memento (LDPRm) within an LDPCv using the given memento-datetime and the
+     * request body.
+     *
+     * @param url the URL of the LDPCv in which to create the LDPRm.
+     * @param mementoDatetime the RFC1123 formatted memento datetime.
+     * @return a memento creation request builder object
+     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
+     */
+    public HistoricMementoBuilder createMemento(final URI url, final String mementoDatetime)
+            throws FcrepoOperationFailedException {
+        return new HistoricMementoBuilder(url, this, mementoDatetime);
+    }
+
+    /**
      * Make a DELETE request to delete a resource
-     * 
+     *
      * @param url the URL of the resource to which to DELETE
      * @return a delete request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
@@ -136,7 +176,7 @@ public class FcrepoClient {
 
     /**
      * Make a MOVE request to copy a resource (and its subtree) to a new location.
-     * 
+     *
      * @param source url of the resource to copy
      * @param destination url of the location for the copy
      * @return a copy request builder object
@@ -148,7 +188,7 @@ public class FcrepoClient {
 
     /**
      * Make a COPY request to move a resource (and its subtree) to a new location.
-     * 
+     *
      * @param source url of the resource to move
      * @param destination url of the new location for the resource
      * @return a move request builder object
@@ -160,7 +200,7 @@ public class FcrepoClient {
 
     /**
      * Make a GET request to retrieve the content of a resource
-     * 
+     *
      * @param url the URL of the resource to which to GET
      * @return a get request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
@@ -171,7 +211,7 @@ public class FcrepoClient {
 
     /**
      * Make a HEAD request to retrieve resource headers.
-     * 
+     *
      * @param url the URL of the resource to make the HEAD request on.
      * @return a HEAD request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
@@ -182,7 +222,7 @@ public class FcrepoClient {
 
     /**
      * Make a OPTIONS request to output information about the supported HTTP methods, etc.
-     * 
+     *
      * @param url the URL of the resource to make the OPTIONS request on.
      * @return a OPTIONS request builder object
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
@@ -193,7 +233,7 @@ public class FcrepoClient {
 
     /**
      * Execute a HTTP request
-     * 
+     *
      * @param url URI the request is made to
      * @param request the request
      * @return the repository response
@@ -271,12 +311,12 @@ public class FcrepoClient {
 
     /**
      * Retrieve all header values
-     * 
+     *
      * @param response response from request
      * @return Map of all values for all response headers
      */
     private static Map<String, List<String>> getHeaders(final HttpResponse response) {
-        final Map<String, List<String>> headers = new HashMap<>();
+        final Map<String, List<String>> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         for (final Header header : response.getAllHeaders()) {
             final List<String> values;
@@ -293,7 +333,7 @@ public class FcrepoClient {
 
     /**
      * Builds an FcrepoClient
-     * 
+     *
      * @author bbpennel
      */
     public static class FcrepoClientBuilder {
@@ -308,7 +348,7 @@ public class FcrepoClient {
 
         /**
          * Add basic authentication credentials to this client
-         * 
+         *
          * @param username username for authentication
          * @param password password for authentication
          * @return the client builder
@@ -321,7 +361,7 @@ public class FcrepoClient {
 
         /**
          * Add an authentication scope to this client
-         * 
+         *
          * @param authHost authentication scope value
          * @return this builder
          */
@@ -333,7 +373,7 @@ public class FcrepoClient {
 
         /**
          * Client should throw exceptions when failures occur
-         * 
+         *
          * @return this builder
          */
         public FcrepoClientBuilder throwExceptionOnFailure() {
@@ -343,7 +383,7 @@ public class FcrepoClient {
 
         /**
          * Get the client
-         * 
+         *
          * @return the client constructed by this builder
          */
         public FcrepoClient build() {

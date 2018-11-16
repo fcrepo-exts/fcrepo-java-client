@@ -19,7 +19,7 @@ package org.fcrepo.client;
 
 /**
  * Header constants used in calls to the Fedora API
- * 
+ *
  * @author bbpennel
  */
 public class FedoraHeaderConstants {
@@ -63,6 +63,11 @@ public class FedoraHeaderConstants {
     public static final String DESTINATION = "Destination";
 
     public static final String LINK = "Link";
+
+    /**
+     * Datetime for a memento, either provided when creating the memento or returned when retrieving one.
+     */
+    public static final String MEMENTO_DATETIME = "Memento-Datetime";
 
     private FedoraHeaderConstants() {
     }
