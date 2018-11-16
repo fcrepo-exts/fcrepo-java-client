@@ -24,9 +24,11 @@ import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION_FILENA
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION_MODIFICATION_DATE;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION_SIZE;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
-import static org.fcrepo.client.FedoraHeaderConstants.DESCRIBED_BY;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.FedoraHeaderConstants.LOCATION;
+import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
+import static org.fcrepo.client.LinkHeaderConstants.DESCRIBEDBY_REL;
+import static org.fcrepo.client.FedoraTypes.MEMENTO_ORIGINAL_TYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -47,6 +49,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.core.Link;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
@@ -245,7 +249,7 @@ public class FcrepoResponseTest {
         try (FcrepoResponse response = new FcrepoResponse(URI.create("http://localhost/foo"), 201,
                 headers, null)) {
             assertEquals(create(location), response.getLocation());
-            assertEquals(describedBy, response.getLinkHeaders(DESCRIBED_BY).get(0).toString());
+            assertEquals(describedBy, response.getLinkHeaders(DESCRIBEDBY_REL).get(0).toString());
         }
     }
 
@@ -268,6 +272,23 @@ public class FcrepoResponseTest {
             assertEquals(disp.get(CONTENT_DISPOSITION_FILENAME), filename);
             assertEquals(disp.get(CONTENT_DISPOSITION_MODIFICATION_DATE), modDate);
             assertEquals(Long.parseLong(disp.get(CONTENT_DISPOSITION_SIZE)), size);
+        }
+    }
+
+    @Test
+    public void testHasType() throws Exception {
+        final Map<String, List<String>> headers = new HashMap<>();
+        final Link typeLink = Link.fromUri(MEMENTO_ORIGINAL_TYPE).rel(TYPE_REL).build();
+        headers.put(LINK, Arrays.asList(typeLink.toString()));
+
+        final URI uri = URI.create("http://localhost/foo");
+        try (final FcrepoResponse response = new FcrepoResponse(uri, 201, headers, new ByteArrayInputStream(""
+                .getBytes()))) {
+            assertTrue(response.hasType(MEMENTO_ORIGINAL_TYPE));
+            assertTrue(response.hasType(URI.create(MEMENTO_ORIGINAL_TYPE)));
+
+            assertFalse(response.hasType("http://example.com/some_type"));
+            assertFalse(response.hasType(URI.create("http://example.com/some_type")));
         }
     }
 }
