@@ -18,6 +18,8 @@
 package org.fcrepo.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 
@@ -53,34 +55,28 @@ public class FcrepoLinkTest {
         assertEquals(rel, link.getRel());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testLinkNoBrackets() {
         final String url = "http://localhost/rest/a/b/c";
         final String rel = "describedby";
         final String header = String.format("%s; rel=%s", url, rel);
-        final FcrepoLink link = new FcrepoLink(header);
-        assertEquals(null, link.getUri());
-        assertEquals(null, link.getRel());
+        new FcrepoLink(header);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testLinkBadBrackets1() {
         final String url = "http://localhost/rest/a/b/c";
         final String rel = "describedby";
         final String header = String.format("<%s; rel=%s", url, rel);
-        final FcrepoLink link = new FcrepoLink(header);
-        assertEquals(null, link.getUri());
-        assertEquals(null, link.getRel());
+        new FcrepoLink(header);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testLinkBadBrackets2() {
         final String url = "http://localhost/rest/a/b/c";
         final String rel = "describedby";
         final String header = String.format("%s>; rel=%s", url, rel);
-        final FcrepoLink link = new FcrepoLink(header);
-        assertEquals(null, link.getUri());
-        assertEquals(null, link.getRel());
+        new FcrepoLink(header);
     }
 
     @Test
@@ -90,15 +86,13 @@ public class FcrepoLinkTest {
         final String header = String.format("<%s>; rel=\"%s", url, rel);
         final FcrepoLink link = new FcrepoLink(header);
         assertEquals(URI.create(url), link.getUri());
-        assertEquals("\"" + rel, link.getRel());
+        assertNull("Incorrectly quoted parameter should return null", link.getRel());
     }
 
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testNullLink() {
-        final FcrepoLink link = new FcrepoLink(null);
-        assertEquals(null, link.getUri());
-        assertEquals(null, link.getRel());
+        new FcrepoLink(null);
     }
 
     @Test
@@ -106,19 +100,104 @@ public class FcrepoLinkTest {
         final FcrepoLink link = new FcrepoLink("<a>; rel=foo; bar=bar");
         assertEquals(URI.create("a"), link.getUri());
         assertEquals("foo", link.getRel());
+        assertEquals("bar", link.getParam("bar"));
     }
 
     @Test
     public void testMultipleMeta() {
         final FcrepoLink link = new FcrepoLink("<a>; rel=foo=bar");
         assertEquals(URI.create("a"), link.getUri());
-        assertEquals(null, link.getRel());
+        // = is an allowable character for the parameter value
+        assertEquals("foo=bar", link.getRel());
     }
 
     @Test
-    public void testNotMetaRel() {
+    public void testArbitraryParameter() {
         final FcrepoLink link = new FcrepoLink("<a>; foo=bar");
         assertEquals(URI.create("a"), link.getUri());
-        assertEquals(null, link.getRel());
+        assertNull(link.getRel());
+    }
+
+    @Test
+    public void testNoParameters() {
+        final FcrepoLink link = new FcrepoLink("<a>");
+        assertEquals(URI.create("a"), link.getUri());
+        assertNull(link.getRel());
+        assertNull(link.getType());
+    }
+
+    @Test
+    public void testFromUriString() {
+        final FcrepoLink link = FcrepoLink.fromUri("http://example.com/").build();
+        assertEquals(URI.create("http://example.com/"), link.getUri());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFromUriStringNull() {
+        FcrepoLink.fromUri((String) null).build();
+    }
+
+    @Test
+    public void testFromUri() {
+        final FcrepoLink link = FcrepoLink.fromUri(URI.create("http://example.com/")).build();
+        assertEquals(URI.create("http://example.com/"), link.getUri());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFromUriNull() {
+        FcrepoLink.fromUri((URI) null).build();
+    }
+
+    @Test
+    public void testBuilder() {
+        final FcrepoLink link = new FcrepoLink.Builder()
+                .uri("http://example.com/")
+                .rel("bar")
+                .type("foo")
+                .param("special", "val")
+                .build();
+
+        assertEquals(URI.create("http://example.com/"), link.getUri());
+        assertEquals("bar", link.getRel());
+        assertEquals("foo", link.getType());
+        assertEquals("val", link.getParam("special"));
+    }
+
+    @Test
+    public void testBuilderParamNeedingQuotes() {
+
+    }
+
+    @Test
+    public void testToStringNoParams() {
+        final String url = "http://localhost/rest/a/b/c";
+        final String header = String.format("<%s>", url);
+        final FcrepoLink link = new FcrepoLink(header);
+        assertEquals(header, link.toString());
+    }
+
+    @Test
+    public void testToStringWithParam() {
+        final String url = "http://localhost/rest/a/b/c";
+        final String rel = "describedby";
+        final String header = String.format("<%s>; rel=\"%s\"", url, rel);
+        final FcrepoLink link = new FcrepoLink(header);
+        assertEquals(header, link.toString());
+    }
+
+    @Test
+    public void testToStringMultipleParams() {
+        final FcrepoLink link = new FcrepoLink.Builder()
+                .uri("http://example.com/")
+                .rel("bar")
+                .type("foo")
+                .param("special", "val")
+                .build();
+
+        final String header = link.toString();
+        assertTrue("Stringified link did not contain URI", header.contains("<http://example.com/>"));
+        assertTrue("Stringified link did not contain rel", header.contains("; rel=\"bar\""));
+        assertTrue("Stringified link did not contain type", header.contains("; type=\"foo\""));
+        assertTrue("Stringified link did not contain param", header.contains("; special=\"val\""));
     }
 }

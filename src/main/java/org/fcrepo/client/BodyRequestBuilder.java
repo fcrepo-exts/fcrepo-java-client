@@ -21,9 +21,9 @@ import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
+import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
-import static javax.ws.rs.core.HttpHeaders.LINK;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,12 +32,10 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.StringJoiner;
 
-import javax.ws.rs.core.Link;
-import javax.ws.rs.core.Link.Builder;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.InputStreamEntity;
+import org.fcrepo.client.FcrepoLink.Builder;
 
 /**
  * Request builder which includes a body component
@@ -114,7 +112,7 @@ public abstract class BodyRequestBuilder extends
      */
     protected BodyRequestBuilder externalContent(final URI contentURI, final String contentType,
             final String handling) {
-        final Builder linkBuilder = Link.fromUri(contentURI)
+        final Builder linkBuilder = FcrepoLink.fromUri(contentURI)
             .rel(EXTERNAL_CONTENT_REL)
             .param(EXTERNAL_CONTENT_HANDLING, handling);
 

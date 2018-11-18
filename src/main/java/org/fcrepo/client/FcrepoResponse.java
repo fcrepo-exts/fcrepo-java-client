@@ -25,7 +25,6 @@ import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.FedoraHeaderConstants.LOCATION;
 import static org.fcrepo.client.LinkHeaderConstants.DESCRIBEDBY_REL;
 import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
-import javax.ws.rs.core.Link;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -245,7 +244,7 @@ public class FcrepoResponse implements Closeable {
      */
     public boolean hasType(final URI typeUri) {
         return getHeaderValues(LINK).stream()
-                .map(Link::valueOf)
+                .map(FcrepoLink::new)
                 .anyMatch(l -> l.getRel().equals(TYPE_REL) && l.getUri().equals(typeUri));
     }
 

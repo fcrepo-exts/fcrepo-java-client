@@ -50,8 +50,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.Link;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 import org.junit.Test;
@@ -278,7 +276,7 @@ public class FcrepoResponseTest {
     @Test
     public void testHasType() throws Exception {
         final Map<String, List<String>> headers = new HashMap<>();
-        final Link typeLink = Link.fromUri(MEMENTO_ORIGINAL_TYPE).rel(TYPE_REL).build();
+        final FcrepoLink typeLink = FcrepoLink.fromUri(MEMENTO_ORIGINAL_TYPE).rel(TYPE_REL).build();
         headers.put(LINK, Arrays.asList(typeLink.toString()));
 
         final URI uri = URI.create("http://localhost/foo");

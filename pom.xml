@@ -87,12 +87,6 @@
       <artifactId>httpclient</artifactId>
       <version>${httpclient.version}</version>
     </dependency>
-    
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-      <version>${javax.ws.rs-api.vesion}</version>
-    </dependency>
 
     <!-- logging -->
     <dependency>
