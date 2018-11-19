@@ -18,22 +18,21 @@
 package org.fcrepo.client;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.StringTokenizer;
 
 /**
  * A class representing the value of an HTTP Link header
  *
  * @author Aaron Coburn
+ * @author bbpennel
  */
 public class FcrepoLink {
 
-    // Pattern to match parameters in a link header, such as rel="acl" or type=unquoted, separated by ';'
-    private static Pattern LINK_PARAM_PATTERN = Pattern.compile("(\\w+) *= *(\"[^\"]+\"|[^\",;]+)\\s*(;|$)");
-
-    private static final String LINK_DELIM = ";";
+    private static final String PARAM_DELIM = ";";
 
     private static final String META_REL = "rel";
 
@@ -117,27 +116,49 @@ public class FcrepoLink {
      * Parse the value of a link header
      */
     private void parse(final String link) {
-        final String[] segments = link.split(LINK_DELIM, 2);
-        if (segments.length > 0) {
-            uri = getLinkPart(segments[0]);
-            // Parse the remainder of the header after the first ; as parameters
-            if (segments.length > 1) {
-                parseParams(segments[1]);
-            }
+        final int paramIndex = link.indexOf(PARAM_DELIM);
+        if (paramIndex == -1) {
+            uri = getLinkPart(link);
+        } else {
+            uri = getLinkPart(link.substring(0, paramIndex));
+            // Parse the remainder of the header after the URI as parameters
+            parseParams(link.substring(paramIndex + 1));
         }
     }
 
     private void parseParams(final String paramString) {
-        final Matcher paramMatcher = LINK_PARAM_PATTERN.matcher(paramString);
-        while (paramMatcher.find()) {
-            final String name = paramMatcher.group(1);
-            // May only specify parameters once, subsequent cases of the same param must be ignored
-            if (params.containsKey(name)) {
-                continue;
+        final StringTokenizer st = new StringTokenizer(paramString, ";\",", true);
+        while (st.hasMoreTokens()) {
+            // Read one parameter, until an unquoted ; is encountered or no more tokens
+            boolean inQuotes = false;
+            final StringBuilder paramBuilder = new StringBuilder();
+            while (st.hasMoreTokens()) {
+                final String token = st.nextToken();
+                if (token.equals("\"")) {
+                    inQuotes = !inQuotes;
+                } else if (!inQuotes && token.equals(";")) {
+                    break;
+                } else if (!inQuotes && token.equals(",")) {
+                    throw new IllegalArgumentException("Cannot parse link, contains unterminated quotes");
+                } else {
+                    paramBuilder.append(token);
+                }
             }
 
-            final String value = stripQuotes(paramMatcher.group(2));
-            params.put(name, value);
+            if (inQuotes) {
+                throw new IllegalArgumentException("Cannot parse link, contains unterminated quotes");
+            }
+
+            final String param = paramBuilder.toString();
+            final String[] components = param.split("=", 2);
+            if (components.length == 2) {
+                final String name = components[0].trim();
+                final String value = components[1].trim();
+                params.put(name, value);
+            } else {
+                throw new IllegalArgumentException(
+                        "Cannot parse link, improperly structured parameter encountered: " + param);
+            }
         }
     }
 
@@ -197,6 +218,67 @@ public class FcrepoLink {
             throw new IllegalArgumentException("URI is required");
         }
         return new Builder().uri(uri);
+    }
+
+    /**
+     * Simple parser to convert a link header containing a single link into an FcrepoLink object.
+     *
+     * @param link link header value.
+     * @return FcrepoLink representing the link
+     */
+    public static FcrepoLink valueOf(final String link) {
+        return new FcrepoLink(link);
+    }
+
+    /**
+     * Parser which converts a link header containing one or more links into a list of FcrepoLink objects.
+     *
+     * @param headerValue link header value.
+     * @return List containing an FcrepoLink for each link in the header value.
+     */
+    public static List<FcrepoLink> fromHeader(final String headerValue) {
+        final List<FcrepoLink> links = new ArrayList<>();
+
+        // States which indicate that a "," is not currently a link delimiter
+        boolean inQuotes = false;
+        boolean inUri = false;
+
+        // Split the header into separate links and create FcrepoLink objects for each
+        // Allows for reserved characters to appear within quoted values or the URI
+        StringBuilder currentLink = new StringBuilder();
+        final StringTokenizer st = new StringTokenizer(headerValue, ",\"<>", true);
+        while (st.hasMoreTokens()) {
+            final String token = st.nextToken();
+            if (token.equals(",")) {
+                // Link delimiter, add current link to result and start next link
+                if (!inQuotes && !inUri) {
+                    links.add(new FcrepoLink(currentLink.toString().trim()));
+                    currentLink = new StringBuilder();
+                    continue;
+                }
+            } else if (token.equals("\"") && !inUri) {
+                inQuotes = !inQuotes;
+            } else if (token.equals("<") && !inQuotes) {
+                inUri = true;
+            } else if (token.equals(">") && !inQuotes) {
+                inUri = false;
+            }
+
+            // Accumulate tokens composing this link
+            currentLink.append(token);
+        }
+
+        if (inQuotes) {
+            throw new IllegalArgumentException("Cannot parse link header, contains unterminated quotes: "
+                    + headerValue);
+        }
+        if (inUri) {
+            throw new IllegalArgumentException("Cannot parse link header, contains unterminated URI: "
+                    + headerValue);
+        }
+
+        links.add(new FcrepoLink(currentLink.toString().trim()));
+        return links;
     }
 
     /**
