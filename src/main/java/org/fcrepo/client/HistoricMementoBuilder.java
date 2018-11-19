@@ -51,8 +51,8 @@ public class HistoricMementoBuilder extends PostBuilder {
     /**
      * Instantiate builder.
      *
-     * @param uri
-     * @param client
+     * @param uri uri of the resource this request is being made to
+     * @param client the client
      * @param mementoDatetime RFC1123 formatted date to use for the memento-datetime
      */
     public HistoricMementoBuilder(final URI uri, final FcrepoClient client, final String mementoDatetime) {

@@ -96,9 +96,8 @@ public class FcrepoClient {
      *
      * @param url the URL of the resource to which to PUT
      * @return a put request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public PutBuilder put(final URI url) throws FcrepoOperationFailedException {
+    public PutBuilder put(final URI url) {
         return new PutBuilder(url, this);
     }
 
@@ -107,9 +106,8 @@ public class FcrepoClient {
      *
      * @param url the URL of the resource to which to PATCH
      * @return a patch request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public PatchBuilder patch(final URI url) throws FcrepoOperationFailedException {
+    public PatchBuilder patch(final URI url) {
         return new PatchBuilder(url, this);
     }
 
@@ -118,9 +116,8 @@ public class FcrepoClient {
      *
      * @param url the URL of the resource to which to POST
      * @return a post request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public PostBuilder post(final URI url) throws FcrepoOperationFailedException {
+    public PostBuilder post(final URI url) {
         return new PostBuilder(url, this);
     }
 
@@ -129,9 +126,8 @@ public class FcrepoClient {
      *
      * @param url the URL of the LDPCv in which to create the LDPRm.
      * @return a memento creation request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public OriginalMementoBuilder createMemento(final URI url) throws FcrepoOperationFailedException {
+    public OriginalMementoBuilder createMemento(final URI url) {
         return new OriginalMementoBuilder(url, this);
     }
 
@@ -142,10 +138,8 @@ public class FcrepoClient {
      * @param url the URL of the LDPCv in which to create the LDPRm.
      * @param mementoInstant the memento datetime as an Instant.
      * @return a memento creation request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public HistoricMementoBuilder createMemento(final URI url, final Instant mementoInstant)
-            throws FcrepoOperationFailedException {
+    public HistoricMementoBuilder createMemento(final URI url, final Instant mementoInstant) {
         return new HistoricMementoBuilder(url, this, mementoInstant);
     }
 
@@ -156,10 +150,8 @@ public class FcrepoClient {
      * @param url the URL of the LDPCv in which to create the LDPRm.
      * @param mementoDatetime the RFC1123 formatted memento datetime.
      * @return a memento creation request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public HistoricMementoBuilder createMemento(final URI url, final String mementoDatetime)
-            throws FcrepoOperationFailedException {
+    public HistoricMementoBuilder createMemento(final URI url, final String mementoDatetime) {
         return new HistoricMementoBuilder(url, this, mementoDatetime);
     }
 
@@ -168,9 +160,8 @@ public class FcrepoClient {
      *
      * @param url the URL of the resource to which to DELETE
      * @return a delete request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public DeleteBuilder delete(final URI url) throws FcrepoOperationFailedException {
+    public DeleteBuilder delete(final URI url) {
         return new DeleteBuilder(url, this);
     }
 
@@ -180,9 +171,8 @@ public class FcrepoClient {
      * @param source url of the resource to copy
      * @param destination url of the location for the copy
      * @return a copy request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public CopyBuilder copy(final URI source, final URI destination) throws FcrepoOperationFailedException {
+    public CopyBuilder copy(final URI source, final URI destination) {
         return new CopyBuilder(source, destination, this);
     }
 
@@ -192,9 +182,8 @@ public class FcrepoClient {
      * @param source url of the resource to move
      * @param destination url of the new location for the resource
      * @return a move request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public MoveBuilder move(final URI source, final URI destination) throws FcrepoOperationFailedException {
+    public MoveBuilder move(final URI source, final URI destination) {
         return new MoveBuilder(source, destination, this);
     }
 
@@ -203,9 +192,8 @@ public class FcrepoClient {
      *
      * @param url the URL of the resource to which to GET
      * @return a get request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public GetBuilder get(final URI url) throws FcrepoOperationFailedException {
+    public GetBuilder get(final URI url) {
         return new GetBuilder(url, this);
     }
 
@@ -214,9 +202,8 @@ public class FcrepoClient {
      *
      * @param url the URL of the resource to make the HEAD request on.
      * @return a HEAD request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public HeadBuilder head(final URI url) throws FcrepoOperationFailedException {
+    public HeadBuilder head(final URI url) {
         return new HeadBuilder(url, this);
     }
 
@@ -225,9 +212,8 @@ public class FcrepoClient {
      *
      * @param url the URL of the resource to make the OPTIONS request on.
      * @return a OPTIONS request builder object
-     * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public OptionsBuilder options(final URI url) throws FcrepoOperationFailedException {
+    public OptionsBuilder options(final URI url) {
         return new OptionsBuilder(url, this);
     }
 

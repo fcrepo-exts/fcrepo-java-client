@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.Model;
@@ -57,12 +58,11 @@ public class VersioningIT extends AbstractResourceIT {
 
     private static final Property DC_TITLE = createProperty("http://purl.org/dc/elements/1.1/title");
 
-    private final String HISTORIC_DATETIME =
-            MEMENTO_RFC_1123_FORMATTER.format(LocalDateTime.of(2000, 1, 1, 00, 00).atZone(ZoneOffset.UTC));
+    private final ZonedDateTime HISTORIC_DATETIME = LocalDateTime.of(2000, 1, 1, 0, 0).atZone(ZoneOffset.UTC);
 
-    protected URI url;
+    private final String HISTORIC_TIMESTAMP = MEMENTO_RFC_1123_FORMATTER.format(HISTORIC_DATETIME);
 
-    public VersioningIT() throws Exception {
+    public VersioningIT() {
         super();
 
         client = FcrepoClient.client()
@@ -108,7 +108,7 @@ public class VersioningIT extends AbstractResourceIT {
         // Create memento of the binary
         final String mementoType = "text/old";
         final String mementoContent = "Hello old world";
-        final FcrepoResponse binMementoResp = client.createMemento(timemapURI, HISTORIC_DATETIME)
+        final FcrepoResponse binMementoResp = client.createMemento(timemapURI, HISTORIC_TIMESTAMP)
                 .body(new ByteArrayInputStream(mementoContent.getBytes()), mementoType)
                 .perform();
         assertEquals(CREATED.getStatusCode(), binMementoResp.getStatusCode());
@@ -127,7 +127,7 @@ public class VersioningIT extends AbstractResourceIT {
         resc.removeAll(RdfLexicon.HAS_MIME_TYPE);
         resc.addLiteral(RdfLexicon.HAS_MIME_TYPE, mementoType);
 
-        final FcrepoResponse descMementoResp = client.createMemento(descTimeMapURI, HISTORIC_DATETIME)
+        final FcrepoResponse descMementoResp = client.createMemento(descTimeMapURI, HISTORIC_TIMESTAMP)
                 .body(modelToInputStream(originalModel), "text/turtle")
                 .perform();
         assertEquals(CREATED.getStatusCode(), descMementoResp.getStatusCode());
@@ -141,7 +141,7 @@ public class VersioningIT extends AbstractResourceIT {
         assertEquals(mementoType, getBinMementoResp.getContentType());
         assertTrue("Retrieved object must be a memento", getBinMementoResp.hasType(MEMENTO_TYPE));
         assertEquals("Memento did not have expected datetime",
-                HISTORIC_DATETIME, getBinMementoResp.getHeaderValue(MEMENTO_DATETIME));
+                HISTORIC_TIMESTAMP, getBinMementoResp.getHeaderValue(MEMENTO_DATETIME));
 
         // TODO replace with datetime negotiation once implemented in client FCREPO-2945
         final URI mementoDescURI = URI.create(binaryMementoURI.toString().replaceAll("fcr:versions",
@@ -149,7 +149,7 @@ public class VersioningIT extends AbstractResourceIT {
         // Verify that the description memento matches expectations
         final FcrepoResponse getResp = client.get(mementoDescURI).perform();
         assertEquals("Memento did not have expected datetime",
-                HISTORIC_DATETIME, getResp.getHeaderValue(MEMENTO_DATETIME));
+                HISTORIC_TIMESTAMP, getResp.getHeaderValue(MEMENTO_DATETIME));
         final Model respModel = getResponseModel(getResp);
         assertTrue("Memento must contain provided property",
                 respModel.contains(createResource(originalURI.toString()), DC_TITLE, titleValue));
@@ -173,7 +173,7 @@ public class VersioningIT extends AbstractResourceIT {
                 .addLiteral(DC_TITLE, titleValue);
 
         // Create historic memento with updated model
-        final FcrepoResponse mementoResp = client.createMemento(timemapURI, HISTORIC_DATETIME)
+        final FcrepoResponse mementoResp = client.createMemento(timemapURI, HISTORIC_DATETIME.toInstant())
                 .body(modelToInputStream(originalModel), "text/turtle")
                 .perform();
         assertEquals(CREATED.getStatusCode(), mementoResp.getStatusCode());
@@ -183,13 +183,13 @@ public class VersioningIT extends AbstractResourceIT {
         final FcrepoResponse getResp = client.get(mementoURI).perform();
         assertTrue("Retrieved object must be a memento", getResp.hasType(MEMENTO_TYPE));
         assertEquals("Memento did not have expected datetime",
-                HISTORIC_DATETIME, getResp.getHeaderValue(MEMENTO_DATETIME));
+                HISTORIC_TIMESTAMP, getResp.getHeaderValue(MEMENTO_DATETIME));
         final Model respModel = getResponseModel(getResp);
         assertTrue("Memento must contain provided property",
                 respModel.contains(null, DC_TITLE, titleValue));
     }
 
-    private InputStream modelToInputStream(final Model model) throws Exception {
+    private InputStream modelToInputStream(final Model model) {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         model.write(out, "text/turtle");
         return new ByteArrayInputStream(out.toByteArray());

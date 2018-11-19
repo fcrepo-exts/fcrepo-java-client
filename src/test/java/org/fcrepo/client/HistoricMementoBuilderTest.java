@@ -50,7 +50,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class HistoricMementoBuilderTest {
 
     private final String HISTORIC_DATETIME =
-            MEMENTO_RFC_1123_FORMATTER.format(LocalDateTime.of(2000, 1, 1, 00, 00).atZone(ZoneOffset.UTC));
+            MEMENTO_RFC_1123_FORMATTER.format(LocalDateTime.of(2000, 1, 1, 0, 0).atZone(ZoneOffset.UTC));
 
     @Mock
     private FcrepoClient client;
