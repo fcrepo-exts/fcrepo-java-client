@@ -39,6 +39,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 /**
  * @author bbpennel
  */
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class MoveBuilderTest {
 
