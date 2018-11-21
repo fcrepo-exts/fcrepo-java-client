@@ -21,10 +21,10 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
-import static org.fcrepo.client.FedoraHeaderConstants.DESCRIBED_BY;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.FedoraHeaderConstants.LOCATION;
-
+import static org.fcrepo.client.LinkHeaderConstants.DESCRIBEDBY_REL;
+import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -227,6 +227,28 @@ public class FcrepoResponse implements Closeable {
     }
 
     /**
+     * Return true if the response represents a resource with the given type
+     *
+     * @param typeString String containing the URI of the type
+     * @return true if the type is present.
+     */
+    public boolean hasType(final String typeString) {
+        return hasType(URI.create(typeString));
+    }
+
+    /**
+     * Return true if the response represents a resource with the given type
+     *
+     * @param typeUri URI of the type
+     * @return true if the type is present.
+     */
+    public boolean hasType(final URI typeUri) {
+        return getHeaderValues(LINK).stream()
+                .map(FcrepoLink::new)
+                .anyMatch(l -> l.getRel().equals(TYPE_REL) && l.getUri().equals(typeUri));
+    }
+
+    /**
      * location getter
      *
      * @return the location of a related resource
@@ -240,7 +262,7 @@ public class FcrepoResponse implements Closeable {
             }
             // Fall back to retrieving from the described by link
             if (location == null) {
-                final List<URI> links = getLinkHeaders(DESCRIBED_BY);
+                final List<URI> links = getLinkHeaders(DESCRIBEDBY_REL);
                 if (links != null && links.size() == 1) {
                     location = links.get(0);
                 }

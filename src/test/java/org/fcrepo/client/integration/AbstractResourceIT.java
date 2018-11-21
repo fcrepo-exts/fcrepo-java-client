@@ -20,7 +20,10 @@ package org.fcrepo.client.integration;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.fcrepo.client.FcrepoClient;
+import org.fcrepo.client.FcrepoResponse;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -49,5 +52,11 @@ public abstract class AbstractResourceIT {
         connectionManager.setMaxTotal(Integer.MAX_VALUE);
         connectionManager.setDefaultMaxPerRoute(20);
         connectionManager.closeIdleConnections(3, TimeUnit.SECONDS);
+    }
+
+    protected Model getResponseModel(final FcrepoResponse resp) {
+        final Model model = ModelFactory.createDefaultModel();
+        model.read(resp.getBody(), null, "text/turtle");
+        return model;
     }
 }

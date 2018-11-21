@@ -38,8 +38,6 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import java.net.URI;
 
-import javax.ws.rs.core.Link;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -176,7 +174,7 @@ public class PostBuilderTest {
 
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
 
-        final Link extLink = Link.valueOf(request.getFirstHeader(LINK).getValue());
+        final FcrepoLink extLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
         assertEquals(EXTERNAL_CONTENT_REL, extLink.getRel());
         assertEquals(PROXY, extLink.getParams().get(EXTERNAL_CONTENT_HANDLING));
         assertEquals("plain/text", extLink.getType());
@@ -192,7 +190,7 @@ public class PostBuilderTest {
 
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
 
-        final Link extLink = Link.valueOf(request.getFirstHeader(LINK).getValue());
+        final FcrepoLink extLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
         assertEquals(EXTERNAL_CONTENT_REL, extLink.getRel());
         assertEquals(PROXY, extLink.getParams().get(EXTERNAL_CONTENT_HANDLING));
         assertNull(extLink.getType());
