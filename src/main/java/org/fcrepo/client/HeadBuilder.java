@@ -17,6 +17,9 @@
  */
 package org.fcrepo.client;
 
+import static org.fcrepo.client.FedoraHeaderConstants.CACHE_CONTROL;
+import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
+
 import java.net.URI;
 
 import org.apache.http.client.config.RequestConfig;
@@ -24,7 +27,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 
 /**
  * Builds a HEAD request to retrieve resource headers.
- * 
+ *
  * @author bbpennel
  */
 public class HeadBuilder extends
@@ -32,7 +35,7 @@ public class HeadBuilder extends
 
     /**
      * Instantiate builder
-     * 
+     *
      * @param uri uri request will be issued to
      * @param client the client
      */
@@ -53,6 +56,30 @@ public class HeadBuilder extends
      */
     public HeadBuilder disableRedirects() {
         request.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build());
+        return this;
+    }
+
+    /**
+     * Provide a Want-Digest header for this request
+     *
+     * @param value header value, following the syntax defined in:
+     *      https://tools.ietf.org/html/rfc3230#section-4.3.1
+     * @return this builder
+     */
+    public HeadBuilder wantDigest(final String value) {
+        if (value != null) {
+            request.setHeader(WANT_DIGEST, value);
+        }
+        return this;
+    }
+
+    /**
+     * Provide a Cache-Control header with value "no-cache"
+     *
+     * @return this builder
+     */
+    public HeadBuilder noCache() {
+        request.setHeader(CACHE_CONTROL, "no-cache");
         return this;
     }
 }

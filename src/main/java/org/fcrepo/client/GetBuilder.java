@@ -18,10 +18,12 @@
 package org.fcrepo.client;
 
 import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT;
+import static org.fcrepo.client.FedoraHeaderConstants.CACHE_CONTROL;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_NONE_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.FedoraHeaderConstants.RANGE;
+import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
 
 import java.net.URI;
 import java.util.List;
@@ -33,15 +35,14 @@ import org.apache.http.client.methods.HttpRequestBase;
 
 /**
  * Builds a GET request to retrieve the content of a resource from the Fedora HTTP API
- * 
+ *
  * @author bbpennel
  */
-public class GetBuilder extends
-        RequestBuilder {
+public class GetBuilder extends RequestBuilder {
 
     /**
      * Construct a GetBuilder
-     * 
+     *
      * @param uri the target
      * @param client the client for this request
      */
@@ -56,7 +57,7 @@ public class GetBuilder extends
 
     /**
      * Add the accept header to this request to negotiate the response format.
-     * 
+     *
      * @param mediaType media type to set as the accept header. It should be a value from one of the allowed RDF
      *        source formats supported by Fedora.
      * @return this builder
@@ -70,7 +71,7 @@ public class GetBuilder extends
 
     /**
      * Set the byte range of content to retrieve
-     * 
+     *
      * @param rangeStart beginning byte index
      * @param rangeEnd ending byte index
      * @return this builder
@@ -93,7 +94,7 @@ public class GetBuilder extends
     /**
      * Set the prefer header for this request to minimal, to indicate that only triples directly related to a resource
      * should be returned.
-     * 
+     *
      * @return this builder
      */
     public GetBuilder preferMinimal() {
@@ -114,7 +115,7 @@ public class GetBuilder extends
     /**
      * Set the prefer header for this request to representation, to indicate that links to other resources and their
      * properties should also be included.
-     * 
+     *
      * @return this builder
      */
     public GetBuilder preferRepresentation() {
@@ -126,7 +127,7 @@ public class GetBuilder extends
      * Set the prefer header for this request to representation, to indicate that links to other resources and their
      * properties should also be included. The set of properties returned can be further specified by providing lists
      * of LDP defined preferences to omit or include.
-     * 
+     *
      * @param includeUris URIs of LDP defined preferences to include
      * @param omitUris URIs of LDP defined preferences to omit
      * @return this builder
@@ -159,7 +160,7 @@ public class GetBuilder extends
 
     /**
      * Provide an etag for the if-none-match header for this request
-     * 
+     *
      * @param etag etag to provide as the if-none-match header
      * @return this builder
      */
@@ -172,7 +173,7 @@ public class GetBuilder extends
 
     /**
      * Provide a if-last-modified header for this request
-     * 
+     *
      * @param lastModified date to provided as the if-modified-since header
      * @return this builder
      */
@@ -180,6 +181,30 @@ public class GetBuilder extends
         if (lastModified != null) {
             request.setHeader(IF_MODIFIED_SINCE, lastModified);
         }
+        return this;
+    }
+
+    /**
+     * Provide a Want-Digest header for this request
+     *
+     * @param value header value, following the syntax defined in:
+     *      https://tools.ietf.org/html/rfc3230#section-4.3.1
+     * @return this builder
+     */
+    public GetBuilder wantDigest(final String value) {
+        if (value != null) {
+            request.setHeader(WANT_DIGEST, value);
+        }
+        return this;
+    }
+
+    /**
+     * Provide a Cache-Control header with value "no-cache"
+     *
+     * @return this builder
+     */
+    public GetBuilder noCache() {
+        request.setHeader(CACHE_CONTROL, "no-cache");
         return this;
     }
 }
