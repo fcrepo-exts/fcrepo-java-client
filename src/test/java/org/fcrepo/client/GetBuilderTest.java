@@ -19,10 +19,12 @@ package org.fcrepo.client;
 
 import static java.net.URI.create;
 import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT;
+import static org.fcrepo.client.FedoraHeaderConstants.CACHE_CONTROL;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_NONE_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.FedoraHeaderConstants.RANGE;
+import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -156,6 +158,22 @@ public class GetBuilderTest {
     public void testDisableRedirects() throws Exception {
         testBuilder.disableRedirects();
         assertFalse(testBuilder.request.getConfig().isRedirectsEnabled());
+    }
+
+    @Test
+    public void testWantDigest() throws Exception {
+        testBuilder.wantDigest("md5").perform();
+
+        final HttpRequestBase request = getRequest();
+        assertEquals("md5", request.getFirstHeader(WANT_DIGEST).getValue());
+    }
+
+    @Test
+    public void testNoCache() throws Exception {
+        testBuilder.noCache().perform();
+
+        final HttpRequestBase request = getRequest();
+        assertEquals("no-cache", request.getFirstHeader(CACHE_CONTROL).getValue());
     }
 
     private HttpRequestBase getRequest() throws FcrepoOperationFailedException {

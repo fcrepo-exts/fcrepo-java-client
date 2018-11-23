@@ -18,7 +18,10 @@
 package org.fcrepo.client;
 
 import static java.net.URI.create;
+import static org.fcrepo.client.FedoraHeaderConstants.CACHE_CONTROL;
+import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
 import static org.fcrepo.client.TestUtils.baseUrl;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -51,6 +55,9 @@ public class HeadBuilderTest {
 
     private URI uri;
 
+    @Captor
+    private ArgumentCaptor<HttpRequestBase> requestCaptor;
+
     @Before
     public void setUp() throws Exception {
         when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
@@ -63,7 +70,7 @@ public class HeadBuilderTest {
     @Test
     public void testHead() throws Exception {
         testBuilder.perform();
-        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
     }
 
@@ -71,5 +78,23 @@ public class HeadBuilderTest {
     public void testDisableRedirects() throws Exception {
         testBuilder.disableRedirects();
         assertFalse(testBuilder.request.getConfig().isRedirectsEnabled());
+    }
+
+    @Test
+    public void testWantDigest() throws Exception {
+        testBuilder.wantDigest("md5").perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+        final HttpRequestBase request = requestCaptor.getValue();
+        assertEquals("md5", request.getFirstHeader(WANT_DIGEST).getValue());
+    }
+
+    @Test
+    public void testNoCache() throws Exception {
+        testBuilder.noCache().perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+        final HttpRequestBase request = requestCaptor.getValue();
+        assertEquals("no-cache", request.getFirstHeader(CACHE_CONTROL).getValue());
     }
 }

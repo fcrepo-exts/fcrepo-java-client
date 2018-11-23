@@ -64,6 +64,10 @@ public class FedoraHeaderConstants {
 
     public static final String LINK = "Link";
 
+    public static final String WANT_DIGEST = "Want-Digest";
+
+    public static final String CACHE_CONTROL = "Cache-Control";
+
     /**
      * Datetime for a memento, either provided when creating the memento or returned when retrieving one.
      */

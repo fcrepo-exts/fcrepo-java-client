@@ -30,6 +30,7 @@ import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
 import static javax.ws.rs.core.Response.Status.TEMPORARY_REDIRECT;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION_FILENAME;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
+import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.ETAG;
 import static org.fcrepo.client.FedoraHeaderConstants.LAST_MODIFIED;
 import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
@@ -47,6 +48,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.core.EntityTag;
@@ -58,6 +60,7 @@ import org.fcrepo.client.ExternalContentHandling;
 import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoOperationFailedException;
 import org.fcrepo.client.FcrepoResponse;
+import org.fcrepo.client.HeaderHelpers;
 import org.jgroups.util.UUID;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -502,6 +505,28 @@ public class FcrepoClientIT extends AbstractResourceIT {
     }
 
     @Test
+    public void testGetWantDigest() throws Exception {
+        // Creating a binary for retrieval
+        final String mimetype = "text/plain";
+        final String bodyContent = "Hello world";
+        final FcrepoResponse response = client.post(new URI(serverAddress))
+                .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
+                .perform();
+
+        final URI url = response.getLocation();
+
+        // Request md5 digest with caching disabled
+        final FcrepoResponse getResp = client.get(url)
+                .wantDigest("md5")
+                .noCache()
+                .perform();
+        assertEquals(OK.getStatusCode(), getResp.getStatusCode());
+
+        final String digest = getResp.getHeaderValue(DIGEST);
+        assertTrue("Did not contain md5", digest.contains("md5=3e25960a79dbc69b674cd4ec67a72c62"));
+    }
+
+    @Test
     public void testHead() throws Exception {
         final FcrepoResponse response = create();
         final FcrepoResponse headResp = client.head(url).perform();
@@ -509,6 +534,36 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals(OK.getStatusCode(), headResp.getStatusCode());
         assertEquals(response.getHeaderValue(ETAG), headResp.getHeaderValue(ETAG));
         assertNotNull(headResp.getHeaderValue("Allow"));
+    }
+
+    @Test
+    public void testHeadWantDigest() throws Exception {
+        // Creating a binary for retrieval
+        final String mimetype = "text/plain";
+        final String bodyContent = "Hello world";
+        final FcrepoResponse response = client.post(new URI(serverAddress))
+                .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
+                .perform();
+
+        final URI url = response.getLocation();
+
+        final Map<String, Double> qualityMap = new HashMap<>();
+        qualityMap.put("md5", 1.0);
+        qualityMap.put("sha", 1.0);
+        qualityMap.put("sha-256", 0.4);
+
+        final String wantDigest = HeaderHelpers.formatQualityValues(qualityMap);
+        // Request multiple digests
+        final FcrepoResponse getResp = client.head(url)
+                .wantDigest(wantDigest)
+                .perform();
+        assertEquals(OK.getStatusCode(), getResp.getStatusCode());
+
+        final String digest = getResp.getHeaderValue(DIGEST);
+        assertTrue("Did not contain md5", digest.contains("md5=3e25960a79dbc69b674cd4ec67a72c62"));
+        assertTrue("Did not contain sha1", digest.contains("sha=7b502c3a1f48c8609ae212cdfb639dee39673f5e"));
+        assertTrue("Did not contain sha256", digest
+                .contains("sha-256=64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c"));
     }
 
     @Test
