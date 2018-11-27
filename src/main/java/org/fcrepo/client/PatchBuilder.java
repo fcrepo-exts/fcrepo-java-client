@@ -25,7 +25,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 /**
  * Builds a PUT request for interacting with the Fedora HTTP API in order to modify the triples associated with a
  * resource with SPARQL-Update.
- * 
+ *
  * @author bbpennel
  */
 public class PatchBuilder extends BodyRequestBuilder {
@@ -34,7 +34,7 @@ public class PatchBuilder extends BodyRequestBuilder {
 
     /**
      * Instantiate builder
-     * 
+     *
      * @param uri uri of the resource this request is being made to
      * @param client the client
      */
@@ -48,10 +48,19 @@ public class PatchBuilder extends BodyRequestBuilder {
     }
 
     /**
-     * Patch defaults to a sparql update
+     * Add a body to this request from a stream, with application/sparql-update as its content type
+     *
+     * @param stream InputStream of the content to be sent to the server
+     * @return this builder
      */
+    @Override
     public PatchBuilder body(final InputStream stream) {
         return (PatchBuilder) super.body(stream, SPARQL_UPDATE);
+    }
+
+    @Override
+    public PatchBuilder body(final InputStream stream, final String contentType) {
+        return (PatchBuilder) super.body(stream, contentType);
     }
 
     @Override
