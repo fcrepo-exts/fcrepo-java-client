@@ -108,6 +108,11 @@ public class PutBuilder extends BodyRequestBuilder {
         return (PutBuilder) super.digestSha256(digest);
     }
 
+    @Override
+    public PutBuilder addInteractionModel(final String interactionModelUri) {
+        return (PutBuilder) super.addInteractionModel(interactionModelUri);
+    }
+
     /**
      * Provide a content disposition header which will be used as the filename
      *

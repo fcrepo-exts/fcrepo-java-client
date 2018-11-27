@@ -23,8 +23,10 @@ import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.SLUG;
+import static org.fcrepo.client.FedoraTypes.LDP_DIRECT_CONTAINER;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
+import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
 import static org.fcrepo.client.ExternalContentHandling.PROXY;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
@@ -194,5 +196,19 @@ public class PostBuilderTest {
         assertEquals(EXTERNAL_CONTENT_REL, extLink.getRel());
         assertEquals(PROXY, extLink.getParams().get(EXTERNAL_CONTENT_HANDLING));
         assertNull(extLink.getType());
+    }
+
+    @Test
+    public void testAddInteractionModel() throws Exception {
+        testBuilder.addInteractionModel(LDP_DIRECT_CONTAINER)
+                .perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+
+        final FcrepoLink interLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
+        assertEquals(TYPE_REL, interLink.getRel());
+        assertEquals(LDP_DIRECT_CONTAINER, interLink.getUri().toString());
     }
 }

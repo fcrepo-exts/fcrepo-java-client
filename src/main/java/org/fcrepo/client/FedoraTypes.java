@@ -24,6 +24,18 @@ package org.fcrepo.client;
  */
 public class FedoraTypes {
 
+    // Type representing an LDP resource
+    public static final String LDP_RESOURCE = "http://www.w3.org/ns/ldp#Resource";
+
+    // Type representing an LDP non-RDF source/binary
+    public static final String LDP_NON_RDF_SOURCE = "http://www.w3.org/ns/ldp#NonRDFSource";
+
+    // Type representing an LDP direct container
+    public static final String LDP_DIRECT_CONTAINER = "http://www.w3.org/ns/ldp#DirectContainer";
+
+    // Type representing an LDP indirect container
+    public static final String LDP_INDIRECT_CONTAINER = "http://www.w3.org/ns/ldp#IndirectContainer";
+
     // Type representing a Memento TimeGate
     public final static String MEMENTO_TIME_GATE_TYPE = "http://mementoweb.org/ns#TimeGate";
 

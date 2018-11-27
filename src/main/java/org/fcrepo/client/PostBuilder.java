@@ -19,7 +19,6 @@ package org.fcrepo.client;
 
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.SLUG;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,6 +95,11 @@ public class PostBuilder extends BodyRequestBuilder {
     @Override
     public PostBuilder digestSha256(final String digest) {
         return (PostBuilder) super.digestSha256(digest);
+    }
+
+    @Override
+    public PostBuilder addInteractionModel(final String interactionModelUri) {
+        return (PostBuilder) super.addInteractionModel(interactionModelUri);
     }
 
     /**
