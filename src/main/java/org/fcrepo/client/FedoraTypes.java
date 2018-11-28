@@ -30,6 +30,9 @@ public class FedoraTypes {
     // Type representing an LDP non-RDF source/binary
     public static final String LDP_NON_RDF_SOURCE = "http://www.w3.org/ns/ldp#NonRDFSource";
 
+    // Type representing an LDP basic container
+    public static final String LDP_BASIC_CONTAINER = "http://www.w3.org/ns/ldp#BasicContainer";
+
     // Type representing an LDP direct container
     public static final String LDP_DIRECT_CONTAINER = "http://www.w3.org/ns/ldp#DirectContainer";
 
