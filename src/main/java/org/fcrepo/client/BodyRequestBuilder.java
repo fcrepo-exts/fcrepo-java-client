@@ -22,6 +22,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
+import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
 
@@ -183,6 +184,22 @@ public abstract class BodyRequestBuilder extends
      */
     protected BodyRequestBuilder digestSha256(final String digest) {
         return digest(digest, "sha256");
+    }
+
+    /**
+     * Add an interaction model to the request
+     *
+     * @param interactionModelUri URI of the interaction model
+     * @return this builder
+     */
+    protected BodyRequestBuilder addInteractionModel(final String interactionModelUri) {
+        if (interactionModelUri != null) {
+            final FcrepoLink link = FcrepoLink.fromUri(interactionModelUri)
+                    .rel(TYPE_REL)
+                    .build();
+            request.addHeader(LINK, link.toString());
+        }
+        return this;
     }
 
     /**

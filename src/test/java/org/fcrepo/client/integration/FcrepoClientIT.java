@@ -33,6 +33,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.ETAG;
 import static org.fcrepo.client.FedoraHeaderConstants.LAST_MODIFIED;
+import static org.fcrepo.client.FedoraTypes.LDP_DIRECT_CONTAINER;
 import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
 import static org.junit.Assert.assertEquals;
@@ -206,6 +207,20 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .perform();
 
         assertEquals("Invalid checksum was not rejected", CONFLICT.getStatusCode(), response.getStatusCode());
+    }
+
+    @Test
+    public void testPostDirectContainer() throws Exception {
+        final FcrepoResponse response = client.post(new URI(serverAddress))
+                .addInteractionModel(LDP_DIRECT_CONTAINER)
+                .perform();
+
+        final int status = response.getStatusCode();
+
+        assertEquals("Didn't get a CREATED response!", CREATED.getStatusCode(), status);
+
+        final FcrepoResponse getResponse = client.get(response.getLocation()).perform();
+        assertTrue("Did not have ldp:DirectContainer type", getResponse.hasType(LDP_DIRECT_CONTAINER));
     }
 
     @Test
