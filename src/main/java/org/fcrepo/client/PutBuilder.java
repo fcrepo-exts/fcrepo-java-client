@@ -113,6 +113,11 @@ public class PutBuilder extends BodyRequestBuilder {
         return (PutBuilder) super.addInteractionModel(interactionModelUri);
     }
 
+    @Override
+    protected PutBuilder linkAcl(final String aclUri) {
+        return (PutBuilder) super.linkAcl(aclUri);
+    }
+
     /**
      * Provide a content disposition header which will be used as the filename
      *

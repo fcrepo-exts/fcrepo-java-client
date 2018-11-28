@@ -24,6 +24,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.SLUG;
 import static org.fcrepo.client.FedoraTypes.LDP_DIRECT_CONTAINER;
+import static org.fcrepo.client.LinkHeaderConstants.ACL_REL;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
 import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
@@ -210,5 +211,19 @@ public class PostBuilderTest {
         final FcrepoLink interLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
         assertEquals(TYPE_REL, interLink.getRel());
         assertEquals(LDP_DIRECT_CONTAINER, interLink.getUri().toString());
+    }
+
+    @Test
+    public void testLinkAcl() throws Exception {
+        testBuilder.linkAcl("http://localhost/acl")
+                .perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+
+        final FcrepoLink aclLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
+        assertEquals(ACL_REL, aclLink.getRel());
+        assertEquals("http://localhost/acl", aclLink.getUri().toString());
     }
 }
