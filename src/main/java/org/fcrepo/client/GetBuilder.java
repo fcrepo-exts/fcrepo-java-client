@@ -18,19 +18,15 @@
 package org.fcrepo.client;
 
 import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT;
-import static org.fcrepo.client.FedoraHeaderConstants.CACHE_CONTROL;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_NONE_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.FedoraHeaderConstants.RANGE;
-import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
-
 import java.net.URI;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**
@@ -38,7 +34,7 @@ import org.apache.http.client.methods.HttpRequestBase;
  *
  * @author bbpennel
  */
-public class GetBuilder extends RequestBuilder {
+public class GetBuilder extends RetrieveRequestBuilder {
 
     /**
      * Construct a GetBuilder
@@ -99,16 +95,6 @@ public class GetBuilder extends RequestBuilder {
      */
     public GetBuilder preferMinimal() {
         request.setHeader(PREFER, buildPrefer("minimal", null, null));
-        return this;
-    }
-
-    /**
-     * Disable following redirects.
-     *
-     * @return this builder
-     */
-    public GetBuilder disableRedirects() {
-        request.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build());
         return this;
     }
 
@@ -184,27 +170,18 @@ public class GetBuilder extends RequestBuilder {
         return this;
     }
 
-    /**
-     * Provide a Want-Digest header for this request
-     *
-     * @param value header value, following the syntax defined in:
-     *      https://tools.ietf.org/html/rfc3230#section-4.3.1
-     * @return this builder
-     */
-    public GetBuilder wantDigest(final String value) {
-        if (value != null) {
-            request.setHeader(WANT_DIGEST, value);
-        }
-        return this;
+    @Override
+    public GetBuilder disableRedirects() {
+        return (GetBuilder) super.disableRedirects();
     }
 
-    /**
-     * Provide a Cache-Control header with value "no-cache"
-     *
-     * @return this builder
-     */
+    @Override
+    public GetBuilder wantDigest(final String value) {
+        return (GetBuilder) super.wantDigest(value);
+    }
+
+    @Override
     public GetBuilder noCache() {
-        request.setHeader(CACHE_CONTROL, "no-cache");
-        return this;
+        return (GetBuilder) super.noCache();
     }
 }
