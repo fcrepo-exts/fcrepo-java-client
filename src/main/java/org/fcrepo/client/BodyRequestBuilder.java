@@ -22,6 +22,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
+import static org.fcrepo.client.LinkHeaderConstants.ACL_REL;
 import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
@@ -224,6 +225,22 @@ public abstract class BodyRequestBuilder extends
     protected BodyRequestBuilder ifMatch(final String etag) {
         if (etag != null) {
             request.setHeader(IF_MATCH, etag);
+        }
+        return this;
+    }
+
+    /**
+     * Provide the URI to an ACL for this request
+     *
+     * @param aclUri URI to the ACL
+     * @return this builder
+     */
+    protected BodyRequestBuilder linkAcl(final String aclUri) {
+        if (aclUri != null) {
+            final FcrepoLink link = FcrepoLink.fromUri(aclUri)
+                    .rel(ACL_REL)
+                    .build();
+            request.addHeader(LINK, link.toString());
         }
         return this;
     }

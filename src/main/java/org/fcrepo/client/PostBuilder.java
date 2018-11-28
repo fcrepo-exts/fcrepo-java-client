@@ -102,6 +102,11 @@ public class PostBuilder extends BodyRequestBuilder {
         return (PostBuilder) super.addInteractionModel(interactionModelUri);
     }
 
+    @Override
+    protected PostBuilder linkAcl(final String aclUri) {
+        return (PostBuilder) super.linkAcl(aclUri);
+    }
+
     /**
      * Provide a content disposition header which will be used as the filename
      *
