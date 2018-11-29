@@ -18,6 +18,7 @@
 package org.fcrepo.client;
 
 import java.net.URI;
+import java.time.Instant;
 
 import org.apache.http.client.methods.HttpRequestBase;
 
@@ -57,5 +58,15 @@ public class HeadBuilder extends RetrieveRequestBuilder {
     @Override
     public HeadBuilder noCache() {
         return (HeadBuilder) super.noCache();
+    }
+
+    @Override
+    public HeadBuilder acceptDatetime(final Instant acceptInstant) {
+        return (HeadBuilder) super.acceptDatetime(acceptInstant);
+    }
+
+    @Override
+    public HeadBuilder acceptDatetime(final String acceptDatetime) {
+        return (HeadBuilder) super.acceptDatetime(acceptDatetime);
     }
 }

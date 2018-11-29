@@ -17,8 +17,11 @@
  */
 package org.fcrepo.client;
 
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Optional.ofNullable;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +34,9 @@ import java.util.stream.Collectors;
  * @author bbpennel
  */
 public class HeaderHelpers {
+
+    // Formatter for converting instants to RFC1123 timestamps in UTC
+    public static DateTimeFormatter UTC_RFC_1123_FORMATTER = RFC_1123_DATE_TIME.withZone(ZoneId.of("UTC"));
 
     /**
      * Format a map of values to q values into a quality value formatted header, as per:

@@ -23,6 +23,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.IF_NONE_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.FedoraHeaderConstants.RANGE;
 import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -183,5 +184,15 @@ public class GetBuilder extends RetrieveRequestBuilder {
     @Override
     public GetBuilder noCache() {
         return (GetBuilder) super.noCache();
+    }
+
+    @Override
+    public GetBuilder acceptDatetime(final Instant acceptInstant) {
+        return (GetBuilder) super.acceptDatetime(acceptInstant);
+    }
+
+    @Override
+    public GetBuilder acceptDatetime(final String acceptDatetime) {
+        return (GetBuilder) super.acceptDatetime(acceptDatetime);
     }
 }

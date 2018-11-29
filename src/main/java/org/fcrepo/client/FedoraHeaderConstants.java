@@ -73,6 +73,8 @@ public class FedoraHeaderConstants {
      */
     public static final String MEMENTO_DATETIME = "Memento-Datetime";
 
+    public static final String ACCEPT_DATETIME = "Accept-Datetime";
+
     private FedoraHeaderConstants() {
     }
 }

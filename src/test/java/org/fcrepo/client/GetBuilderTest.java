@@ -19,12 +19,14 @@ package org.fcrepo.client;
 
 import static java.net.URI.create;
 import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT;
+import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT_DATETIME;
 import static org.fcrepo.client.FedoraHeaderConstants.CACHE_CONTROL;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_NONE_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.FedoraHeaderConstants.RANGE;
 import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
+import static org.fcrepo.client.HeaderHelpers.UTC_RFC_1123_FORMATTER;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -34,6 +36,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -50,6 +54,9 @@ import org.mockito.junit.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class GetBuilderTest {
+
+    private final String HISTORIC_DATETIME =
+            UTC_RFC_1123_FORMATTER.format(LocalDateTime.of(2000, 1, 1, 0, 0).atZone(ZoneOffset.UTC));
 
     @Mock
     private FcrepoClient client;
@@ -174,6 +181,14 @@ public class GetBuilderTest {
 
         final HttpRequestBase request = getRequest();
         assertEquals("no-cache", request.getFirstHeader(CACHE_CONTROL).getValue());
+    }
+
+    @Test
+    public void testAcceptDatetime() throws Exception {
+        testBuilder.acceptDatetime(HISTORIC_DATETIME).perform();
+
+        final HttpRequestBase request = getRequest();
+        assertEquals(HISTORIC_DATETIME, request.getFirstHeader(ACCEPT_DATETIME).getValue());
     }
 
     private HttpRequestBase getRequest() throws FcrepoOperationFailedException {
