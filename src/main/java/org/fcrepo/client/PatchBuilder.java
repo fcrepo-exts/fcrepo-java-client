@@ -103,4 +103,14 @@ public class PatchBuilder extends BodyRequestBuilder {
     public PatchBuilder digestSha256(final String digest) {
         return (PatchBuilder) super.digestSha256(digest);
     }
+
+    @Override
+    public PatchBuilder addHeader(final String name, final String value) {
+        return (PatchBuilder) super.addHeader(name, value);
+    }
+
+    @Override
+    public PatchBuilder addLinkHeader(final FcrepoLink linkHeader) {
+        return (PatchBuilder) super.addLinkHeader(linkHeader);
+    }
 }

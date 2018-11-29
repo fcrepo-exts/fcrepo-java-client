@@ -40,7 +40,7 @@ public class MoveBuilder extends RequestBuilder {
      * @param destinationUrl uri for the new path for the moved resource
      * @param client the client
      */
-    protected MoveBuilder(final URI sourceUrl, final URI destinationUrl, final FcrepoClient client) {
+    public MoveBuilder(final URI sourceUrl, final URI destinationUrl, final FcrepoClient client) {
         super(sourceUrl, client);
         Args.notNull(destinationUrl, "Destination URL");
         // Add the required destination header to the request
@@ -50,5 +50,10 @@ public class MoveBuilder extends RequestBuilder {
     @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.MOVE.createRequest(targetUri);
+    }
+
+    @Override
+    public MoveBuilder addHeader(final String name, final String value) {
+        return (MoveBuilder) super.addHeader(name, value);
     }
 }

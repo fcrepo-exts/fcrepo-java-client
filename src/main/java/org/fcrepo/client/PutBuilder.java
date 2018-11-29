@@ -119,8 +119,18 @@ public class PutBuilder extends BodyRequestBuilder {
     }
 
     @Override
-    protected PutBuilder linkAcl(final String aclUri) {
+    public PutBuilder linkAcl(final String aclUri) {
         return (PutBuilder) super.linkAcl(aclUri);
+    }
+
+    @Override
+    public PutBuilder addHeader(final String name, final String value) {
+        return (PutBuilder) super.addHeader(name, value);
+    }
+
+    @Override
+    public PutBuilder addLinkHeader(final FcrepoLink linkHeader) {
+        return (PutBuilder) super.addLinkHeader(linkHeader);
     }
 
     /**

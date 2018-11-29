@@ -195,4 +195,14 @@ public class GetBuilder extends RetrieveRequestBuilder {
     public GetBuilder acceptDatetime(final String acceptDatetime) {
         return (GetBuilder) super.acceptDatetime(acceptDatetime);
     }
+
+    @Override
+    public GetBuilder addHeader(final String name, final String value) {
+        return (GetBuilder) super.addHeader(name, value);
+    }
+
+    @Override
+    public GetBuilder addLinkHeader(final FcrepoLink linkHeader) {
+        return (GetBuilder) super.addLinkHeader(linkHeader);
+    }
 }
