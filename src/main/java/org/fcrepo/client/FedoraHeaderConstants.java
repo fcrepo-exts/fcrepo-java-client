@@ -60,6 +60,10 @@ public class FedoraHeaderConstants {
 
     public static final String ETAG = "ETag";
 
+    public static final String STATE_TOKEN = "X-State-Token";
+
+    public static final String IF_STATE_TOKEN = "X-If-State-Token";
+
     public static final String DESTINATION = "Destination";
 
     public static final String LINK = "Link";

@@ -82,6 +82,11 @@ public class PutBuilder extends BodyRequestBuilder {
         return (PutBuilder) super.ifUnmodifiedSince(modified);
     }
 
+    @Override
+    public PutBuilder ifStateToken(final String token) {
+        return (PutBuilder) super.ifStateToken(token);
+    }
+
     @Deprecated
     @Override
     public PutBuilder digest(final String digest) {

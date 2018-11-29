@@ -19,6 +19,7 @@ package org.fcrepo.client;
 
 import static java.net.URI.create;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
+import static org.fcrepo.client.FedoraHeaderConstants.IF_STATE_TOKEN;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -99,5 +100,20 @@ public class PatchBuilderTest {
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("text/plain", request.getFirstHeader(CONTENT_TYPE).getValue());
+    }
+
+    @Test
+    public void testStateToken() throws Exception {
+        final InputStream bodyStream = mock(InputStream.class);
+        final String token = "state";
+
+        testBuilder.body(bodyStream)
+                .ifStateToken(token)
+                .perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        assertEquals(token, request.getFirstHeader(IF_STATE_TOKEN).getValue());
     }
 }

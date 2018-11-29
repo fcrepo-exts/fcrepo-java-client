@@ -20,6 +20,7 @@ package org.fcrepo.client;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MATCH;
+import static org.fcrepo.client.FedoraHeaderConstants.IF_STATE_TOKEN;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.LinkHeaderConstants.ACL_REL;
@@ -241,6 +242,19 @@ public abstract class BodyRequestBuilder extends
                     .rel(ACL_REL)
                     .build();
             request.addHeader(LINK, link.toString());
+        }
+        return this;
+    }
+
+    /**
+     * Provide a value for the if-state-token header for this request.
+     *
+     * @param token state token value
+     * @return this builder
+     */
+    protected BodyRequestBuilder ifStateToken(final String token) {
+        if (token != null) {
+            request.setHeader(IF_STATE_TOKEN, token);
         }
         return this;
     }

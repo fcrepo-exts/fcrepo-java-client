@@ -33,6 +33,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.ETAG;
 import static org.fcrepo.client.FedoraHeaderConstants.LAST_MODIFIED;
+import static org.fcrepo.client.FedoraHeaderConstants.STATE_TOKEN;
 import static org.fcrepo.client.FedoraTypes.LDP_DIRECT_CONTAINER;
 import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
@@ -626,6 +627,31 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final FcrepoResponse destResp = client.get(destUrl).perform();
         final String destContent = IOUtils.toString(destResp.getBody(), "UTF-8");
         assertTrue(destContent.contains("Foo"));
+    }
+
+    @Ignore("Pending state token implementation in fcrepo")
+    @Test
+    public void testStateTokens() throws Exception {
+        create();
+
+        final FcrepoResponse getResp = client.get(url).perform();
+        final String stateToken = getResp.getHeaderValue(STATE_TOKEN);
+
+        // Attempt to update triples with an incorrect state token
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        final FcrepoResponse badTokenResp = client.patch(url)
+                .body(body)
+                .ifStateToken("bad_state_token")
+                .perform();
+        assertEquals(PRECONDITION_FAILED.getStatusCode(), badTokenResp.getStatusCode());
+
+        // Update triples with the correct state token
+        body.reset();
+        final FcrepoResponse goodTokenResp = client.patch(url)
+                .body(body)
+                .ifStateToken(stateToken)
+                .perform();
+        assertEquals(NO_CONTENT.getStatusCode(), goodTokenResp.getStatusCode());
     }
 
     private FcrepoResponse create() throws FcrepoOperationFailedException {
