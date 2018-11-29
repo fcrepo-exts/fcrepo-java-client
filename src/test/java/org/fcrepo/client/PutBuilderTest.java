@@ -24,6 +24,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MATCH;
+import static org.fcrepo.client.FedoraHeaderConstants.IF_STATE_TOKEN;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.FedoraTypes.LDP_DIRECT_CONTAINER;
@@ -208,5 +209,20 @@ public class PutBuilderTest {
         final FcrepoLink aclLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
         assertEquals(ACL_REL, aclLink.getRel());
         assertEquals("http://localhost/acl", aclLink.getUri().toString());
+    }
+
+    @Test
+    public void testStateToken() throws Exception {
+        final InputStream bodyStream = mock(InputStream.class);
+        final String token = "state";
+
+        testBuilder.body(bodyStream)
+                .ifStateToken(token)
+                .perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        assertEquals(token, request.getFirstHeader(IF_STATE_TOKEN).getValue());
     }
 }

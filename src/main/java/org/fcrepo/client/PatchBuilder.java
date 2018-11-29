@@ -73,6 +73,11 @@ public class PatchBuilder extends BodyRequestBuilder {
         return (PatchBuilder) super.ifUnmodifiedSince(modified);
     }
 
+    @Override
+    public PatchBuilder ifStateToken(final String token) {
+        return (PatchBuilder) super.ifStateToken(token);
+    }
+
     @Deprecated
     @Override
     public PatchBuilder digest(final String digest) {
