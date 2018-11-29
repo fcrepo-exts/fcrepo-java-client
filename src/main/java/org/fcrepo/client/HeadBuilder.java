@@ -17,12 +17,9 @@
  */
 package org.fcrepo.client;
 
-import static org.fcrepo.client.FedoraHeaderConstants.CACHE_CONTROL;
-import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
-
 import java.net.URI;
+import java.time.Instant;
 
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**
@@ -30,8 +27,7 @@ import org.apache.http.client.methods.HttpRequestBase;
  *
  * @author bbpennel
  */
-public class HeadBuilder extends
-        RequestBuilder {
+public class HeadBuilder extends RetrieveRequestBuilder {
 
     /**
      * Instantiate builder
@@ -49,37 +45,28 @@ public class HeadBuilder extends
         return HttpMethods.HEAD.createRequest(targetUri);
     }
 
-    /**
-     * Disable following redirects.
-     *
-     * @return this builder
-     */
+    @Override
     public HeadBuilder disableRedirects() {
-        request.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build());
-        return this;
+        return (HeadBuilder) super.disableRedirects();
     }
 
-    /**
-     * Provide a Want-Digest header for this request
-     *
-     * @param value header value, following the syntax defined in:
-     *      https://tools.ietf.org/html/rfc3230#section-4.3.1
-     * @return this builder
-     */
+    @Override
     public HeadBuilder wantDigest(final String value) {
-        if (value != null) {
-            request.setHeader(WANT_DIGEST, value);
-        }
-        return this;
+        return (HeadBuilder) super.wantDigest(value);
     }
 
-    /**
-     * Provide a Cache-Control header with value "no-cache"
-     *
-     * @return this builder
-     */
+    @Override
     public HeadBuilder noCache() {
-        request.setHeader(CACHE_CONTROL, "no-cache");
-        return this;
+        return (HeadBuilder) super.noCache();
+    }
+
+    @Override
+    public HeadBuilder acceptDatetime(final Instant acceptInstant) {
+        return (HeadBuilder) super.acceptDatetime(acceptInstant);
+    }
+
+    @Override
+    public HeadBuilder acceptDatetime(final String acceptDatetime) {
+        return (HeadBuilder) super.acceptDatetime(acceptDatetime);
     }
 }

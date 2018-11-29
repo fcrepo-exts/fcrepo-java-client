@@ -19,13 +19,13 @@ package org.fcrepo.client;
 
 import static java.net.URI.create;
 import static org.fcrepo.client.TestUtils.baseUrl;
-import static org.fcrepo.kernel.api.services.VersionService.MEMENTO_RFC_1123_FORMATTER;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.fcrepo.client.FedoraHeaderConstants.MEMENTO_DATETIME;
+import static org.fcrepo.client.HeaderHelpers.UTC_RFC_1123_FORMATTER;
 
 import java.net.URI;
 import java.time.Instant;
@@ -50,7 +50,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class HistoricMementoBuilderTest {
 
     private final String HISTORIC_DATETIME =
-            MEMENTO_RFC_1123_FORMATTER.format(LocalDateTime.of(2000, 1, 1, 0, 0).atZone(ZoneOffset.UTC));
+            UTC_RFC_1123_FORMATTER.format(LocalDateTime.of(2000, 1, 1, 0, 0).atZone(ZoneOffset.UTC));
 
     @Mock
     private FcrepoClient client;

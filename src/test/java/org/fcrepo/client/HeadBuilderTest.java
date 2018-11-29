@@ -18,9 +18,11 @@
 package org.fcrepo.client;
 
 import static java.net.URI.create;
+import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT_DATETIME;
 import static org.fcrepo.client.FedoraHeaderConstants.CACHE_CONTROL;
 import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
 import static org.fcrepo.client.TestUtils.baseUrl;
+import static org.fcrepo.client.HeaderHelpers.UTC_RFC_1123_FORMATTER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +31,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.Before;
@@ -44,6 +49,9 @@ import org.mockito.junit.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class HeadBuilderTest {
+
+    private final String HISTORIC_DATETIME =
+            UTC_RFC_1123_FORMATTER.format(LocalDateTime.of(2000, 1, 1, 0, 0).atZone(ZoneOffset.UTC));
 
     @Mock
     private FcrepoClient client;
@@ -96,5 +104,24 @@ public class HeadBuilderTest {
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
         final HttpRequestBase request = requestCaptor.getValue();
         assertEquals("no-cache", request.getFirstHeader(CACHE_CONTROL).getValue());
+    }
+
+    @Test
+    public void testAcceptDatetime() throws Exception {
+        testBuilder.acceptDatetime(HISTORIC_DATETIME).perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+        final HttpRequestBase request = requestCaptor.getValue();
+        assertEquals(HISTORIC_DATETIME, request.getFirstHeader(ACCEPT_DATETIME).getValue());
+    }
+
+    @Test
+    public void testAcceptDatetimeInstant() throws Exception {
+        final Instant datetime = LocalDateTime.of(2000, 1, 1, 00, 00).atZone(ZoneOffset.UTC).toInstant();
+        testBuilder.acceptDatetime(datetime).perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+        final HttpRequestBase request = requestCaptor.getValue();
+        assertEquals(HISTORIC_DATETIME, request.getFirstHeader(ACCEPT_DATETIME).getValue());
     }
 }

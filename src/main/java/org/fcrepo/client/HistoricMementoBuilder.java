@@ -17,13 +17,11 @@
  */
 package org.fcrepo.client;
 
-import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+import static org.fcrepo.client.HeaderHelpers.UTC_RFC_1123_FORMATTER;
 import static org.fcrepo.client.FedoraHeaderConstants.MEMENTO_DATETIME;
 
 import java.net.URI;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Builds a POST request for creating a memento (LDPRm) with the state given in the request body
@@ -32,8 +30,6 @@ import java.time.format.DateTimeFormatter;
  * @author bbpennel
  */
 public class HistoricMementoBuilder extends PostBuilder {
-
-    private static DateTimeFormatter UTC_RFC_1123_FORMATTER = RFC_1123_DATE_TIME.withZone(ZoneId.of("UTC"));
 
     /**
      * Instantiate builder
