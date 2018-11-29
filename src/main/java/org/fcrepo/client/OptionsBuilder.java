@@ -23,15 +23,14 @@ import org.apache.http.client.methods.HttpRequestBase;
 
 /**
  * Builds an OPTIONS request to output information about the supported HTTP methods, etc.
- * 
+ *
  * @author bbpennel
  */
-public class OptionsBuilder extends
-        RequestBuilder {
+public class OptionsBuilder extends RequestBuilder {
 
     /**
      * Instantiate builder
-     * 
+     *
      * @param uri uri of the resource this request is being made to
      * @param client the client
      */
@@ -42,5 +41,15 @@ public class OptionsBuilder extends
     @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.OPTIONS.createRequest(targetUri);
+    }
+
+    @Override
+    public OptionsBuilder addHeader(final String name, final String value) {
+        return (OptionsBuilder) super.addHeader(name, value);
+    }
+
+    @Override
+    public OptionsBuilder addLinkHeader(final FcrepoLink linkHeader) {
+        return (OptionsBuilder) super.addLinkHeader(linkHeader);
     }
 }

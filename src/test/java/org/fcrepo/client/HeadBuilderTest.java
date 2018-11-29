@@ -20,6 +20,7 @@ package org.fcrepo.client;
 import static java.net.URI.create;
 import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT_DATETIME;
 import static org.fcrepo.client.FedoraHeaderConstants.CACHE_CONTROL;
+import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.fcrepo.client.HeaderHelpers.UTC_RFC_1123_FORMATTER;
@@ -123,5 +124,24 @@ public class HeadBuilderTest {
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
         final HttpRequestBase request = requestCaptor.getValue();
         assertEquals(HISTORIC_DATETIME, request.getFirstHeader(ACCEPT_DATETIME).getValue());
+    }
+
+    @Test
+    public void testAddHeader() throws Exception {
+        testBuilder.addHeader("my-header", "head-val").perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+        final HttpRequestBase request = requestCaptor.getValue();
+        assertEquals("head-val", request.getFirstHeader("my-header").getValue());
+    }
+
+    @Test
+    public void testAddLinkHeader() throws Exception {
+        final FcrepoLink link = FcrepoLink.fromUri("http://example.com/link").type("foo").build();
+        testBuilder.addLinkHeader(link).perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+        final HttpRequestBase request = requestCaptor.getValue();
+        assertEquals(link.toString(), request.getFirstHeader(LINK).getValue());
     }
 }

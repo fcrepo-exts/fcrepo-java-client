@@ -20,6 +20,7 @@ package org.fcrepo.client;
 import static java.net.URI.create;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_STATE_TOKEN;
+import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -115,5 +116,24 @@ public class PatchBuilderTest {
 
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
         assertEquals(token, request.getFirstHeader(IF_STATE_TOKEN).getValue());
+    }
+
+    @Test
+    public void testAddHeader() throws Exception {
+        testBuilder.addHeader("my-header", "head-val").perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+        final HttpRequestBase request = requestCaptor.getValue();
+        assertEquals("head-val", request.getFirstHeader("my-header").getValue());
+    }
+
+    @Test
+    public void testAddLinkHeader() throws Exception {
+        final FcrepoLink link = FcrepoLink.fromUri("http://example.com/link").type("foo").build();
+        testBuilder.addLinkHeader(link).perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+        final HttpRequestBase request = requestCaptor.getValue();
+        assertEquals(link.toString(), request.getFirstHeader(LINK).getValue());
     }
 }

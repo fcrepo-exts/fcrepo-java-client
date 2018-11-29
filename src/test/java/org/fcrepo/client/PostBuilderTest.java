@@ -18,10 +18,10 @@
 package org.fcrepo.client;
 
 import static java.net.URI.create;
-import static javax.ws.rs.core.HttpHeaders.LINK;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
+import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.FedoraHeaderConstants.SLUG;
 import static org.fcrepo.client.FedoraTypes.LDP_DIRECT_CONTAINER;
 import static org.fcrepo.client.LinkHeaderConstants.ACL_REL;
@@ -225,5 +225,24 @@ public class PostBuilderTest {
         final FcrepoLink aclLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
         assertEquals(ACL_REL, aclLink.getRel());
         assertEquals("http://localhost/acl", aclLink.getUri().toString());
+    }
+
+    @Test
+    public void testAddHeader() throws Exception {
+        testBuilder.addHeader("my-header", "head-val").perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+        final HttpRequestBase request = requestCaptor.getValue();
+        assertEquals("head-val", request.getFirstHeader("my-header").getValue());
+    }
+
+    @Test
+    public void testAddLinkHeader() throws Exception {
+        final FcrepoLink link = FcrepoLink.fromUri("http://example.com/link").type("foo").build();
+        testBuilder.addLinkHeader(link).perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+        final HttpRequestBase request = requestCaptor.getValue();
+        assertEquals(link.toString(), request.getFirstHeader(LINK).getValue());
     }
 }

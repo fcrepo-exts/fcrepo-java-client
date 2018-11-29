@@ -23,6 +23,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT_DATETIME;
 import static org.fcrepo.client.FedoraHeaderConstants.CACHE_CONTROL;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_NONE_MATCH;
+import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.FedoraHeaderConstants.RANGE;
 import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
@@ -189,6 +190,23 @@ public class GetBuilderTest {
 
         final HttpRequestBase request = getRequest();
         assertEquals(HISTORIC_DATETIME, request.getFirstHeader(ACCEPT_DATETIME).getValue());
+    }
+
+    @Test
+    public void testAddHeader() throws Exception {
+        testBuilder.addHeader("my-header", "head-val").perform();
+
+        final HttpRequestBase request = getRequest();
+        assertEquals("head-val", request.getFirstHeader("my-header").getValue());
+    }
+
+    @Test
+    public void testAddLinkHeader() throws Exception {
+        final FcrepoLink link = FcrepoLink.fromUri("http://example.com/link").type("foo").build();
+        testBuilder.addLinkHeader(link).perform();
+
+        final HttpRequestBase request = getRequest();
+        assertEquals(link.toString(), request.getFirstHeader(LINK).getValue());
     }
 
     private HttpRequestBase getRequest() throws FcrepoOperationFailedException {

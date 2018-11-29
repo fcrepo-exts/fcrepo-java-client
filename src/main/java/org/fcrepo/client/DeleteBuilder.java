@@ -23,14 +23,14 @@ import org.apache.http.client.methods.HttpRequestBase;
 
 /**
  * Builds a request to delete a resource
- * 
+ *
  * @author bbpennel
  */
 public class DeleteBuilder extends RequestBuilder {
 
     /**
      * Instantiate builder
-     * 
+     *
      * @param uri uri request will be issued to
      * @param client the client
      */
@@ -41,5 +41,10 @@ public class DeleteBuilder extends RequestBuilder {
     @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.DELETE.createRequest(targetUri);
+    }
+
+    @Override
+    public DeleteBuilder addHeader(final String name, final String value) {
+        return (DeleteBuilder) super.addHeader(name, value);
     }
 }

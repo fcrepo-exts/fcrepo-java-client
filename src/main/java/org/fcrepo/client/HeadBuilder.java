@@ -69,4 +69,14 @@ public class HeadBuilder extends RetrieveRequestBuilder {
     public HeadBuilder acceptDatetime(final String acceptDatetime) {
         return (HeadBuilder) super.acceptDatetime(acceptDatetime);
     }
+
+    @Override
+    public HeadBuilder addHeader(final String name, final String value) {
+        return (HeadBuilder) super.addHeader(name, value);
+    }
+
+    @Override
+    public HeadBuilder addLinkHeader(final FcrepoLink linkHeader) {
+        return (HeadBuilder) super.addLinkHeader(linkHeader);
+    }
 }

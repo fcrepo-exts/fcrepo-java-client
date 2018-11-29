@@ -34,7 +34,7 @@ public class OriginalMementoBuilder extends RequestBuilder {
      * @param uri uri of the resource this request is being made to
      * @param client the client
      */
-    protected OriginalMementoBuilder(final URI uri, final FcrepoClient client) {
+    public OriginalMementoBuilder(final URI uri, final FcrepoClient client) {
         super(uri, client);
     }
 
@@ -43,4 +43,13 @@ public class OriginalMementoBuilder extends RequestBuilder {
         return HttpMethods.POST.createRequest(targetUri);
     }
 
+    @Override
+    public OriginalMementoBuilder addHeader(final String name, final String value) {
+        return (OriginalMementoBuilder) super.addHeader(name, value);
+    }
+
+    @Override
+    public OriginalMementoBuilder addLinkHeader(final FcrepoLink linkHeader) {
+        return (OriginalMementoBuilder) super.addLinkHeader(linkHeader);
+    }
 }

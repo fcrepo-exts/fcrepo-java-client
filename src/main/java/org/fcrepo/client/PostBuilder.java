@@ -103,8 +103,18 @@ public class PostBuilder extends BodyRequestBuilder {
     }
 
     @Override
-    protected PostBuilder linkAcl(final String aclUri) {
+    public PostBuilder linkAcl(final String aclUri) {
         return (PostBuilder) super.linkAcl(aclUri);
+    }
+
+    @Override
+    public PostBuilder addHeader(final String name, final String value) {
+        return (PostBuilder) super.addHeader(name, value);
+    }
+
+    @Override
+    public PostBuilder addLinkHeader(final FcrepoLink linkHeader) {
+        return (PostBuilder) super.addLinkHeader(linkHeader);
     }
 
     /**

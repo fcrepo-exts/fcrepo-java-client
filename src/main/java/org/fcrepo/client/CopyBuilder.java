@@ -37,12 +37,17 @@ public class CopyBuilder extends MoveBuilder {
      * @param destinationUrl uri for the new path for the moved resource
      * @param client the client
      */
-    protected CopyBuilder(final URI sourceUrl, final URI destinationUrl, final FcrepoClient client) {
+    public CopyBuilder(final URI sourceUrl, final URI destinationUrl, final FcrepoClient client) {
         super(sourceUrl, destinationUrl, client);
     }
 
     @Override
     protected HttpRequestBase createRequest() {
         return HttpMethods.COPY.createRequest(targetUri);
+    }
+
+    @Override
+    public CopyBuilder addHeader(final String name, final String value) {
+        return (CopyBuilder) super.addHeader(name, value);
     }
 }
