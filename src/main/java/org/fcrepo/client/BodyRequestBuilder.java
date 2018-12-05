@@ -144,7 +144,7 @@ public abstract class BodyRequestBuilder extends
      *
      * @param digest checksum to provide as the digest for the request body
      * @param alg abbreviated algorithm identifier for the type of checksum being
-     *      added (for example, sha1, md5, etc)
+     *      added (for example, sha, md5, etc)
      * @return this builder
      */
     protected BodyRequestBuilder digest(final String digest, final String alg) {
@@ -165,7 +165,7 @@ public abstract class BodyRequestBuilder extends
      * @return this builder
      */
     protected BodyRequestBuilder digestSha1(final String digest) {
-        return digest(digest, "sha1");
+        return digest(digest, "sha");
     }
 
     /**

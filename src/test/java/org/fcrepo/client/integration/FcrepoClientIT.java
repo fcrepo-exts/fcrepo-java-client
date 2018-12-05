@@ -173,7 +173,6 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals(fileContent, getContent);
     }
 
-    @Ignore("Pending alignment with SHA1 rename")
     @Test
     public void testPostDigestMismatch() throws Exception {
         final String bodyContent = "Hello world";
@@ -187,7 +186,6 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals("Invalid checksum was not rejected", CONFLICT.getStatusCode(), response.getStatusCode());
     }
 
-    @Ignore("Pending alignment with SHA1 rename")
     @Test
     public void testPostDigestMultipleChecksums() throws Exception {
         final String bodyContent = "Hello world";
@@ -202,7 +200,6 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals("Checksums rejected", CREATED.getStatusCode(), response.getStatusCode());
     }
 
-    @Ignore("Pending alignment with SHA1 rename")
     @Test
     public void testPostDigestMultipleChecksumsOneMismatch() throws Exception {
         final String bodyContent = "Hello world";
