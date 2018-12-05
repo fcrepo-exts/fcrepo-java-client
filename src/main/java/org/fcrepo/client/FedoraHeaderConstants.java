@@ -46,6 +46,8 @@ public class FedoraHeaderConstants {
 
     public static final String PREFER = "Prefer";
 
+    public static final String PREFERENCE_APPLIED = "Preference-Applied";
+
     public static final String RANGE = "Range";
 
     public static final String IF_NONE_MATCH = "If-None-Match";
@@ -78,6 +80,8 @@ public class FedoraHeaderConstants {
     public static final String MEMENTO_DATETIME = "Memento-Datetime";
 
     public static final String ACCEPT_DATETIME = "Accept-Datetime";
+
+    public static final String ACCEPT_EXTERNAL_CONTENT_HANDLING = "Accept-External-Content-Handling";
 
     private FedoraHeaderConstants() {
     }

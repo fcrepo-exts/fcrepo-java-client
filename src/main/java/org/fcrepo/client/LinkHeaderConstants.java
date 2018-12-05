@@ -45,6 +45,9 @@ public class LinkHeaderConstants {
     // rel identifying the RDF resource describing this resource
     public static final String DESCRIBEDBY_REL = "describedby";
 
+    // rel identifying the NonRDFSource described by this resource
+    public static final String DESCRIBES_REL = "describes";
+
     // rel identifying the ACL for the resource
     public static final String ACL_REL = "acl";
 

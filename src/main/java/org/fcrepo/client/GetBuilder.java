@@ -22,6 +22,8 @@ import static org.fcrepo.client.FedoraHeaderConstants.IF_MODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_NONE_MATCH;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.FedoraHeaderConstants.RANGE;
+import static org.fcrepo.client.PreferHeaderConstants.RETURN_REPRESENTATION;
+import static org.fcrepo.client.PreferHeaderConstants.RETURN_MINIMAL;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
@@ -95,7 +97,7 @@ public class GetBuilder extends RetrieveRequestBuilder {
      * @return this builder
      */
     public GetBuilder preferMinimal() {
-        request.setHeader(PREFER, buildPrefer("minimal", null, null));
+        request.setHeader(PREFER, RETURN_MINIMAL);
         return this;
     }
 
@@ -106,7 +108,7 @@ public class GetBuilder extends RetrieveRequestBuilder {
      * @return this builder
      */
     public GetBuilder preferRepresentation() {
-        request.setHeader(PREFER, buildPrefer("representation", null, null));
+        request.setHeader(PREFER, RETURN_REPRESENTATION);
         return this;
     }
 
@@ -120,13 +122,13 @@ public class GetBuilder extends RetrieveRequestBuilder {
      * @return this builder
      */
     public GetBuilder preferRepresentation(final List<URI> includeUris, final List<URI> omitUris) {
-        request.setHeader(PREFER, buildPrefer("representation", includeUris, omitUris));
+        request.setHeader(PREFER, buildPrefer(includeUris, omitUris));
         return this;
     }
 
-    private String buildPrefer(final String prefer, final List<URI> includeUris, final List<URI> omitUris) {
+    private String buildPrefer(final List<URI> includeUris, final List<URI> omitUris) {
         final StringJoiner preferJoin = new StringJoiner("; ");
-        preferJoin.add("return=" + prefer);
+        preferJoin.add(RETURN_REPRESENTATION);
 
         if (includeUris != null) {
             final String include = includeUris.stream().map(URI::toString).collect(Collectors.joining(" "));

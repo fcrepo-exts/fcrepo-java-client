@@ -19,6 +19,7 @@ package org.fcrepo.client;
 
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
+import static org.fcrepo.client.PreferHeaderConstants.HANDLING_LENIENT;
 
 import java.io.File;
 import java.io.IOException;
@@ -157,7 +158,7 @@ public class PutBuilder extends BodyRequestBuilder {
      * @return this builder
      */
     public PutBuilder preferLenient() {
-        request.setHeader(PREFER, "handling=lenient; received=\"minimal\"");
+        request.setHeader(PREFER, HANDLING_LENIENT);
         return this;
     }
 }
