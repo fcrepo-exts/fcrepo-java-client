@@ -110,7 +110,7 @@ public class PutBuilderTest {
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
-        assertEquals("sha1=checksum", request.getFirstHeader(DIGEST).getValue());
+        assertEquals("sha=checksum", request.getFirstHeader(DIGEST).getValue());
         assertEquals("attachment; filename=\"file.txt\"", request.getFirstHeader(CONTENT_DISPOSITION).getValue());
     }
 

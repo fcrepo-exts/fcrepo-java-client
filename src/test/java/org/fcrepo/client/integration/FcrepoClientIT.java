@@ -33,8 +33,14 @@ import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
 import static org.fcrepo.client.FedoraHeaderConstants.ETAG;
 import static org.fcrepo.client.FedoraHeaderConstants.LAST_MODIFIED;
+import static org.fcrepo.client.FedoraHeaderConstants.PREFERENCE_APPLIED;
 import static org.fcrepo.client.FedoraHeaderConstants.STATE_TOKEN;
 import static org.fcrepo.client.FedoraTypes.LDP_DIRECT_CONTAINER;
+import static org.fcrepo.client.PreferHeaderConstants.RETURN_MINIMAL;
+import static org.fcrepo.client.PreferHeaderConstants.RETURN_REPRESENTATION;
+import static org.fcrepo.client.PreferHeaderConstants.PREFER_CONTAINED_DESCRIPTIONS;
+import static org.fcrepo.client.PreferHeaderConstants.PREFER_MEMBERSHIP;
+import static org.fcrepo.client.PreferHeaderConstants.PREFER_CONTAINMENT;
 import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
 import static org.junit.Assert.assertEquals;
@@ -42,6 +48,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static java.util.Collections.singletonList;
+import static java.util.Arrays.asList;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -165,7 +173,6 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals(fileContent, getContent);
     }
 
-    @Ignore("Pending alignment with SHA1 rename")
     @Test
     public void testPostDigestMismatch() throws Exception {
         final String bodyContent = "Hello world";
@@ -179,7 +186,6 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals("Invalid checksum was not rejected", CONFLICT.getStatusCode(), response.getStatusCode());
     }
 
-    @Ignore("Pending alignment with SHA1 rename")
     @Test
     public void testPostDigestMultipleChecksums() throws Exception {
         final String bodyContent = "Hello world";
@@ -194,7 +200,6 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertEquals("Checksums rejected", CREATED.getStatusCode(), response.getStatusCode());
     }
 
-    @Ignore("Pending alignment with SHA1 rename")
     @Test
     public void testPostDigestMultipleChecksumsOneMismatch() throws Exception {
         final String bodyContent = "Hello world";
@@ -471,7 +476,23 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .perform();
 
         assertEquals(OK.getStatusCode(), response.getStatusCode());
-        assertEquals("return=minimal", response.getHeaderValue("Preference-Applied"));
+        assertEquals(RETURN_MINIMAL, response.getHeaderValue(PREFERENCE_APPLIED));
+    }
+
+    @Test
+    public void testGetPreferRepresentation() throws Exception {
+        create();
+
+        final FcrepoResponse response = client.get(url)
+                .preferRepresentation(asList(PREFER_MEMBERSHIP, PREFER_CONTAINED_DESCRIPTIONS),
+                        singletonList(PREFER_CONTAINMENT))
+                .perform();
+
+        assertEquals(OK.getStatusCode(), response.getStatusCode());
+        final String prefApplied = response.getHeaderValue(PREFERENCE_APPLIED);
+        assertTrue(prefApplied.contains(RETURN_REPRESENTATION));
+        assertTrue(prefApplied.contains("include"));
+        assertTrue(prefApplied.contains("omit"));
     }
 
     @Test

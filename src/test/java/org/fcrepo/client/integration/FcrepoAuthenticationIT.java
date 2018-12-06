@@ -33,7 +33,7 @@ import java.net.URI;
 import org.apache.commons.io.IOUtils;
 import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoResponse;
-import org.junit.Ignore;
+import org.jgroups.util.UUID;
 import org.junit.Test;
 
 /**
@@ -126,21 +126,43 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
     }
 
     @Test
-    public void testAuthUserCanGet()
-            throws Exception {
-        final FcrepoResponse response = authClient.get(new URI(serverAddress)).perform();
+    public void testAuthUserCanGet() throws Exception {
+        final URI uri = URI.create(serverAddress + UUID.randomUUID().toString());
+        createRestrictedResource(uri);
+
+        final FcrepoResponse response = authClient.get(uri).perform();
         final int status = response.getStatusCode();
         assertEquals("Authenticated user can not read root!", OK
                 .getStatusCode(), status);
     }
 
-    @Ignore("Pending alignment with WebAC in FCREPO-2952")
     @Test
-    public void testUnAuthUserCannotGet()
-            throws Exception {
+    public void testUnAuthUserCanGet() throws Exception {
+        final URI uri = URI.create(serverAddress + UUID.randomUUID().toString());
+        createRestrictedResource(uri);
+
         final FcrepoResponse response = client.get(new URI(serverAddress)).perform();
         final int status = response.getStatusCode();
-        assertEquals("Unauthenticated user should be forbidden!", FORBIDDEN
+        assertEquals("Unauthenticated user should be forbidden!", OK
                 .getStatusCode(), status);
+    }
+
+    private static final String AUTHENTICATED_ACL =
+            "@prefix acl: <http://www.w3.org/ns/auth/acl#> .\n" +
+            "\n" +
+            "<#authenticated_agent> a acl:Authorization ;\n" +
+            "   acl:agentClass acl:AuthenticatedAgent ;\n" +
+            "   acl:mode acl:Read ;\n" +
+            "   acl:accessTo <%s> .";
+
+    private void createRestrictedResource(final URI uri) throws Exception {
+        authClient.put(uri).perform();
+
+        final URI aclUri = URI.create(uri.toString() + "/fcr:acl");
+        final String aclBody = String.format(AUTHENTICATED_ACL, uri.toString());
+
+        authClient.put(aclUri)
+                .body(new ByteArrayInputStream(aclBody.getBytes()), "text/turtle")
+                .perform();
     }
 }

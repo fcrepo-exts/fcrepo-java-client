@@ -108,7 +108,7 @@ public class PostBuilderTest {
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
-        assertEquals("sha1=checksum", request.getFirstHeader(DIGEST).getValue());
+        assertEquals("sha=checksum", request.getFirstHeader(DIGEST).getValue());
         assertEquals("slug_value", request.getFirstHeader(SLUG).getValue());
         assertEquals("attachment; filename=\"file.txt\"", request.getFirstHeader(CONTENT_DISPOSITION).getValue());
     }
@@ -142,7 +142,7 @@ public class PostBuilderTest {
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
-        assertEquals("sha1=checksum, sha256=checksum256", request.getFirstHeader(DIGEST).getValue());
+        assertEquals("sha=checksum, sha256=checksum256", request.getFirstHeader(DIGEST).getValue());
     }
 
     @Test
