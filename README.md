@@ -1,10 +1,10 @@
-Java Client for fcrepo4
+Java Client for fcrepo
 =======================
 
-This project serves as a client library for interacting with Fedora 4
+This project serves as a client library for interacting with Fedora 
 using Java.
 
-[![Build Status](https://travis-ci.org/fcrepo4-exts/fcrepo-java-client.png?branch=master)](https://travis-ci.org/fcrepo4-exts/fcrepo-java-client)
+[![Build Status](https://travis-ci.org/fcrepo-exts/fcrepo-java-client.png?branch=master)](https://travis-ci.org/fcrepo-exts/fcrepo-java-client)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.client/fcrepo-java-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.client/fcrepo-java-client/)
 
 Usage Examples
