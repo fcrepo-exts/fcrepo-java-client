@@ -14,8 +14,8 @@
   <body>
     <links>
       <item name="Fedora" href="http://fcrepo.org/" />
-      <item name="fcrepo-java-client on GitHub" href="http://github.com/fcrepo4-exts/fcrepo-java-client" />
-      <item name="Developer Documentation" href="http://fcrepo4.github.com/fcrepo4/" />
+      <item name="fcrepo-java-client on GitHub" href="http://github.com/fcrepo-exts/fcrepo-java-client" />
+      <item name="Developer Documentation" href="http://fcrepo.github.com/fcrepo/" />
     </links>
 
     <breadcrumbs>

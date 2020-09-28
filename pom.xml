@@ -30,7 +30,7 @@
     <project.copyrightYear>2015</project.copyrightYear>
 
     <!-- Use ${project_name} instead of ${project.artifactId} to avoid incorrect
-      replacements of "fcrepo4" in child modules (for scm, site-distribution, etc -->
+      replacements of "fcrepo" in child modules (for scm, site-distribution, etc -->
     <project_name>fcrepo-java-client</project_name>
 
     <!-- https://github.com/github/maven-plugins/blob/master/README.md -->
@@ -56,9 +56,9 @@
   </properties>
 
   <scm>
-    <connection>scm:git:git://github.com/fcrepo4-exts/${project_name}.git</connection>
-    <developerConnection>scm:git:git@github.com:fcrepo4-exts/${project_name}.git</developerConnection>
-    <url>https://github.com/fcrepo4-exts/fcrepo-java-client</url>
+    <connection>scm:git:git://github.com/fcrepo-exts/${project_name}.git</connection>
+    <developerConnection>scm:git:git@github.com:fcrepo-exts/${project_name}.git</developerConnection>
+    <url>https://github.com/fcrepo-exts/fcrepo-java-client</url>
     <tag>HEAD</tag>
   </scm>
 
@@ -342,7 +342,7 @@
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/fcrepo4-exts/fcrepo-java-client/issues</url>
+    <url>https://github.com/fcrepo-exts/fcrepo-java-client/issues</url>
   </issueManagement>
 
 </project>
