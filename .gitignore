@@ -18,6 +18,7 @@ velocity.log*
 .settings/
 /examples/*/target/
 transaction.log*
+.checkstyle
 
 # IDE files
 .idea/
