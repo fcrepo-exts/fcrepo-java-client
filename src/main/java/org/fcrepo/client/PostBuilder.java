@@ -19,14 +19,14 @@ package org.fcrepo.client;
 
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.SLUG;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLEncoder;
 
 import org.apache.http.client.methods.HttpRequestBase;
+import org.springframework.http.ContentDisposition;
 
 /**
  * Builds a post request for interacting with the Fedora HTTP API in order to create a new resource within an LDP
@@ -125,12 +125,10 @@ public class PostBuilder extends BodyRequestBuilder {
      * @throws FcrepoOperationFailedException if unable to encode filename
      */
     public PostBuilder filename(final String filename) throws FcrepoOperationFailedException {
-        try {
-            final String f = (filename != null) ? "; filename=\"" + URLEncoder.encode(filename, "utf-8") + "\"" : "";
-            request.addHeader(CONTENT_DISPOSITION, "attachment" + f);
-        } catch (final UnsupportedEncodingException e) {
-            throw new FcrepoOperationFailedException(request.getURI(), -1, e.getMessage());
-        }
+        final ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
+                .filename(filename)
+                .build();
+        request.addHeader(CONTENT_DISPOSITION, contentDisposition.toString());
         return this;
     }
 
