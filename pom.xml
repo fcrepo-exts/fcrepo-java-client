@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.fcrepo</groupId>
     <artifactId>fcrepo-parent</artifactId>
-    <version>5.0.0-SNAPSHOT</version>
+    <version>5.1.1</version>
   </parent>
 
   <groupId>org.fcrepo.client</groupId>
@@ -37,7 +37,7 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <fcrepo.version>5.0.0-SNAPSHOT</fcrepo.version>
+    <fcrepo.version>5.1.1</fcrepo.version>
     <commons.io.version>2.6</commons.io.version>
     <commons.lang3.version>3.7</commons.lang3.version>
     <grizzly.version>2.4.3</grizzly.version>
