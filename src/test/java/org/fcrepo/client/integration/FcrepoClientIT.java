@@ -106,7 +106,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
     @Test
     public void testPostBinary() throws Exception {
-        final String slug = "hello1";
+        final String slug = UUID.randomUUID().toString();
         final String filename = "hello.txt";
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
@@ -222,6 +222,70 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         final FcrepoResponse getResponse = client.get(response.getLocation()).perform();
         assertTrue("Did not have ldp:DirectContainer type", getResponse.hasType(LDP_DIRECT_CONTAINER));
+    }
+
+    // FCREPO-3698
+    @Test
+    public void testPostBinaryFilenameSpecialCharacters() throws Exception {
+        final String slug = UUID.randomUUID().toString();
+        final String filename = "hello world\nof_we\0ird:+\tchar/acters\u0001.tx\rt";
+        final String expectedFilename = "hello world of_we ird:+\tchar/acters .tx t";
+        final String mimetype = "text/plain";
+        final String bodyContent = "Hello world";
+        final FcrepoResponse response = client.post(new URI(serverAddress))
+                .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
+                .filename(filename)
+                .slug(slug)
+                .perform();
+
+        final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
+
+        assertEquals("Didn't get a CREATED response! Got content:\n" + content,
+                CREATED.getStatusCode(), status);
+        assertEquals("Location did not match slug", serverAddress + slug, response.getLocation().toString());
+
+        assertNotNull("Didn't find linked description!", response.getLinkHeaders("describedby").get(0));
+
+        final FcrepoResponse getResponse = client.get(response.getLocation()).perform();
+        final Map<String, String> contentDisp = getResponse.getContentDisposition();
+        assertEquals(expectedFilename, contentDisp.get(CONTENT_DISPOSITION_FILENAME));
+
+        assertEquals(mimetype, getResponse.getContentType());
+
+        final String getContent = IOUtils.toString(getResponse.getBody(), "UTF-8");
+        assertEquals(bodyContent, getContent);
+    }
+
+    @Test
+    public void testPutBinaryFilenameSpecialCharacters() throws Exception {
+        final String id = UUID.randomUUID().toString();
+        final String filename = "hello world\nof_we\0ird:+\tchar/acters\u0001.tx\rt";
+        final String expectedFilename = "hello world of_we ird:+\tchar/acters .tx t";
+        final String mimetype = "text/plain";
+        final String bodyContent = "Hello world";
+        final FcrepoResponse response = client.put(new URI(serverAddress + id))
+                .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
+                .filename(filename)
+                .perform();
+
+        final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
+
+        assertEquals("Didn't get a CREATED response! Got content:\n" + content,
+                CREATED.getStatusCode(), status);
+        assertEquals("Location did not match slug", serverAddress + id, response.getLocation().toString());
+
+        assertNotNull("Didn't find linked description!", response.getLinkHeaders("describedby").get(0));
+
+        final FcrepoResponse getResponse = client.get(response.getLocation()).perform();
+        final Map<String, String> contentDisp = getResponse.getContentDisposition();
+        assertEquals(expectedFilename, contentDisp.get(CONTENT_DISPOSITION_FILENAME));
+
+        assertEquals(mimetype, getResponse.getContentType());
+
+        final String getContent = IOUtils.toString(getResponse.getBody(), "UTF-8");
+        assertEquals(bodyContent, getContent);
     }
 
     @Test
