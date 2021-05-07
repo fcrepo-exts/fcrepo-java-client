@@ -18,6 +18,7 @@
 package org.fcrepo.client;
 
 import static java.net.URI.create;
+import static org.fcrepo.client.ExternalContentHandling.PROXY;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
@@ -28,7 +29,6 @@ import static org.fcrepo.client.LinkHeaderConstants.ACL_REL;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
 import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
-import static org.fcrepo.client.ExternalContentHandling.PROXY;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -108,7 +108,7 @@ public class PostBuilderTest {
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
-        assertEquals("sha1=checksum", request.getFirstHeader(DIGEST).getValue());
+        assertEquals("sha=checksum", request.getFirstHeader(DIGEST).getValue());
         assertEquals("slug_value", request.getFirstHeader(SLUG).getValue());
         assertEquals("attachment; filename=\"file.txt\"", request.getFirstHeader(CONTENT_DISPOSITION).getValue());
     }
@@ -142,7 +142,7 @@ public class PostBuilderTest {
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
-        assertEquals("sha1=checksum, sha256=checksum256", request.getFirstHeader(DIGEST).getValue());
+        assertEquals("sha=checksum, sha256=checksum256", request.getFirstHeader(DIGEST).getValue());
     }
 
     @Test
