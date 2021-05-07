@@ -27,6 +27,7 @@ import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
 import org.springframework.http.ContentDisposition;
+import org.springframework.http.ContentDisposition.Builder;
 
 /**
  * Builds a PUT request for interacting with the Fedora HTTP API in order to create a resource with a specified path,
@@ -140,10 +141,11 @@ public class PutBuilder extends BodyRequestBuilder {
      * @throws FcrepoOperationFailedException if unable to encode filename
      */
     public PutBuilder filename(final String filename) throws FcrepoOperationFailedException {
-        final ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
-                .filename(filename)
-                .build();
-        request.addHeader(CONTENT_DISPOSITION, contentDisposition.toString());
+        final Builder builder = ContentDisposition.builder("attachment");
+        if (filename != null) {
+            builder.filename(filename);
+        }
+        request.addHeader(CONTENT_DISPOSITION, builder.build().toString());
         return this;
     }
 
