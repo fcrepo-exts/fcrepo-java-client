@@ -24,9 +24,9 @@ import static org.fcrepo.client.FedoraHeaderConstants.IF_STATE_TOKEN;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.LinkHeaderConstants.ACL_REL;
-import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
+import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -165,7 +165,7 @@ public abstract class BodyRequestBuilder extends
      * @return this builder
      */
     protected BodyRequestBuilder digestSha1(final String digest) {
-        return digest(digest, "sha1");
+        return digest(digest, "sha");
     }
 
     /**

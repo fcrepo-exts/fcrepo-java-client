@@ -28,9 +28,9 @@ import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.FedoraHeaderConstants.PREFER;
 import static org.fcrepo.client.FedoraTypes.LDP_DIRECT_CONTAINER;
+import static org.fcrepo.client.LinkHeaderConstants.ACL_REL;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
-import static org.fcrepo.client.LinkHeaderConstants.ACL_REL;
 import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
@@ -110,7 +110,7 @@ public class PutBuilderTest {
         assertEquals(bodyStream, bodyEntity.getContent());
 
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
-        assertEquals("sha1=checksum", request.getFirstHeader(DIGEST).getValue());
+        assertEquals("sha=checksum", request.getFirstHeader(DIGEST).getValue());
         assertEquals("attachment; filename=\"file.txt\"", request.getFirstHeader(CONTENT_DISPOSITION).getValue());
     }
 
