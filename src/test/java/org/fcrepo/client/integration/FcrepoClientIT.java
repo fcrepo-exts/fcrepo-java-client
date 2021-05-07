@@ -208,6 +208,18 @@ public class FcrepoClientIT extends AbstractResourceIT {
     }
 
     @Test
+    public void testPostBinaryNullFilename() throws Exception {
+        final String bodyContent = "Hello world";
+
+        final FcrepoResponse response = client.post(new URI(serverAddress))
+                .body(new ByteArrayInputStream(bodyContent.getBytes()), "text/plain")
+                .filename(null)
+                .perform();
+
+        assertEquals("Empty filename rejected", CREATED.getStatusCode(), response.getStatusCode());
+    }
+
+    @Test
     public void testPostDirectContainer() throws Exception {
         final FcrepoResponse response = client.post(new URI(serverAddress))
                 .addInteractionModel(LDP_DIRECT_CONTAINER)
@@ -396,6 +408,18 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         final String getContent = IOUtils.toString(getResponse.getBody(), "UTF-8");
         assertEquals(fileContent, getContent);
+    }
+
+    @Test
+    public void testPutBinaryNullFilename() throws Exception {
+        final String bodyContent = "Hello world";
+
+        final FcrepoResponse response = client.put(url)
+                .body(new ByteArrayInputStream(bodyContent.getBytes()), "text/plain")
+                .filename(null)
+                .perform();
+
+        assertEquals("Empty filename rejected", CREATED.getStatusCode(), response.getStatusCode());
     }
 
     @Test
