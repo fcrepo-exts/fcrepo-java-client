@@ -46,9 +46,11 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
     public FcrepoAuthenticationIT() throws Exception {
         super();
 
-        client = FcrepoClient.client().build();
+        client = FcrepoClient.client().credentials("testuser", "testpass")
+                .authScope("localhost")
+                .build();
         authClient = FcrepoClient.client()
-                .credentials("fedoraAdmin", "password")
+                .credentials("fedoraAdmin", "fedoraAdmin")
                 .authScope("localhost")
                 .build();
     }
@@ -80,6 +82,7 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     @Test
     public void testAuthUserCanPatch() throws Exception {
+
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
         final FcrepoResponse response = authClient.patch(new URI(serverAddress + "testobj1"))
                 .body(body)

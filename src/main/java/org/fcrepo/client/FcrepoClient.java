@@ -166,32 +166,6 @@ public class FcrepoClient {
     }
 
     /**
-     * Make a COPY request to copy a resource (and its subtree) to a new location.
-     *
-     * @param source url of the resource to copy
-     * @param destination url of the location for the copy
-     * @return a copy request builder object
-     * @deprecated the COPY method is not supported by the Fedora 1.0 specification
-     */
-    @Deprecated
-    public CopyBuilder copy(final URI source, final URI destination) {
-        return new CopyBuilder(source, destination, this);
-    }
-
-    /**
-     * Make a MOVE request to move a resource (and its subtree) to a new location.
-     *
-     * @param source url of the resource to move
-     * @param destination url of the new location for the resource
-     * @return a move request builder object
-     * @deprecated the MOVE method is not supported by the Fedora 1.0 specification
-     */
-    @Deprecated
-    public MoveBuilder move(final URI source, final URI destination) {
-        return new MoveBuilder(source, destination, this);
-    }
-
-    /**
      * Make a GET request to retrieve the content of a resource
      *
      * @param url the URL of the resource to which to GET

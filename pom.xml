@@ -6,14 +6,14 @@
   <parent>
     <groupId>org.fcrepo</groupId>
     <artifactId>fcrepo-parent</artifactId>
-    <version>5.1.1</version>
+    <version>6.0.0-SNAPSHOT</version>
   </parent>
 
   <groupId>org.fcrepo.client</groupId>
   <artifactId>fcrepo-java-client</artifactId>
-  <packaging>bundle</packaging>
+  <packaging>jar</packaging>
 
-  <version>5.1.0-SNAPSHOT</version>
+  <version>6.0.0-SNAPSHOT</version>
 
   <name>Fedora Java Client Libraries</name>
   <description>Java libraries for interacting with a Fedora Repository</description>
@@ -37,22 +37,21 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <fcrepo.version>5.1.1</fcrepo.version>
+    <fcrepo.version>6.0.0-SNAPSHOT</fcrepo.version>
     <commons.io.version>2.7</commons.io.version>
     <commons.lang3.version>3.7</commons.lang3.version>
-    <grizzly.version>2.4.3</grizzly.version>
     <httpclient.version>4.5.6</httpclient.version>
-    <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
     <javax.ws.rs-api.vesion>2.0.1</javax.ws.rs-api.vesion>
-    <jersey.version>2.25.1</jersey.version>
+    <jersey.version>2.32</jersey.version>
     <logback.version>1.2.3</logback.version>
     <mockito.version>2.23.0</mockito.version>
     <mockserver.version>5.4.1</mockserver.version>
     <slf4j.version>1.7.25</slf4j.version>
-    <spring.version>5.0.9.RELEASE</spring.version>
-    <!-- osgi -->
-    <osgi.export.packages>org.fcrepo.client.*;version=${project.version}</osgi.export.packages>
-    <osgi.import.packages>*</osgi.import.packages>
+    <spring.version>5.3.4</spring.version>
+    <jena.version>3.17.0</jena.version>
+    <jetty.version>9.4.34.v20201102</jetty.version>
+    <jetty.users.file>${project.build.directory}/test-classes/jetty-users.properties</jetty.users.file>
+
   </properties>
 
   <scm>
@@ -88,12 +87,6 @@
       <version>${httpclient.version}</version>
     </dependency>
     
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-web</artifactId>
-      <version>${spring.version}</version>
-    </dependency>
-
     <!-- logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -101,7 +94,20 @@
       <version>${slf4j.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+
     <!-- testing -->
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-common</artifactId>
+      <version>${jersey.version}</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
@@ -123,64 +129,18 @@
       <scope>test</scope>
     </dependency>
 
-
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>${spring.version}</version>
-      <scope>test</scope>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-core</artifactId>
+      <version>${jena.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-aop</artifactId>
-      <version>${spring.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>${spring.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.glassfish.grizzly</groupId>
-      <artifactId>grizzly-http-servlet</artifactId>
-      <version>${grizzly.version}</version>
-      <scope>test</scope>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-arq</artifactId>
+      <version>${jena.version}</version>
     </dependency>
     
-    <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
-        <version>${javax.servlet-api.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-    <dependency>
-      <groupId>org.glassfish.jersey.core</groupId>
-      <artifactId>jersey-common</artifactId>
-      <version>${jersey.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.glassfish.jersey.ext</groupId>
-      <artifactId>jersey-spring3</artifactId>
-      <version>${jersey.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-
-    <dependency>
-      <groupId>org.glassfish.jersey.test-framework.providers</groupId>
-      <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-      <version>${jersey.version}</version>
-      <scope>test</scope>
-    </dependency>
-
     <dependency>
       <groupId>org.mock-server</groupId>
       <artifactId>mockserver-client-java</artifactId>
@@ -195,49 +155,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-kernel-modeshape</artifactId>
-      <version>${fcrepo.version}</version>
-      <scope>test</scope>
-      <classifier>tests</classifier>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-http-api</artifactId>
-      <version>${fcrepo.version}</version>
-      <scope>test</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-auth-webac</artifactId>
-      <version>${fcrepo.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-configs</artifactId>
-      <version>${fcrepo.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-http-commons</artifactId>
-      <version>${fcrepo.version}</version>
-      <scope>test</scope>
-      <type>test-jar</type>
-    </dependency>
-
-    <dependency>
-      <groupId>org.fcrepo</groupId>
-      <artifactId>fcrepo-auth-common</artifactId>
-      <version>${fcrepo.version}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
@@ -249,6 +166,12 @@
         <filtering>true</filtering>
       </resource>
     </resources>
+    <testResources>
+      <testResource>
+        <filtering>true</filtering>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
 
     <plugins>
 
@@ -342,6 +265,106 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+
+      <!-- Launch jetty for integration testing with fedora -->
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>${jetty.version}</version>
+        <configuration>
+          <supportedPackagings>jar</supportedPackagings>
+          <systemProperties>
+            <force>true</force>
+            <systemProperty>
+              <name>fcrepo.home</name>
+              <value>${project.build.directory}/fcrepo-data</value>
+            </systemProperty>
+            <systemProperty>
+              <name>fcrepo.dynamic.test.port</name>
+              <value>${fcrepo.dynamic.test.port}</value>
+            </systemProperty>
+            <systemProperty>
+              <name>fcrepo.jms.enabled</name>
+              <value>false</value>
+            </systemProperty>
+            <systemProperty>
+              <name>fcrepo.home</name>
+              <value>${project.build.directory}/fcrepo-home</value>
+            </systemProperty>
+            <systemProperty>
+              <name>fcrepo.external.content.allowed</name>
+              <value>${project.build.directory}/test-classes/allowed_external_paths.txt</value>
+            </systemProperty>
+            <systemProperty>
+              <name>fcrepo.activemq.directory</name>
+              <value>${project.build.directory}/active-mq</value>
+            </systemProperty>	
+          </systemProperties>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+          <stopKey>STOP</stopKey>
+          <stopPort>${jetty.dynamic.stop.port}</stopPort>
+          <daemon>true</daemon>
+        </configuration>
+        <executions>
+          <execution>
+            <id>start-jetty</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+            <configuration>
+              <jettyXml>${project.build.directory}/test-classes/jetty-test.xml</jettyXml>
+              <scanIntervalSeconds>0</scanIntervalSeconds>
+              <daemon>true</daemon>
+              <contextHandlers>
+                <contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
+                  <war>${project.build.directory}/fcrepo.war</war>
+                  <contextPath>/fcrepo</contextPath>
+                </contextHandler>
+              </contextHandlers>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>stop-jetty</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+            <configuration>
+              <stopPort>${jetty.dynamic.stop.port}</stopPort>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <!--Bring in fcrepo webapp for integration testing-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.fcrepo</groupId>
+                  <artifactId>fcrepo-webapp</artifactId>
+                  <version>${fcrepo.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <destFileName>fcrepo.war</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

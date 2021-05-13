@@ -17,6 +17,7 @@
  */
 package org.fcrepo.client;
 
+import static java.util.Arrays.asList;
 import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_MODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_NONE_MATCH;
@@ -95,7 +96,7 @@ public class GetBuilder extends RetrieveRequestBuilder {
      * @return this builder
      */
     public GetBuilder preferMinimal() {
-        request.setHeader(PREFER, buildPrefer("minimal", null, null));
+        request.setHeader(PREFER, buildPrefer("minimal", null,  asList(URI.create("http://fedora.info/definitions/fcrepo#ServerManaged"))));
         return this;
     }
 

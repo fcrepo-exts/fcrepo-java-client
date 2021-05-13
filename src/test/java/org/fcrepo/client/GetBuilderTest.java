@@ -94,7 +94,7 @@ public class GetBuilderTest {
         testBuilder.preferMinimal().perform();
 
         final HttpRequestBase request = getRequest();
-        assertEquals("return=minimal", request.getFirstHeader(PREFER).getValue());
+        assertEquals("return=minimal; omit=\"http://fedora.info/definitions/fcrepo#ServerManaged\"", request.getFirstHeader(PREFER).getValue());
     }
 
     @Test
