@@ -48,6 +48,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -549,11 +550,13 @@ public class FcrepoClientIT extends AbstractResourceIT {
         create();
 
         final FcrepoResponse response = client.get(url)
-                .preferMinimal()
-                .perform();
+                .preferRepresentation(Arrays.asList(URI.create("http://www.w3.org/ns/ldp#PreferMinimalContainer")),
+                        Arrays.asList(URI.create("http://fedora.info/definitions/fcrepo#ServerManaged"))).perform();
 
         assertEquals(OK.getStatusCode(), response.getStatusCode());
-        assertEquals("return=minimal", response.getHeaderValue("Preference-Applied"));
+        assertEquals("return=representation; include=\"http://www.w3.org/ns/ldp#PreferMinimalContainer\"; " +
+                "omit=\"http://fedora.info/definitions/fcrepo#ServerManaged\"",
+                response.getHeaderValue("Preference-Applied"));
     }
 
     @Test
@@ -706,8 +709,8 @@ public class FcrepoClientIT extends AbstractResourceIT {
     private String getTurtle(final URI url) throws Exception {
         final FcrepoResponse getResponse = client.get(url)
                 .accept("text/turtle")
-                .preferMinimal()
-                .perform();
+                .preferRepresentation(Arrays.asList(URI.create("http://www.w3.org/ns/ldp#PreferMinimalContainer")),
+                        Arrays.asList(URI.create("http://fedora.info/definitions/fcrepo#ServerManaged"))).perform();
         return IOUtils.toString(getResponse.getBody(), "UTF-8");
     }
 }

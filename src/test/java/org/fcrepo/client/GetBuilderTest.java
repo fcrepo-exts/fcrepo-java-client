@@ -91,10 +91,13 @@ public class GetBuilderTest {
 
     @Test
     public void testPreferMinimal() throws Exception {
-        testBuilder.preferMinimal().perform();
+        testBuilder.preferRepresentation(Arrays.asList(
+                URI.create("http://www.w3.org/ns/ldp#PreferMinimalContainer")), null)
+                .perform();
 
         final HttpRequestBase request = getRequest();
-        assertEquals("return=minimal; omit=\"http://fedora.info/definitions/fcrepo#ServerManaged\"", request.getFirstHeader(PREFER).getValue());
+        assertEquals("return=representation; include=\"http://www.w3.org/ns/ldp#PreferMinimalContainer\"",
+                request.getFirstHeader(PREFER).getValue());
     }
 
     @Test
