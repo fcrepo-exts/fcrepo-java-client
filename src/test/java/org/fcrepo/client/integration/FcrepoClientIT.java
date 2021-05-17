@@ -364,7 +364,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         create();
         final String body = "<> <http://purl.org/dc/elements/1.1/title> \"some-title\"";
 
-        // try to update without lenient header // fedora 6 is lenient by default.
+        // try to update without lenient header
         final FcrepoResponse strictResponse = client.put(url)
                 .body(new ByteArrayInputStream(body.getBytes()), TEXT_TURTLE)
                 .perform();
