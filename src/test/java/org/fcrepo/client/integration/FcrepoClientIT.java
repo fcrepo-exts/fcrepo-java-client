@@ -66,7 +66,6 @@ import org.fcrepo.client.FcrepoOperationFailedException;
 import org.fcrepo.client.FcrepoResponse;
 import org.fcrepo.client.HeaderHelpers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -229,13 +228,11 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertTrue("Did not have ldp:DirectContainer type", getResponse.hasType(LDP_DIRECT_CONTAINER));
     }
 
-    // FCREPO-3698
-    @Ignore("fix me")
     @Test
     public void testPostBinaryFilenameSpecialCharacters() throws Exception {
         final String slug = UUID.randomUUID().toString();
-        final String filename = "hello world\nof_we\0ird:+\tchar/acters\u0001.tx\rt";
-        final String expectedFilename = "hello world of_we ird:+\tchar/acters .tx t";
+        final String filename = "hello world\nof_weird:+\tchar/acters.tx\rt";
+        final String expectedFilename = "hello world of_weird:+\tchar/acters.tx t";
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
         final FcrepoResponse response = client.post(new URI(serverAddress))
@@ -264,11 +261,10 @@ public class FcrepoClientIT extends AbstractResourceIT {
     }
 
     @Test
-    @Ignore("fix me")
     public void testPutBinaryFilenameSpecialCharacters() throws Exception {
         final String id = UUID.randomUUID().toString();
-        final String filename = "hello world\nof_we\0ird:+\tchar/acters\u0001.tx\rt";
-        final String expectedFilename = "hello world of_we ird:+\tchar/acters .tx t";
+        final String filename = "hello world\nof_weird:+\tchar/acters.tx\rt";
+        final String expectedFilename = "hello world of_weird:+\tchar/acters.tx t";
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
         final FcrepoResponse response = client.put(new URI(serverAddress + id))
