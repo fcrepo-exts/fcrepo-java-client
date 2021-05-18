@@ -24,15 +24,10 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoResponse;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * @author bbpennel
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("/spring-test/test-container.xml")
 public abstract class AbstractResourceIT {
 
     protected static final int SERVER_PORT = Integer.parseInt(System
@@ -41,7 +36,7 @@ public abstract class AbstractResourceIT {
     protected static final String HOSTNAME = "localhost";
 
     protected static final String serverAddress = "http://" + HOSTNAME + ":" +
-            SERVER_PORT + "/rest/";
+            SERVER_PORT + "/fcrepo/rest/";
 
     protected final PoolingHttpClientConnectionManager connectionManager =
             new PoolingHttpClientConnectionManager();

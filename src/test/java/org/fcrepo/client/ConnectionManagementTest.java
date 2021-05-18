@@ -344,15 +344,6 @@ public class ConnectionManagementTest {
                 case PUT:
                     response = client.put(uri.asUri()).body(nullIn, TEXT_TURTLE).perform();
                     break;
-
-                case MOVE:
-                    response = client.move(uri.asUri(), uri.asUri()).perform();
-                    break;
-
-                case COPY:
-                    response = client.copy(uri.asUri(), uri.asUri()).perform();
-                    break;
-
                 default:
                     fail("Unknown HTTP method: " + method.name());
             }

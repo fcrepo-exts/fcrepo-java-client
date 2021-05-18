@@ -89,17 +89,6 @@ public class GetBuilder extends RetrieveRequestBuilder {
     }
 
     /**
-     * Set the prefer header for this request to minimal, to indicate that only triples directly related to a resource
-     * should be returned.
-     *
-     * @return this builder
-     */
-    public GetBuilder preferMinimal() {
-        request.setHeader(PREFER, buildPrefer("minimal", null, null));
-        return this;
-    }
-
-    /**
      * Set the prefer header for this request to representation, to indicate that links to other resources and their
      * properties should also be included.
      *

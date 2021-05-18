@@ -89,7 +89,6 @@ public class FcrepoClientTest {
 
         final FcrepoResponse response = testClient.get(uri)
                 .accept(RDF_XML)
-                .preferMinimal()
                 .perform();
 
         assertEquals(response.getUrl(), uri);
@@ -479,9 +478,7 @@ public class FcrepoClientTest {
 
         final FcrepoResponse response = testClient.get(uri)
                 .accept(RDF_XML)
-                .preferMinimal()
                 .perform();
-
         assertEquals(response.getUrl(), uri);
         assertEquals(response.getStatusCode(), status);
         assertEquals(response.getContentType(), RDF_XML);

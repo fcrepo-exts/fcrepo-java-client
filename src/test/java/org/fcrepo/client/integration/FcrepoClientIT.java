@@ -48,10 +48,12 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.ws.rs.core.EntityTag;
 
@@ -63,19 +65,12 @@ import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoOperationFailedException;
 import org.fcrepo.client.FcrepoResponse;
 import org.fcrepo.client.HeaderHelpers;
-import org.jgroups.util.UUID;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * @author bbpennel
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("/spring-test/test-container.xml")
 public class FcrepoClientIT extends AbstractResourceIT {
 
     protected URI url;
@@ -86,7 +81,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         super();
 
         client = FcrepoClient.client()
-                .credentials("fedoraAdmin", "password")
+                .credentials("fedoraAdmin", "fedoraAdmin")
                 .authScope("localhost")
                 .build();
     }
@@ -233,12 +228,11 @@ public class FcrepoClientIT extends AbstractResourceIT {
         assertTrue("Did not have ldp:DirectContainer type", getResponse.hasType(LDP_DIRECT_CONTAINER));
     }
 
-    // FCREPO-3698
     @Test
     public void testPostBinaryFilenameSpecialCharacters() throws Exception {
         final String slug = UUID.randomUUID().toString();
-        final String filename = "hello world\nof_we\0ird:+\tchar/acters\u0001.tx\rt";
-        final String expectedFilename = "hello world of_we ird:+\tchar/acters .tx t";
+        final String filename = "hello world\nof_weird:+\tchar/acters.tx\rt";
+        final String expectedFilename = "hello world of_weird:+\tchar/acters.tx t";
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
         final FcrepoResponse response = client.post(new URI(serverAddress))
@@ -269,8 +263,8 @@ public class FcrepoClientIT extends AbstractResourceIT {
     @Test
     public void testPutBinaryFilenameSpecialCharacters() throws Exception {
         final String id = UUID.randomUUID().toString();
-        final String filename = "hello world\nof_we\0ird:+\tchar/acters\u0001.tx\rt";
-        final String expectedFilename = "hello world of_we ird:+\tchar/acters .tx t";
+        final String filename = "hello world\nof_weird:+\tchar/acters.tx\rt";
+        final String expectedFilename = "hello world of_weird:+\tchar/acters.tx t";
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
         final FcrepoResponse response = client.put(new URI(serverAddress + id))
@@ -370,7 +364,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final FcrepoResponse strictResponse = client.put(url)
                 .body(new ByteArrayInputStream(body.getBytes()), TEXT_TURTLE)
                 .perform();
-        assertEquals(CONFLICT.getStatusCode(), strictResponse.getStatusCode());
+        assertEquals(NO_CONTENT.getStatusCode(), strictResponse.getStatusCode());
 
         // try again with lenient header
         final FcrepoResponse lenientResponse = client.put(url)
@@ -552,11 +546,13 @@ public class FcrepoClientIT extends AbstractResourceIT {
         create();
 
         final FcrepoResponse response = client.get(url)
-                .preferMinimal()
-                .perform();
+                .preferRepresentation(Arrays.asList(URI.create("http://www.w3.org/ns/ldp#PreferMinimalContainer")),
+                        Arrays.asList(URI.create("http://fedora.info/definitions/fcrepo#ServerManaged"))).perform();
 
         assertEquals(OK.getStatusCode(), response.getStatusCode());
-        assertEquals("return=minimal", response.getHeaderValue("Preference-Applied"));
+        assertEquals("return=representation; include=\"http://www.w3.org/ns/ldp#PreferMinimalContainer\"; " +
+                "omit=\"http://fedora.info/definitions/fcrepo#ServerManaged\"",
+                response.getHeaderValue("Preference-Applied"));
     }
 
     @Test
@@ -679,43 +675,6 @@ public class FcrepoClientIT extends AbstractResourceIT {
     }
 
     @Test
-    public void testMove() throws Exception {
-        create();
-
-        final URI destUrl = new URI(url.toString() + "_dest");
-        final FcrepoResponse moveResp = client.move(url, destUrl).perform();
-        assertEquals(CREATED.getStatusCode(), moveResp.getStatusCode());
-
-        assertEquals("Object still at original url",
-                GONE.getStatusCode(), client.get(url).perform().getStatusCode());
-
-        assertEquals("Object not at expected new url",
-                OK.getStatusCode(), client.get(destUrl).perform().getStatusCode());
-    }
-
-    @Test
-    public void testCopy() throws Exception {
-        create();
-
-        // Add something identifiable to the record
-        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-        client.patch(url).body(body).perform();
-
-        final URI destUrl = new URI(url.toString() + "_dest");
-        final FcrepoResponse copyResp = client.copy(url, destUrl).perform();
-        assertEquals(CREATED.getStatusCode(), copyResp.getStatusCode());
-
-        final FcrepoResponse originalResp = client.get(url).perform();
-        final String originalContent = IOUtils.toString(originalResp.getBody(), "UTF-8");
-        assertTrue(originalContent.contains("Foo"));
-
-        final FcrepoResponse destResp = client.get(destUrl).perform();
-        final String destContent = IOUtils.toString(destResp.getBody(), "UTF-8");
-        assertTrue(destContent.contains("Foo"));
-    }
-
-    @Ignore("Pending state token implementation in fcrepo")
-    @Test
     public void testStateTokens() throws Exception {
         create();
 
@@ -746,7 +705,8 @@ public class FcrepoClientIT extends AbstractResourceIT {
     private String getTurtle(final URI url) throws Exception {
         final FcrepoResponse getResponse = client.get(url)
                 .accept("text/turtle")
-                .perform();
+                .preferRepresentation(Arrays.asList(URI.create("http://www.w3.org/ns/ldp#PreferMinimalContainer")),
+                        Arrays.asList(URI.create("http://fedora.info/definitions/fcrepo#ServerManaged"))).perform();
         return IOUtils.toString(getResponse.getBody(), "UTF-8");
     }
 }
