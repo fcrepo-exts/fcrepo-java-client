@@ -42,7 +42,7 @@
     <commons.lang3.version>3.7</commons.lang3.version>
     <httpclient.version>4.5.13</httpclient.version>
     <javax.ws.rs-api.vesion>2.0.1</javax.ws.rs-api.vesion>
-    <jersey.version>2.32</jersey.version>
+    <jersey.version>2.34</jersey.version>
     <logback.version>1.2.3</logback.version>
     <mockito.version>2.23.0</mockito.version>
     <mockserver.version>5.4.1</mockserver.version>
