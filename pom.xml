@@ -133,12 +133,14 @@
       <groupId>org.apache.jena</groupId>
       <artifactId>jena-core</artifactId>
       <version>${jena.version}</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.apache.jena</groupId>
       <artifactId>jena-arq</artifactId>
       <version>${jena.version}</version>
+      <scope>test</scope>
     </dependency>
     
     <dependency>
