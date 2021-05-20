@@ -7,6 +7,7 @@ package org.fcrepo.client;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -44,7 +45,7 @@ import org.slf4j.Logger;
  * @author Aaron Coburn
  * @since October 20, 2014
  */
-public class FcrepoClient {
+public class FcrepoClient implements Closeable {
 
     private CloseableHttpClient httpclient;
 
@@ -181,6 +182,11 @@ public class FcrepoClient {
      */
     public OptionsBuilder options(final URI url) {
         return new OptionsBuilder(url, this);
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.httpclient.close();
     }
 
     /**
