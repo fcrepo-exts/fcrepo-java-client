@@ -5,10 +5,7 @@
  */
 package org.fcrepo.client;
 
-import static org.fcrepo.client.MockHttpExpectations.host;
-import static org.fcrepo.client.MockHttpExpectations.port;
 import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
-import static org.fcrepo.client.TestUtils.setField;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -159,20 +156,16 @@ public class ConnectionManagementTest {
         // Uris that we connect to, and answered by the Mock http server
         uris = new MockHttpExpectations.SupportedUris();
 
-        // A FcrepoClient configured to throw exceptions when an error is encountered.
-        client = new FcrepoClient(null, null, host + ":" + port, true);
-
         // We're testing the behavior of a default HttpClient with a pooling connection manager.
         underTest = HttpClientBuilder.create().setConnectionManager(connectionManager).build();
 
-        // Put our testable HttpClient instance on the FcrepoClient
-        setField(client, "httpclient", underTest);
+        // A FcrepoClient configured to throw exceptions when an error is encountered.
+        client = new FcrepoClient(underTest, true);
 
     }
 
     @After
     public void tearDown() throws IOException {
-        underTest.close();
         client.close();
     }
 
