@@ -31,6 +31,8 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     protected static FcrepoClient authClient;
 
+    protected static FcrepoClient authClientNoHost;
+
     public FcrepoAuthenticationIT() throws Exception {
         super();
 
@@ -41,6 +43,9 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
                 .credentials("fedoraAdmin", "fedoraAdmin")
                 .authScope("localhost")
                 .build();
+        authClientNoHost = FcrepoClient.client()
+                .credentials("fedoraAdmin", "fedoraAdmin")
+                .build();
     }
 
     @Test
@@ -48,6 +53,19 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
         final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
         final FcrepoResponse response = authClient.put(new URI(serverAddress + "testobj1"))
+                .body(body, TEXT_TURTLE)
+                .perform();
+        final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
+        assertEquals("Didn't get a CREATED response! Got content:\n" + content,
+                CREATED.getStatusCode(), status);
+    }
+
+    @Test
+    public void testAuthUserNoHostCanPut() throws Exception {
+
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        final FcrepoResponse response = authClientNoHost.put(new URI(serverAddress + "testobj3"))
                 .body(body, TEXT_TURTLE)
                 .perform();
         final String content = IOUtils.toString(response.getBody(), "UTF-8");
@@ -81,6 +99,18 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
     }
 
     @Test
+    public void testAuthUserNoHostCanPatch() throws Exception {
+
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        final FcrepoResponse response = authClientNoHost.patch(new URI(serverAddress + "testobj3"))
+                .body(body)
+                .perform();
+        final int status = response.getStatusCode();
+        assertEquals("Didn't get a successful PATCH response! Got content:\n",
+                NO_CONTENT.getStatusCode(), status);
+    }
+
+    @Test
     public void testUnAuthUserCannotPatch() throws Exception {
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
         final FcrepoResponse response = client.patch(new URI(serverAddress + "testobj1"))
@@ -105,6 +135,18 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
     }
 
     @Test
+    public void testAuthUserNoHostCanPost() throws Exception {
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        final FcrepoResponse response = authClientNoHost.post(new URI(serverAddress))
+                .body(body, TEXT_TURTLE)
+                .perform();
+        final String content = IOUtils.toString(response.getBody(), "UTF-8");
+        final int status = response.getStatusCode();
+        assertEquals("Didn't get a CREATED response! Got content:\n" + content,
+                CREATED.getStatusCode(), status);
+    }
+
+    @Test
     public void testUnAuthUserCannotPost() throws Exception {
         final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
         final FcrepoResponse response = client.post(new URI(serverAddress))
@@ -120,6 +162,15 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
     public void testAuthUserCanGet()
             throws Exception {
         final FcrepoResponse response = authClient.get(new URI(serverAddress)).perform();
+        final int status = response.getStatusCode();
+        assertEquals("Authenticated user can not read root!", OK
+                .getStatusCode(), status);
+    }
+
+    @Test
+    public void testAuthUserNoHostCanGet()
+            throws Exception {
+        final FcrepoResponse response = authClientNoHost.get(new URI(serverAddress)).perform();
         final int status = response.getStatusCode();
         assertEquals("Authenticated user can not read root!", OK
                 .getStatusCode(), status);
