@@ -1,27 +1,28 @@
-Java Client for fcrepo
-=======================
+# Java Client for fcrepo
 
-This project serves as a client library for interacting with Fedora 
-using Java.
+This project serves as a client library for interacting with Fedora using Java.
 
 [![Build Status](https://travis-ci.org/fcrepo-exts/fcrepo-java-client.png?branch=master)](https://travis-ci.org/fcrepo-exts/fcrepo-java-client)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.client/fcrepo-java-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.fcrepo.client/fcrepo-java-client/)
 
-Usage Examples
---------------
+## Usage Examples
 
-###Create a Fedora client
+### Create a Fedora client
+
 ```java
 FcrepoClient client = FcrepoClient.client().build();
 ```
 
-####Create a Fedora client with credentials
+#### Create a Fedora client with credentials
+
 ```java
 FcrepoClient client = FcrepoClient.client().credentials(username, password).build();
 ```
 
-###CRUD
-* Create a new container with RDF properties:
+### CRUD
+
+Create a new container with RDF properties:
+
 ```java
 try (FcrepoResponse response = new PostBuilder(uri, client)
         .body(turtleFile, "text/turtle")
@@ -31,7 +32,8 @@ try (FcrepoResponse response = new PostBuilder(uri, client)
 }
 ```
 
-* Uploaded file with checksum mismatch:
+Uploaded file with checksum mismatch:
+
 ```java
 try (FcrepoResponse response = new PostBuilder(uri, client)
         .body(pictureFile, "image/jpg")
@@ -42,7 +44,8 @@ try (FcrepoResponse response = new PostBuilder(uri, client)
 }
 ```
 
-* Replace triples on resource:
+Replace triples on resource:
+
 ```java
 try (FcrepoResponse response = new PutBuilder(uri, client)
       .body(turtleFile, "text/turtle")
@@ -52,7 +55,8 @@ try (FcrepoResponse response = new PutBuilder(uri, client)
 }
 ```
 
-* Retrieving a resource in RDF+XML format:
+Retrieving a resource in RDF+XML format:
+
 ```java
 try (FcrepoResponse response = new GetBuilder(uri, client)
         .accept("application/rdf+xml")
@@ -61,7 +65,8 @@ try (FcrepoResponse response = new GetBuilder(uri, client)
 }
 ```
 
-* Retrieving a binary/Non-RDF source:
+Retrieving a binary/Non-RDF source:
+
 ```java
 try (FcrepoResponse response = new GetBuilder(binaryUri, client)
         .perform()) {
@@ -74,7 +79,8 @@ try (FcrepoResponse response = new GetBuilder(binaryUri, client)
 }
 ```
 
-* Retrieving a resource with links to other resources, including/excluding specific preferences:
+Retrieving a resource with links to other resources, including/excluding specific preferences:
+
 ```java
 List<URI> includes = Arrays.asList(
       URI.create("http://fedora.info/definitions/v4/repository#InboundReferences"));
@@ -89,20 +95,24 @@ try (FcrepoResponse response = new GetBuilder(uri, client)
 }
 ```
 
-* Delete a resource:
+Delete a resource:
+
 ```java
 try (FcrepoResponse response = new DeleteBuilder(uri, client).perform()) {
     logger.debug("Resource deletion status: {}", response.getStatusCode());
 }
 ```
 
-###Versioning
-* After the first version is created on a resource, you can see a triple on the resource with predicate fedora:hasVersions like below
+### Versioning
+
+After the first version is created on a resource, you can see a triple on the resource with predicate fedora:hasVersions like below
+
 ```
 <fedoraurl/resource1> fedora:hasVersions <fedoraurl/resource1/fcr:versions>
 ```
 
-* Create a version:
+Create a version:
+
 ```java
 URI uri = URI.create("fedoraurl/fcr:versions");
 try (FcrepoResponse response = new PostBuilder(uri, client)
@@ -113,7 +123,8 @@ try (FcrepoResponse response = new PostBuilder(uri, client)
 }
 ```
 
-* Delete a version:
+Delete a version:
+
 ```java
 URI uri = URI.create("fedoraurl/fcr:versions/version1");
 try (FcrepoResponse response = new DeleteBuilder(uri, client).perform()) {
@@ -121,7 +132,8 @@ try (FcrepoResponse response = new DeleteBuilder(uri, client).perform()) {
 }
 ```
 
-* Revert a version:
+Revert a version:
+
 ```java
 URI uri = URI.create("fedoraurl/fcr:versions/version1");
 try (FcrepoResponse response = new PatchBuilder(uri, client).perform()) {
@@ -129,13 +141,16 @@ try (FcrepoResponse response = new PatchBuilder(uri, client).perform()) {
 }
 ```
 
-###Fixity
-* Fixity only applies to Binary resources. You can see a triple on NonRdfSourceDescription with predicate fedora:hasFixityService like below
+### Fixity
+
+Fixity only applies to Binary resources. You can see a triple on NonRdfSourceDescription with predicate fedora:hasFixityService like below
+
 ```
 <fedoraurl/node1> fedora:hasFixityService <fedoraurl/node1/fcr:fixity>
 ```
 
-* Fixity check:
+Fixity check:
+
 ```java
 URI uri = URI.create("fedoraurl/fcr:fixity");
 try (FcrepoResponse response = new GetBuilder(uri, client).perform()) {
@@ -143,13 +158,16 @@ try (FcrepoResponse response = new GetBuilder(uri, client).perform()) {
 }
 ```
 
-###Batch atomic operations
-* A triple on the repository root with predicate fedora:hasTransactionProvider defines the location of the transaction provider:
+### Batch atomic operations
+
+A triple on the repository root with predicate fedora:hasTransactionProvider defines the location of the transaction provider:
+
 ```
 <fedoraurl/tx:transactionid/> fedora:hasTransactionProvider <fedoraurl/fcr:tx>
 ```
 
-* Create a transaction:
+Create a transaction:
+
 ```java
 URI uri = URI.create("fedoraurl/fcr:tx");
 try (FcrepoResponse response = new PostBuilder(uri, client).perform()) {
@@ -158,7 +176,8 @@ try (FcrepoResponse response = new PostBuilder(uri, client).perform()) {
 }
 ```
 
-* Keep an existing transaction alive:
+Keep an existing transaction alive:
+
 ```java
 URI uri = URI.create("fedoraurl/tx:xxxx/fcr:tx");
 try (FcrepoResponse response = new PostBuilder(uri, client).perform()) {
@@ -166,7 +185,8 @@ try (FcrepoResponse response = new PostBuilder(uri, client).perform()) {
 }
 ```
 
-* Commit a transaction:
+Commit a transaction:
+
 ```java
 URI uri = URI.create("fedoraurl/tx:xxxx/fcr:tx/fcr:commit");
 try (FcrepoResponse response = new PostBuilder(uri, client).perform()) {
@@ -174,7 +194,8 @@ try (FcrepoResponse response = new PostBuilder(uri, client).perform()) {
 }
 ```
 
-* Rollback a transaction:
+Rollback a transaction:
+
 ```java
 URI uri = URI.create("fedoraurl/tx:xxxx/fcr:tx/fcr:rollback");
 try (FcrepoResponse response = new PostBuilder(uri, client).perform()) {
@@ -182,7 +203,8 @@ try (FcrepoResponse response = new PostBuilder(uri, client).perform()) {
 }
 ```
 
-###Processing link headers:
+### Processing link headers
+
 ```java
 try (FcrepoResponse response = new GetBuilder(uriForBinary, client).perform()) {
     final List<URI> links = response.getLinkHeaders(FedoraHeaderConstants.DESCRIBED_BY);
@@ -190,14 +212,16 @@ try (FcrepoResponse response = new GetBuilder(uriForBinary, client).perform()) {
 }
 ```
 
-* Container Link Headers
+Container Link Headers
+
 ```
 <http://www.w3.org/ns/ldp#Resource>;rel="type",
 <http://www.w3.org/ns/ldp#Container>;rel="type",
 <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
 ```
 
-* NonRDFSource Link Headers
+NonRDFSource Link Headers
+
 ```
 <http://www.w3.org/ns/ldp#Resource>;rel="type",
 <http://www.w3.org/ns/ldp#NonRDFSource>;rel="type",
@@ -205,15 +229,13 @@ try (FcrepoResponse response = new GetBuilder(uriForBinary, client).perform()) {
 
 ```
 
-History
--------
+## History
 
-The stateless core of this codebase was written as part of the 
+The stateless core of this codebase was written as part of the
 fcrepo-camel project but has since been extracted to be an independent
 library so that it may be used in other applications.
 
-Including in your project
--------------------------
+## Including in your project
 
 You can include the `fcrepo-java-client` library in your project with the following coordinates:
 
@@ -235,10 +257,9 @@ dependencies {
 }
 ```
 
-Maintainers
------------
+## Maintainers
 
 Current maintainers:
+
 * [Daniel Lamb](https://github.com/dannylamb)
 * [Mike Durbin](https://github.com/mikedurbin)
-
