@@ -48,7 +48,7 @@
     <mockserver.version>5.4.1</mockserver.version>
     <slf4j.version>1.7.25</slf4j.version>
     <spring.version>5.3.4</spring.version>
-    <jena.version>3.17.0</jena.version>
+    <jena.version>4.2.0</jena.version>
     <jetty.version>9.4.34.v20201102</jetty.version>
     <jetty.users.file>${project.build.directory}/test-classes/jetty-users.properties</jetty.users.file>
 
