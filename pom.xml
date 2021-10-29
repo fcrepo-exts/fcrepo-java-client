@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.fcrepo</groupId>
     <artifactId>fcrepo-parent</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.1.0</version>
   </parent>
 
   <groupId>org.fcrepo.client</groupId>
@@ -20,8 +20,8 @@
   <url>http://fcrepo.org</url>
 
   <organization>
-    <name>DuraSpace, Inc.</name>
-    <url>http://www.duraspace.org/</url>
+    <name>Lyrasis, Inc.</name>
+    <url>http://www.lyrasis.org/</url>
   </organization>
 
   <properties>
@@ -37,7 +37,7 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <fcrepo.version>6.0.0-SNAPSHOT</fcrepo.version>
+    <fcrepo.version>6.1.0</fcrepo.version>
     <commons.io.version>2.7</commons.io.version>
     <commons.lang3.version>3.7</commons.lang3.version>
     <httpclient.version>4.5.13</httpclient.version>
