@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.fcrepo</groupId>
     <artifactId>fcrepo-parent</artifactId>
-    <version>6.0.0</version>
+    <version>6.1.0</version>
   </parent>
 
   <groupId>org.fcrepo.client</groupId>
@@ -20,8 +20,8 @@
   <url>http://fcrepo.org</url>
 
   <organization>
-    <name>DuraSpace, Inc.</name>
-    <url>http://www.duraspace.org/</url>
+    <name>Lyrasis, Inc.</name>
+    <url>http://www.lyrasis.org/</url>
   </organization>
 
   <properties>
@@ -37,19 +37,19 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <fcrepo.version>6.0.0</fcrepo.version>
-    <commons.io.version>2.7</commons.io.version>
-    <commons.lang3.version>3.7</commons.lang3.version>
+    <fcrepo.version>6.1.0</fcrepo.version>
+    <commons.io.version>2.11.0</commons.io.version>
+    <commons.lang3.version>3.12.0</commons.lang3.version>
     <httpclient.version>4.5.13</httpclient.version>
     <javax.ws.rs-api.vesion>2.0.1</javax.ws.rs-api.vesion>
-    <jersey.version>2.34</jersey.version>
-    <logback.version>1.2.3</logback.version>
+    <jersey.version>2.35</jersey.version>
+    <logback.version>1.2.6</logback.version>
     <mockito.version>2.23.0</mockito.version>
     <mockserver.version>5.4.1</mockserver.version>
-    <slf4j.version>1.7.25</slf4j.version>
-    <spring.version>5.3.4</spring.version>
-    <jena.version>3.17.0</jena.version>
-    <jetty.version>9.4.34.v20201102</jetty.version>
+    <slf4j.version>1.7.32</slf4j.version>
+    <spring.version>5.3.10</spring.version>
+    <jena.version>4.2.0</jena.version>
+    <jetty.version>9.4.44.v20210927</jetty.version>
     <jetty.users.file>${project.build.directory}/test-classes/jetty-users.properties</jetty.users.file>
 
   </properties>
