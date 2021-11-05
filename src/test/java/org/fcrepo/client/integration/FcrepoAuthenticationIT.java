@@ -41,7 +41,7 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     private static FcrepoClient authClientNoHost;
 
-    private URI testRessourceUrl;
+    private URI testResourceUrl;
 
     @BeforeClass
     public static void beforeClass() {
@@ -67,16 +67,16 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     @Before
     public void before() {
-        testRessourceUrl = URI.create(SERVER_ADDRESS + UUID.randomUUID().toString());
+        testResourceUrl = URI.create(SERVER_ADDRESS + UUID.randomUUID().toString());
     }
 
     @Test
     public void testAuthUserCanPut() throws Exception {
 
-        try (final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
-                final FcrepoResponse response = authClient.put(testRessourceUrl)
-                        .body(body, TEXT_TURTLE)
-                        .perform()) {
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        try (final FcrepoResponse response = authClient.put(testResourceUrl)
+                .body(body, TEXT_TURTLE)
+                .perform()) {
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
             assertEquals("Didn't get a CREATED response! Got content:\n" + content,
@@ -87,10 +87,10 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
     @Test
     public void testAuthUserNoHostCanPut() throws Exception {
 
-        try (final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
-                final FcrepoResponse response = authClientNoHost.put(testRessourceUrl)
-                        .body(body, TEXT_TURTLE)
-                        .perform()) {
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        try (final FcrepoResponse response = authClientNoHost.put(testResourceUrl)
+                .body(body, TEXT_TURTLE)
+                .perform()) {
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
             assertEquals("Didn't get a CREATED response! Got content:\n" + content,
@@ -100,10 +100,10 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     @Test
     public void testUnAuthUserCannotPut() throws Exception {
-        try (final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
-                final FcrepoResponse response = unauthClient.put(testRessourceUrl)
-                        .body(body, TEXT_TURTLE)
-                        .perform()) {
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        try (final FcrepoResponse response = unauthClient.put(testResourceUrl)
+                .body(body, TEXT_TURTLE)
+                .perform()) {
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
             assertEquals("Unauthenticated user should be forbidden! Got content:\n" + content,
@@ -113,14 +113,13 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     @Test
     public void testAuthUserCanPatch() throws Exception {
-        try (final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes())) {
-            createTestRessource(body, TEXT_TURTLE);
-        }
+        final InputStream rdfBody = new ByteArrayInputStream(rdfTtl.getBytes());
+        createTestResource(rdfBody, TEXT_TURTLE);
 
-        try (final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-                final FcrepoResponse response = authClient.patch(testRessourceUrl)
-                        .body(body)
-                        .perform()) {
+        final InputStream sparqlUpdateBody = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        try (final FcrepoResponse response = authClient.patch(testResourceUrl)
+                .body(sparqlUpdateBody)
+                .perform()) {
             final int status = response.getStatusCode();
             assertEquals("Didn't get a successful PATCH response! Got content:\n",
                     NO_CONTENT.getStatusCode(), status);
@@ -129,14 +128,13 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     @Test
     public void testAuthUserNoHostCanPatch() throws Exception {
-        try (final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes())) {
-            createTestRessource(body, TEXT_TURTLE);
-        }
+        final InputStream rdfBody = new ByteArrayInputStream(rdfTtl.getBytes());
+        createTestResource(rdfBody, TEXT_TURTLE);
 
-        try (final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-                final FcrepoResponse response = authClientNoHost.patch(testRessourceUrl)
-                        .body(body)
-                        .perform()) {
+        final InputStream sparqlUpdateBody = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        try (final FcrepoResponse response = authClientNoHost.patch(testResourceUrl)
+                .body(sparqlUpdateBody)
+                .perform()) {
             final int status = response.getStatusCode();
             assertEquals("Didn't get a successful PATCH response! Got content:\n",
                     NO_CONTENT.getStatusCode(), status);
@@ -145,14 +143,13 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     @Test
     public void testUnAuthUserCannotPatch() throws Exception {
-        try (final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes())) {
-            createTestRessource(body, TEXT_TURTLE);
-        }
+        final InputStream rdfBody = new ByteArrayInputStream(rdfTtl.getBytes());
+        createTestResource(rdfBody, TEXT_TURTLE);
 
-        try (final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-                final FcrepoResponse response = unauthClient.patch(testRessourceUrl)
-                        .body(body)
-                        .perform()) {
+        final InputStream sparqlUpdateBody = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        try (final FcrepoResponse response = unauthClient.patch(testResourceUrl)
+                .body(sparqlUpdateBody)
+                .perform()) {
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
             assertEquals("Unauthenticated user should be forbidden! Got content:\n" + content,
@@ -162,10 +159,10 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     @Test
     public void testAuthUserCanPost() throws Exception {
-        try (final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
-                final FcrepoResponse response = authClient.post(new URI(SERVER_ADDRESS))
-                        .body(body, TEXT_TURTLE)
-                        .perform()) {
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        try (final FcrepoResponse response = authClient.post(new URI(SERVER_ADDRESS))
+                .body(body, TEXT_TURTLE)
+                .perform()) {
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
             assertEquals("Didn't get a CREATED response! Got content:\n" + content,
@@ -175,10 +172,10 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     @Test
     public void testAuthUserNoHostCanPost() throws Exception {
-        try (final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
-                final FcrepoResponse response = authClientNoHost.post(new URI(SERVER_ADDRESS))
-                        .body(body, TEXT_TURTLE)
-                        .perform()) {
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        try (final FcrepoResponse response = authClientNoHost.post(new URI(SERVER_ADDRESS))
+                .body(body, TEXT_TURTLE)
+                .perform()) {
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
             assertEquals("Didn't get a CREATED response! Got content:\n" + content,
@@ -188,10 +185,10 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
 
     @Test
     public void testUnAuthUserCannotPost() throws Exception {
-        try (final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
-                final FcrepoResponse response = unauthClient.post(new URI(SERVER_ADDRESS))
-                        .body(body, TEXT_TURTLE)
-                        .perform()) {
+        final InputStream body = new ByteArrayInputStream(rdfTtl.getBytes());
+        try (final FcrepoResponse response = unauthClient.post(new URI(SERVER_ADDRESS))
+                .body(body, TEXT_TURTLE)
+                .perform()) {
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
             assertEquals("Unauthenticated user should be forbidden! Got content:\n" + content,
@@ -231,11 +228,11 @@ public class FcrepoAuthenticationIT extends AbstractResourceIT {
         }
     }
 
-    private void createTestRessource(final InputStream body, final String contentType)
+    private void createTestResource(final InputStream body, final String contentType)
             throws IOException, FcrepoOperationFailedException {
-        try (final FcrepoResponse response = authClient.put(testRessourceUrl).perform()) {
-            assertEquals("Test ressource wasn't created at the expected location:\n",
-                    testRessourceUrl.toString(), response.getLocation().toString());
+        try (final FcrepoResponse response = authClient.put(testResourceUrl).perform()) {
+            assertEquals("Test resource wasn't created at the expected location:\n",
+                    testResourceUrl.toString(), response.getLocation().toString());
         }
     }
 }

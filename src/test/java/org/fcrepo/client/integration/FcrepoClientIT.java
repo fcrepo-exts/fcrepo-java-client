@@ -103,7 +103,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
 
-        final URI createdRessourceUri;
+        final URI createdResourceUri;
         try (final FcrepoResponse response =
                 client.post(new URI(SERVER_ADDRESS))
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
@@ -113,16 +113,16 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
-            createdRessourceUri = response.getLocation();
+            createdResourceUri = response.getLocation();
 
             assertEquals("Didn't get a CREATED response! Got content:\n" + content,
                     CREATED.getStatusCode(), status);
-            assertEquals("Location did not match slug", SERVER_ADDRESS + slug, createdRessourceUri.toString());
+            assertEquals("Location did not match slug", SERVER_ADDRESS + slug, createdResourceUri.toString());
 
             assertNotNull("Didn't find linked description!", response.getLinkHeaders("describedby").get(0));
         }
 
-        try (final FcrepoResponse getResponse = client.get(createdRessourceUri).perform()) {
+        try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
             final Map<String, String> contentDisp = getResponse.getContentDisposition();
             assertEquals(filename, contentDisp.get(CONTENT_DISPOSITION_FILENAME));
 
@@ -142,7 +142,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final Path contentPath = Files.createTempFile(null, ".txt");
         FileUtils.write(contentPath.toFile(), fileContent, "UTF-8");
 
-        final URI createdRessourceUri;
+        final URI createdResourceUri;
         try (final FcrepoResponse response =
                 client.post(new URI(SERVER_ADDRESS))
                 .externalContent(contentPath.toUri(), mimetype, ExternalContentHandling.PROXY)
@@ -151,13 +151,13 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
-            createdRessourceUri = response.getLocation();
+            createdResourceUri = response.getLocation();
 
             assertEquals("Didn't get a CREATED response! Got content:\n" + content,
                     CREATED.getStatusCode(), status);
         }
 
-        try (final FcrepoResponse getResponse = client.get(createdRessourceUri).perform()) {
+        try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
             final Map<String, String> contentDisp = getResponse.getContentDisposition();
             assertEquals(filename, contentDisp.get(CONTENT_DISPOSITION_FILENAME));
 
@@ -232,19 +232,19 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
     @Test
     public void testPostDirectContainer() throws Exception {
-        final URI createdRessourceUri;
+        final URI createdResourceUri;
         try (final FcrepoResponse response =
                 client.post(new URI(SERVER_ADDRESS))
                 .addInteractionModel(LDP_DIRECT_CONTAINER)
                 .perform()) {
 
             final int status = response.getStatusCode();
-            createdRessourceUri = response.getLocation();
+            createdResourceUri = response.getLocation();
 
             assertEquals("Didn't get a CREATED response!", CREATED.getStatusCode(), status);
         }
 
-        try (final FcrepoResponse getResponse = client.get(createdRessourceUri).perform()) {
+        try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
             assertTrue("Did not have ldp:DirectContainer type", getResponse.hasType(LDP_DIRECT_CONTAINER));
         }
     }
@@ -257,7 +257,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
 
-        final URI createdRessourceUri;
+        final URI createdResourceUri;
         try (final FcrepoResponse response =
                 client.post(new URI(SERVER_ADDRESS))
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
@@ -267,7 +267,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
-            createdRessourceUri = response.getLocation();
+            createdResourceUri = response.getLocation();
 
             assertEquals("Didn't get a CREATED response! Got content:\n" + content,
                     CREATED.getStatusCode(), status);
@@ -276,7 +276,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
             assertNotNull("Didn't find linked description!", response.getLinkHeaders("describedby").get(0));
         }
 
-        try (final FcrepoResponse getResponse = client.get(createdRessourceUri).perform()) {
+        try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
             final Map<String, String> contentDisp = getResponse.getContentDisposition();
             assertEquals(expectedFilename, contentDisp.get(CONTENT_DISPOSITION_FILENAME));
 
@@ -295,7 +295,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
 
-        final URI createdRessourceUri;
+        final URI createdResourceUri;
         try (final FcrepoResponse response =
                 client.put(new URI(SERVER_ADDRESS + id))
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
@@ -304,7 +304,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
-            createdRessourceUri = response.getLocation();
+            createdResourceUri = response.getLocation();
 
             assertEquals("Didn't get a CREATED response! Got content:\n" + content,
                     CREATED.getStatusCode(), status);
@@ -313,7 +313,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
             assertNotNull("Didn't find linked description!", response.getLinkHeaders("describedby").get(0));
         }
 
-        try (final FcrepoResponse getResponse = client.get(createdRessourceUri).perform()) {
+        try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
             final Map<String, String> contentDisp = getResponse.getContentDisposition();
             assertEquals(expectedFilename, contentDisp.get(CONTENT_DISPOSITION_FILENAME));
 
@@ -427,7 +427,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final Path contentPath = Files.createTempFile(null, ".txt");
         FileUtils.write(contentPath.toFile(), fileContent, "UTF-8");
 
-        final URI createdRessourceUri;
+        final URI createdResourceUri;
         try (final FcrepoResponse response = client.put(url)
                 .externalContent(contentPath.toUri(), mimetype, ExternalContentHandling.PROXY)
                 .filename(filename)
@@ -435,13 +435,13 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
             final String content = IOUtils.toString(response.getBody(), "UTF-8");
             final int status = response.getStatusCode();
-            createdRessourceUri = response.getLocation();
+            createdResourceUri = response.getLocation();
 
             assertEquals("Didn't get a CREATED response! Got content:\n" + content,
                     CREATED.getStatusCode(), status);
         }
 
-        try (final FcrepoResponse getResponse = client.get(createdRessourceUri).perform()) {
+        try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
             final Map<String, String> contentDisp = getResponse.getContentDisposition();
             assertEquals(filename, contentDisp.get(CONTENT_DISPOSITION_FILENAME));
 
@@ -471,10 +471,10 @@ public class FcrepoClientIT extends AbstractResourceIT {
         }
 
         // Update triples with sparql update
-        try (final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-                final FcrepoResponse response = client.patch(url)
-                        .body(body)
-                        .perform()) {
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        try (final FcrepoResponse response = client.patch(url)
+                .body(body)
+                .perform()) {
 
             assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
         }
@@ -489,11 +489,11 @@ public class FcrepoClientIT extends AbstractResourceIT {
         }
 
         // Update triples with sparql update
-        try (final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-                final FcrepoResponse response = client.patch(url)
-                        .body(body)
-                        .ifMatch("\"" + createdEtag.getValue() + "\"")
-                        .perform()) {
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        try (final FcrepoResponse response = client.patch(url)
+                .body(body)
+                .ifMatch("\"" + createdEtag.getValue() + "\"")
+                .perform()) {
 
             final EntityTag updateEtag = EntityTag.valueOf(response.getHeaderValue(ETAG));
 
@@ -626,16 +626,16 @@ public class FcrepoClientIT extends AbstractResourceIT {
         // Creating a binary for retrieval
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
-        final URI createdRessourceUri;
+        final URI createdResourceUri;
         try (final FcrepoResponse response = client.post(new URI(SERVER_ADDRESS))
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
                 .perform()) {
 
-            createdRessourceUri = response.getLocation();
+            createdResourceUri = response.getLocation();
         }
 
         // Get the content of the object after the first 6 bytes
-        try (final FcrepoResponse rangeResp = client.get(createdRessourceUri)
+        try (final FcrepoResponse rangeResp = client.get(createdResourceUri)
                 .range(6L, null)
                 .perform()) {
 
@@ -651,17 +651,17 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final String mimetype = "text/plain";
 
         final URI externalURI = URI.create("http://example.com/");
-        final URI ressourceLocation;
+        final URI resourceLocation;
 
         try (final FcrepoResponse response = client.post(new URI(SERVER_ADDRESS))
                 .externalContent(externalURI, mimetype, ExternalContentHandling.REDIRECT)
                 .filename(filename)
                 .perform()
                 ) {
-            ressourceLocation = response.getLocation();
+                    resourceLocation = response.getLocation();
         }
 
-        try (final FcrepoResponse getResponse = client.get(ressourceLocation)
+                try (final FcrepoResponse getResponse = client.get(resourceLocation)
                 .disableRedirects()
                 .perform();
                 ) {
@@ -682,15 +682,15 @@ public class FcrepoClientIT extends AbstractResourceIT {
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
 
-        final URI createdRessourceUri;
+        final URI createdResourceUri;
         try (final FcrepoResponse response = client.post(new URI(SERVER_ADDRESS))
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
                 .perform()) {
-            createdRessourceUri = response.getLocation();
+            createdResourceUri = response.getLocation();
         }
 
         // Request md5 digest with caching disabled
-        try (final FcrepoResponse getResp = client.get(createdRessourceUri)
+        try (final FcrepoResponse getResp = client.get(createdResourceUri)
                 .wantDigest("md5")
                 .noCache()
                 .perform()) {
@@ -717,12 +717,12 @@ public class FcrepoClientIT extends AbstractResourceIT {
         // Creating a binary for retrieval
         final String mimetype = "text/plain";
         final String bodyContent = "Hello world";
-        final URI createdRessourceUri;
+        final URI createdResourceUri;
         try (final FcrepoResponse response = client.post(new URI(SERVER_ADDRESS))
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), mimetype)
                 .perform()) {
 
-            createdRessourceUri = response.getLocation();
+            createdResourceUri = response.getLocation();
         }
 
         final Map<String, Double> qualityMap = new HashMap<>();
@@ -732,7 +732,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
         final String wantDigest = HeaderHelpers.formatQualityValues(qualityMap);
         // Request multiple digests
-        try (final FcrepoResponse getResp = client.head(createdRessourceUri)
+        try (final FcrepoResponse getResp = client.head(createdResourceUri)
                 .wantDigest(wantDigest)
                 .perform()) {
             assertEquals(OK.getStatusCode(), getResp.getStatusCode());
@@ -770,22 +770,21 @@ public class FcrepoClientIT extends AbstractResourceIT {
         }
 
         // Attempt to update triples with an incorrect state token
-        try (final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes())) {
-            try (final FcrepoResponse badTokenResp = client.patch(url)
-                    .body(body)
-                    .ifStateToken("bad_state_token")
-                    .perform()) {
-                assertEquals(PRECONDITION_FAILED.getStatusCode(), badTokenResp.getStatusCode());
-            }
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        try (final FcrepoResponse badTokenResp = client.patch(url)
+                .body(body)
+                .ifStateToken("bad_state_token")
+                .perform()) {
+            assertEquals(PRECONDITION_FAILED.getStatusCode(), badTokenResp.getStatusCode());
+        }
 
-            // Update triples with the correct state token
-            body.reset();
-            try (final FcrepoResponse goodTokenResp = client.patch(url)
-                    .body(body)
-                    .ifStateToken(stateToken)
-                    .perform()) {
-                assertEquals(NO_CONTENT.getStatusCode(), goodTokenResp.getStatusCode());
-            }
+        // Update triples with the correct state token
+        body.reset();
+        try (final FcrepoResponse goodTokenResp = client.patch(url)
+                .body(body)
+                .ifStateToken(stateToken)
+                .perform()) {
+            assertEquals(NO_CONTENT.getStatusCode(), goodTokenResp.getStatusCode());
         }
     }
 
