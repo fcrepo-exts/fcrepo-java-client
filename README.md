@@ -19,6 +19,31 @@ FcrepoClient client = FcrepoClient.client().build();
 FcrepoClient client = FcrepoClient.client().credentials(username, password).build();
 ```
 
+### Properly cleaning up resources allocated by FcrepoClient
+
+FcrepoClient uses the apache HttpClient internally. In order to properly close the `HttpClientConnectionManager`
+used by the apache HttpClient always call the `close()` method of FcrepoClient once you're done:
+
+Using a try-with-resources block:
+
+
+```java
+try (final FcrepoClient client = FcrepoClient.client().build()) {
+  // use client
+}
+```
+
+Using a classic try-finally block:
+
+```java
+final FcrepoClient client = FcrepoClient.client().build());
+try {
+  // use client
+} finally {
+  client.close();
+}
+```
+
 ### CRUD
 
 Create a new container with RDF properties:

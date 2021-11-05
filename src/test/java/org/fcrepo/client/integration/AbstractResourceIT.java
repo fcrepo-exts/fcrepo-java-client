@@ -5,12 +5,8 @@
  */
 package org.fcrepo.client.integration;
 
-import java.util.concurrent.TimeUnit;
-
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoResponse;
 
 /**
@@ -23,19 +19,8 @@ public abstract class AbstractResourceIT {
 
     protected static final String HOSTNAME = "localhost";
 
-    protected static final String serverAddress = "http://" + HOSTNAME + ":" +
+    protected static final String SERVER_ADDRESS = "http://" + HOSTNAME + ":" +
             SERVER_PORT + "/fcrepo/rest/";
-
-    protected final PoolingHttpClientConnectionManager connectionManager =
-            new PoolingHttpClientConnectionManager();
-
-    protected static FcrepoClient client;
-
-    protected AbstractResourceIT() {
-        connectionManager.setMaxTotal(Integer.MAX_VALUE);
-        connectionManager.setDefaultMaxPerRoute(20);
-        connectionManager.closeIdleConnections(3, TimeUnit.SECONDS);
-    }
 
     protected Model getResponseModel(final FcrepoResponse resp) {
         final Model model = ModelFactory.createDefaultModel();

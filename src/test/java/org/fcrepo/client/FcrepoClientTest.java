@@ -13,7 +13,6 @@ import static org.fcrepo.client.TestUtils.SPARQL_UPDATE;
 import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.fcrepo.client.TestUtils.rdfXml;
-import static org.fcrepo.client.TestUtils.setField;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +32,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -62,8 +62,12 @@ public class FcrepoClientTest {
 
     @Before
     public void setUp() throws IOException {
-        testClient = FcrepoClient.client().throwExceptionOnFailure().build();
-        setField(testClient, "httpclient", mockHttpclient);
+        testClient = new FcrepoClient(mockHttpclient, true);
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        testClient.close();
     }
 
     @Test
