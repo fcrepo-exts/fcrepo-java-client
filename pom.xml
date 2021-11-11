@@ -13,7 +13,7 @@
   <artifactId>fcrepo-java-client</artifactId>
   <packaging>jar</packaging>
 
-  <version>6.1.0</version>
+  <version>6.2.0-SNAPSHOT</version>
 
   <name>Fedora Java Client Libraries</name>
   <description>Java libraries for interacting with a Fedora Repository</description>
@@ -58,7 +58,7 @@
     <connection>scm:git:git://github.com/fcrepo-exts/${project_name}.git</connection>
     <developerConnection>scm:git:git@github.com:fcrepo-exts/${project_name}.git</developerConnection>
     <url>https://github.com/fcrepo-exts/fcrepo-java-client</url>
-    <tag>fcrepo-java-client-6.1.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
