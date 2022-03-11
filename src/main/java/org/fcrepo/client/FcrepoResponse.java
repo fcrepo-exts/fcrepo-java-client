@@ -56,6 +56,8 @@ public class FcrepoResponse implements Closeable {
 
     private InputStream body;
 
+    private String transactionUri;
+
     private String contentType;
 
     private boolean closed = false;
@@ -312,5 +314,19 @@ public class FcrepoResponse implements Closeable {
             }
         }
         return contentDisposition;
+    }
+
+    /**
+     * Get the transaction location. If the location is not for a transaction, return null.
+     *
+     * @return the transaction location or null
+     */
+    public String getTransactionUri() {
+        if (transactionUri == null && headers.containsKey(LOCATION)) {
+            final var location = getHeaderValue(LOCATION);
+            transactionUri = location.contains("fcr:tx") ? location : null;
+        }
+
+        return transactionUri;
     }
 }
