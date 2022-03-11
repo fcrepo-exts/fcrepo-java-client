@@ -40,4 +40,9 @@ public class OriginalMementoBuilder extends RequestBuilder {
     public OriginalMementoBuilder addLinkHeader(final FcrepoLink linkHeader) {
         return (OriginalMementoBuilder) super.addLinkHeader(linkHeader);
     }
+
+    @Override
+    public RequestBuilder addTransaction(final String transaction) {
+        throw new IllegalStateException("Mementos are not allowed in transactions");
+    }
 }

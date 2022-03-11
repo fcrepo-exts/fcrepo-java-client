@@ -5,6 +5,7 @@
  */
 package org.fcrepo.client;
 
+import static org.fcrepo.client.FedoraHeaderConstants.ATOMIC_ID;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 
@@ -87,6 +88,17 @@ public abstract class RequestBuilder {
      */
     protected RequestBuilder addLinkHeader(final FcrepoLink linkHeader) {
         request.addHeader(LINK, linkHeader.toString());
+        return this;
+    }
+
+    /**
+     * Add a transaction atomic id header to the request
+     *
+     * @param transaction transaction atomic id
+     * @return this builder
+     */
+    public RequestBuilder addTransaction(final String transaction) {
+        request.addHeader(ATOMIC_ID, transaction);
         return this;
     }
 }

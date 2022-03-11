@@ -45,4 +45,9 @@ public class HistoricMementoBuilder extends PostBuilder {
         UTC_RFC_1123_FORMATTER.parse(mementoDatetime);
         request.setHeader(MEMENTO_DATETIME, mementoDatetime);
     }
+
+    @Override
+    public RequestBuilder addTransaction(final String transaction) {
+        throw new IllegalStateException("Mementos are not allowed in transactions");
+    }
 }
