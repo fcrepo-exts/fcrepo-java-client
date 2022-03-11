@@ -67,6 +67,10 @@ public class FedoraHeaderConstants {
 
     public static final String ACCEPT_DATETIME = "Accept-Datetime";
 
+    public static final String ATOMIC_ID = "Atomic-Id";
+
+    public static final String ATOMIC_EXPIRES = "Atomic-Expires";
+
     private FedoraHeaderConstants() {
     }
 }
