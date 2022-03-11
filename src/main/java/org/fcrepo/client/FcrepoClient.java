@@ -51,6 +51,8 @@ public class FcrepoClient implements Closeable {
 
     private Boolean throwExceptionOnFailure = true;
 
+    private static final String TRANSACTION_ENDPOINT = "fcr:tx";
+
     private static final Logger LOGGER = getLogger(FcrepoClient.class);
 
     /**
@@ -150,6 +152,17 @@ public class FcrepoClient implements Closeable {
      */
     public HistoricMementoBuilder createMemento(final URI url, final String mementoDatetime) {
         return new HistoricMementoBuilder(url, this, mementoDatetime);
+    }
+
+    /**
+     * Make a POST request to create a new Transaction
+     *
+     * @param url the base url of the Fedora repository
+     * @return ???
+     */
+    public PostBuilder startTransaction(final URI url) {
+        final var txUrl = url.resolve(TRANSACTION_ENDPOINT);
+        return post(txUrl);
     }
 
     /**
