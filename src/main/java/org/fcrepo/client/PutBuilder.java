@@ -121,6 +121,11 @@ public class PutBuilder extends BodyRequestBuilder {
         return (PutBuilder) super.addLinkHeader(linkHeader);
     }
 
+    @Override
+    public PutBuilder addTransaction(String transaction) {
+        return (PutBuilder) super.addTransaction(transaction);
+    }
+
     /**
      * Provide a content disposition header which will be used as the filename
      *

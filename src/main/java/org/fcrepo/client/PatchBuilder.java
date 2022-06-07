@@ -101,4 +101,9 @@ public class PatchBuilder extends BodyRequestBuilder {
     public PatchBuilder addLinkHeader(final FcrepoLink linkHeader) {
         return (PatchBuilder) super.addLinkHeader(linkHeader);
     }
+
+    @Override
+    public PatchBuilder addTransaction(String transaction) {
+        return (PatchBuilder) super.addTransaction(transaction);
+    }
 }

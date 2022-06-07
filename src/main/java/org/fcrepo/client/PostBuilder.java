@@ -102,6 +102,11 @@ public class PostBuilder extends BodyRequestBuilder {
     }
 
     @Override
+    public PostBuilder addTransaction(String transaction) {
+        return (PostBuilder) super.addTransaction(transaction);
+    }
+
+    @Override
     public PostBuilder addLinkHeader(final FcrepoLink linkHeader) {
         return (PostBuilder) super.addLinkHeader(linkHeader);
     }

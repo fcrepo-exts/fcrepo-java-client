@@ -42,7 +42,7 @@ public class OriginalMementoBuilder extends RequestBuilder {
     }
 
     @Override
-    public RequestBuilder addTransaction(final String transaction) {
+    public OriginalMementoBuilder addTransaction(final String transaction) {
         throw new IllegalStateException("Mementos are not allowed in transactions");
     }
 }

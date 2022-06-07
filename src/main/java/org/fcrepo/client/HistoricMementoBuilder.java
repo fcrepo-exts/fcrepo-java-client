@@ -47,7 +47,7 @@ public class HistoricMementoBuilder extends PostBuilder {
     }
 
     @Override
-    public RequestBuilder addTransaction(final String transaction) {
-        throw new IllegalStateException("Mementos are not allowed in transactions");
+    public HistoricMementoBuilder addTransaction(final String transaction) {
+        throw new UnsupportedOperationException("Mementos are not allowed in transactions");
     }
 }

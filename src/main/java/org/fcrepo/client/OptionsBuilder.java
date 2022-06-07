@@ -7,6 +7,8 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
+import javax.swing.text.html.Option;
+
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**
@@ -39,5 +41,10 @@ public class OptionsBuilder extends RequestBuilder {
     @Override
     public OptionsBuilder addLinkHeader(final FcrepoLink linkHeader) {
         return (OptionsBuilder) super.addLinkHeader(linkHeader);
+    }
+
+    @Override
+    public OptionsBuilder addTransaction(String transaction) {
+        return (OptionsBuilder) super.addTransaction(transaction);
     }
 }
