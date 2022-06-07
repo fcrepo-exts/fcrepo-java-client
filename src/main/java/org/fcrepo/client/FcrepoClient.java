@@ -51,7 +51,7 @@ public class FcrepoClient implements Closeable {
 
     private Boolean throwExceptionOnFailure = true;
 
-    private static final String TRANSACTION_ENDPOINT = "fcr:tx";
+    public static final String TRANSACTION_ENDPOINT = "fcr:tx";
 
     private static final Logger LOGGER = getLogger(FcrepoClient.class);
 

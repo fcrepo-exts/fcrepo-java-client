@@ -7,6 +7,7 @@ package org.fcrepo.client;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.fcrepo.client.FcrepoClient.TRANSACTION_ENDPOINT;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
@@ -324,7 +325,7 @@ public class FcrepoResponse implements Closeable {
     public String getTransactionUri() {
         if (transactionUri == null && headers.containsKey(LOCATION)) {
             final var location = getHeaderValue(LOCATION);
-            transactionUri = location.contains("fcr:tx") ? location : null;
+            transactionUri = location.contains(TRANSACTION_ENDPOINT) ? location : null;
         }
 
         return transactionUri;
