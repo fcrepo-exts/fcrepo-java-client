@@ -17,6 +17,8 @@ import org.apache.http.util.Args;
  */
 public class TransactionBuilder {
 
+    public static final String TRANSACTION_ENDPOINT = "fcr:tx";
+
     private final URI uri;
     private final FcrepoClient client;
 
@@ -32,6 +34,29 @@ public class TransactionBuilder {
 
         this.uri = uri;
         this.client = client;
+    }
+
+    /**
+     * Create a RequestBuilder to start a transaction
+     *
+     * @return the RequestBuilder
+     */
+    public RequestBuilder start() {
+        final URI target;
+        final var asString = uri.toString();
+        if (asString.endsWith(TRANSACTION_ENDPOINT)) {
+            target = uri;
+        } else {
+            // handle trailing slash in the given uri
+            target = URI.create(asString.replaceFirst("/?$", "/" + TRANSACTION_ENDPOINT));
+        }
+
+        return new RequestBuilder(target, client) {
+            @Override
+            protected HttpRequestBase createRequest() {
+                return HttpMethods.POST.createRequest(targetUri);
+            }
+        };
     }
 
     /**
