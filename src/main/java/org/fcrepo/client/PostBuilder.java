@@ -102,7 +102,7 @@ public class PostBuilder extends BodyRequestBuilder {
     }
 
     @Override
-    public PostBuilder addTransaction(String transaction) {
+    public PostBuilder addTransaction(final String transaction) {
         return (PostBuilder) super.addTransaction(transaction);
     }
 

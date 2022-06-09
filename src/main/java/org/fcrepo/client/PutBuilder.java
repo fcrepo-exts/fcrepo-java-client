@@ -122,7 +122,7 @@ public class PutBuilder extends BodyRequestBuilder {
     }
 
     @Override
-    public PutBuilder addTransaction(String transaction) {
+    public PutBuilder addTransaction(final String transaction) {
         return (PutBuilder) super.addTransaction(transaction);
     }
 

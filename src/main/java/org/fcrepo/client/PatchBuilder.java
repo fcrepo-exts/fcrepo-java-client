@@ -103,7 +103,7 @@ public class PatchBuilder extends BodyRequestBuilder {
     }
 
     @Override
-    public PatchBuilder addTransaction(String transaction) {
+    public PatchBuilder addTransaction(final String transaction) {
         return (PatchBuilder) super.addTransaction(transaction);
     }
 }

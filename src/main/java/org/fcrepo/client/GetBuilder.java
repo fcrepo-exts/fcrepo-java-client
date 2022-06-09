@@ -184,7 +184,7 @@ public class GetBuilder extends RetrieveRequestBuilder {
     }
 
     @Override
-    public GetBuilder addTransaction(String transaction) {
+    public GetBuilder addTransaction(final String transaction) {
         return (GetBuilder) super.addTransaction(transaction);
     }
 }

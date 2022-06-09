@@ -69,7 +69,7 @@ public class HeadBuilder extends RetrieveRequestBuilder {
     }
 
     @Override
-    public HeadBuilder addTransaction(String transaction) {
+    public HeadBuilder addTransaction(final String transaction) {
         return (HeadBuilder) super.addTransaction(transaction);
     }
 }

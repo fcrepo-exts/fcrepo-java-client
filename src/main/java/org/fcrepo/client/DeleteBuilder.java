@@ -37,7 +37,7 @@ public class DeleteBuilder extends RequestBuilder {
     }
 
     @Override
-    public DeleteBuilder addTransaction(String transaction) {
+    public DeleteBuilder addTransaction(final String transaction) {
         return (DeleteBuilder) super.addTransaction(transaction);
     }
 
