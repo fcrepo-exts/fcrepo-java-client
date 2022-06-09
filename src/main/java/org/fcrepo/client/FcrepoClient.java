@@ -161,8 +161,19 @@ public class FcrepoClient implements Closeable {
      * @return ???
      */
     public PostBuilder startTransaction(final URI url) {
-        final var txUrl = url.resolve(TRANSACTION_ENDPOINT);
-        return post(txUrl);
+        final var txUrl = url.toString() + TRANSACTION_ENDPOINT;
+        LOGGER.info("txUrl = {}", txUrl);
+        return post(URI.create(txUrl));
+    }
+
+    /**
+     * Interact with the Transaction API (rewrite this comment)
+     *
+     * @param url The transaction being worked on
+     * @return a transaction request builder object
+     */
+    public TransactionBuilder transaction(final URI url) {
+        return new TransactionBuilder(url, this);
     }
 
     /**
