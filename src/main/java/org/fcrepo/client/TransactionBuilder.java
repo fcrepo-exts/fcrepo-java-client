@@ -6,6 +6,7 @@
 package org.fcrepo.client;
 
 import java.net.URI;
+import java.util.regex.Pattern;
 
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.Args;
@@ -25,7 +26,8 @@ public class TransactionBuilder {
     /**
      * Instantiate builder. Throws an IllegalArgumentException if either the uri or client are null.
      *
-     * @param uri    uri of the resource this request is being made to
+     * @param uri    the transaction this request is being made to: either the repository root,
+     *               the create transaction endpoint, or a transaction uri
      * @param client the client
      */
     public TransactionBuilder(final URI uri, final FcrepoClient client) {
@@ -44,10 +46,13 @@ public class TransactionBuilder {
     public RequestBuilder start() {
         final URI target;
         final var asString = uri.toString();
-        if (asString.endsWith(TRANSACTION_ENDPOINT)) {
+        final var txPattern = Pattern.compile(TRANSACTION_ENDPOINT + "/?$");
+        if (txPattern.matcher(asString).find()) {
+            checkTxUri(uri);
             target = uri;
         } else {
             // handle trailing slash in the given uri
+            checkRootUri(uri);
             target = URI.create(asString.replaceFirst("/?$", "/" + TRANSACTION_ENDPOINT));
         }
 
@@ -65,6 +70,7 @@ public class TransactionBuilder {
      * @return a commit RequestBuilder
      */
     public RequestBuilder commit() {
+        checkTxUri(uri);
         return new RequestBuilder(uri, client) {
             @Override
             protected HttpRequestBase createRequest() {
@@ -79,6 +85,7 @@ public class TransactionBuilder {
      * @return a keepalive RequestBuilder
      */
     public RequestBuilder keepAlive() {
+        checkTxUri(uri);
         return new RequestBuilder(uri, client) {
             @Override
             protected HttpRequestBase createRequest() {
@@ -93,6 +100,7 @@ public class TransactionBuilder {
      * @return a status RequestBuilder
      */
     public RequestBuilder status() {
+        checkTxUri(uri);
         return new RequestBuilder(uri, client) {
             @Override
             protected HttpRequestBase createRequest() {
@@ -107,12 +115,38 @@ public class TransactionBuilder {
      * @return a rollback RequestBuilder
      */
     public RequestBuilder rollback() {
+        checkTxUri(uri);
         return new RequestBuilder(uri, client) {
             @Override
             protected HttpRequestBase createRequest() {
                 return HttpMethods.DELETE.createRequest(targetUri);
             }
         };
+    }
+
+    /**
+     * Check that the uri is the root of the fedora rest api
+     *
+     * @param uri the uri to validate
+     */
+    private void checkRootUri(final URI uri) {
+        final var restPattern = Pattern.compile("rest/?$");
+        if (!restPattern.matcher(uri.toString()).find()) {
+            throw new IllegalArgumentException("Uri is not a valid transaction endpoint");
+        }
+    }
+
+    /**
+     * Check that a given uri is a valid transaction url (/rest/fcr:tx)
+     *
+     * @param uri the uri to validate
+     * @throws IllegalArgumentException if the uri is not a transaction endpoint
+     */
+    private void checkTxUri(final URI uri) {
+        final var transactionPattern = "rest/" + TRANSACTION_ENDPOINT;
+        if (!uri.toString().contains(transactionPattern)) {
+            throw new IllegalArgumentException("Uri is not a valid transaction endpoint");
+        }
     }
 
 }
