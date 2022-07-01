@@ -26,23 +26,31 @@ public class TransactionBuilderTest {
     private FcrepoClient client;
 
     @Test
-    public void testStartValidUris() {
+    public void testStartRootEndpoint() {
         final var root = SERVER_ENDPOINT + "/rest";
+        final var builder = new TransactionBuilder(URI.create(root), client);
+        builder.start();
+    }
+
+    @Test
+    public void testStartRootTrailingSlash() {
         final var rootTrailingSlash = SERVER_ENDPOINT + "/rest/";
+        final var builder = new TransactionBuilder(URI.create(rootTrailingSlash), client);
+        builder.start();
+    }
+
+    @Test
+    public void testStartTxUri() {
         final var txUri = SERVER_ENDPOINT + "/rest/fcr:tx";
+        final var builder = new TransactionBuilder(URI.create(txUri), client);
+        builder.start();
+    }
+
+    @Test
+    public void testStartTxUriTrailingSlash() {
         final var txUriTrailingSlash = SERVER_ENDPOINT + "/rest/fcr:tx/";
-
-        final var builder1 = new TransactionBuilder(URI.create(root), client);
-        builder1.start();
-
-        final var builder2 = new TransactionBuilder(URI.create(rootTrailingSlash), client);
-        builder2.start();
-
-        final var builder3 = new TransactionBuilder(URI.create(txUri), client);
-        builder3.start();
-
-        final var builder4 = new TransactionBuilder(URI.create(txUriTrailingSlash), client);
-        builder4.start();
+        final var builder = new TransactionBuilder(URI.create(txUriTrailingSlash), client);
+        builder.start();
     }
 
     @Test(expected = IllegalArgumentException.class)
