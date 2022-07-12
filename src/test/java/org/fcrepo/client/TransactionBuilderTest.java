@@ -6,6 +6,7 @@
 package org.fcrepo.client;
 
 import java.net.URI;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +52,20 @@ public class TransactionBuilderTest {
         final var txUriTrailingSlash = SERVER_ENDPOINT + "/rest/fcr:tx/";
         final var builder = new TransactionBuilder(URI.create(txUriTrailingSlash), client);
         builder.start();
+    }
+
+    @Test
+    public void testCheckTxUriWithUUID() {
+        final var txUriTrailingSlash = SERVER_ENDPOINT + "/rest/fcr:tx/" + UUID.randomUUID();
+        final var builder = new TransactionBuilder(URI.create(txUriTrailingSlash), client);
+        builder.keepAlive();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCheckInvalidAfterUUID() {
+        final var txUriTrailingSlash = SERVER_ENDPOINT + "/rest/fcr:tx/" + UUID.randomUUID() + "/fcr:tx";
+        final var builder = new TransactionBuilder(URI.create(txUriTrailingSlash), client);
+        builder.keepAlive();
     }
 
     @Test(expected = IllegalArgumentException.class)

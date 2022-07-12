@@ -137,14 +137,16 @@ public class TransactionBuilder {
     }
 
     /**
-     * Check that a given uri is a valid transaction url (/rest/fcr:tx)
+     * Check that a given uri is a valid transaction url (/rest/fcr:tx or /rest/fcr:tx/uuid)
      *
      * @param uri the uri to validate
      * @throws IllegalArgumentException if the uri is not a transaction endpoint
      */
     private void checkTxUri(final URI uri) {
-        final var transactionPattern = "rest/" + TRANSACTION_ENDPOINT;
-        if (!uri.toString().contains(transactionPattern)) {
+        // regex taken from TransactionProvider in fcrepo
+        final var transactionPattern = "rest/" + TRANSACTION_ENDPOINT + "(/?|/[0-9a-f\\-]+)$";
+        final var pattern = Pattern.compile(transactionPattern);
+        if (!pattern.matcher(uri.toString()).find()) {
             throw new IllegalArgumentException("Uri is not a valid transaction endpoint");
         }
     }
