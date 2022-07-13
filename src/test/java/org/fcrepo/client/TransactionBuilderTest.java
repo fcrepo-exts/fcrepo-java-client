@@ -29,36 +29,37 @@ public class TransactionBuilderTest {
     @Test
     public void testStartRootEndpoint() {
         final var root = SERVER_ENDPOINT + "/rest";
-        final var builder = new TransactionBuilder(URI.create(root), client);
-        builder.start();
+        final var builder = new TransactionBuilder(client);
+        builder.start(URI.create(root));
     }
 
     @Test
     public void testStartRootTrailingSlash() {
         final var rootTrailingSlash = SERVER_ENDPOINT + "/rest/";
-        final var builder = new TransactionBuilder(URI.create(rootTrailingSlash), client);
-        builder.start();
+        final var builder = new TransactionBuilder(client);
+        builder.start(URI.create(rootTrailingSlash));
     }
 
     @Test
     public void testStartTxUri() {
         final var txUri = SERVER_ENDPOINT + "/rest/fcr:tx";
-        final var builder = new TransactionBuilder(URI.create(txUri), client);
-        builder.start();
+        final var builder = new TransactionBuilder(client);
+        builder.start(URI.create(txUri));
     }
 
     @Test
     public void testStartTxUriTrailingSlash() {
         final var txUriTrailingSlash = SERVER_ENDPOINT + "/rest/fcr:tx/";
-        final var builder = new TransactionBuilder(URI.create(txUriTrailingSlash), client);
-        builder.start();
+        final var builder = new TransactionBuilder(client);
+        builder.start(URI.create(txUriTrailingSlash));
     }
 
+    /*
     @Test
     public void testCheckTxUriWithUUID() {
         final var txUriTrailingSlash = SERVER_ENDPOINT + "/rest/fcr:tx/" + UUID.randomUUID();
-        final var builder = new TransactionBuilder(URI.create(txUriTrailingSlash), client);
-        builder.keepAlive();
+        final var builder = new TransactionBuilder(client);
+        builder.keepAlive(URI.create(txUriTrailingSlash));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -67,21 +68,37 @@ public class TransactionBuilderTest {
         final var builder = new TransactionBuilder(URI.create(txUriTrailingSlash), client);
         builder.keepAlive();
     }
+    */
 
     @Test(expected = IllegalArgumentException.class)
     public void testStartNonRestEndpoint() {
         final var endpoint = SERVER_ENDPOINT + "/static";
-        final var builder = new TransactionBuilder(URI.create(endpoint), client);
-        builder.start();
+        final var builder = new TransactionBuilder(client);
+        builder.start(URI.create(endpoint));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testStartNonRestTxEndpoint() {
         final var endpoint = SERVER_ENDPOINT + "/static/fcr:tx";
-        final var builder = new TransactionBuilder(URI.create(endpoint), client);
-        builder.start();
+        final var builder = new TransactionBuilder(client);
+        builder.start(URI.create(endpoint));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testRestTrailingPath() {
+        final var endpoint = SERVER_ENDPOINT + "/rest/my-resource/";
+        final var builder = new TransactionBuilder(client);
+        builder.start(URI.create(endpoint));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testRestTxTrailingPath() {
+        final var endpoint = SERVER_ENDPOINT + "/rest/fcr:tx/" + UUID.randomUUID();
+        final var builder = new TransactionBuilder(client);
+        builder.start(URI.create(endpoint));
+    }
+
+    /*
     @Test(expected = IllegalArgumentException.class)
     public void checkNonRestEndpoint() {
         final var endpoint = SERVER_ENDPOINT + "/static";
@@ -96,5 +113,6 @@ public class TransactionBuilderTest {
         final var builder = new TransactionBuilder(URI.create(endpoint), client);
         builder.keepAlive();
     }
+     */
 
 }

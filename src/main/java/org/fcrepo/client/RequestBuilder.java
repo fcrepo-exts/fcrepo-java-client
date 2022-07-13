@@ -13,6 +13,7 @@ import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.Args;
+import org.fcrepo.client.FcrepoResponse.TransactionURI;
 import org.slf4j.Logger;
 
 /**
@@ -97,8 +98,8 @@ public abstract class RequestBuilder {
      * @param transaction transaction atomic id
      * @return this builder
      */
-    public RequestBuilder addTransaction(final String transaction) {
-        request.addHeader(ATOMIC_ID, transaction);
+    public RequestBuilder addTransaction(final TransactionURI transaction) {
+        request.addHeader(ATOMIC_ID, transaction.asString());
         return this;
     }
 }

@@ -9,12 +9,16 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 
 import org.fcrepo.client.FcrepoClient;
+import org.fcrepo.client.FcrepoResponse;
 import org.fcrepo.client.FedoraHeaderConstants;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -44,72 +48,76 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
 
     @Test
     public void testTransactionCommit() throws Exception {
-        final String location;
+        final FcrepoResponse.TransactionURI location;
 
-        try (final var response = client.transaction(new URI(SERVER_ADDRESS)).start().perform()) {
+        try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
             assertEquals(CREATED.getStatusCode(), response.getStatusCode());
-            location = response.getTransactionUri();
+            location = response.getTransactionUri().orElseThrow(() -> new IllegalStateException("No tx found"));
         }
 
-        try (final var response = client.transaction(new URI(location)).commit().perform()) {
+        try (final var response = client.transaction().commit(location).perform()) {
             assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
         }
     }
 
     @Test
     public void testTransactionKeepAlive() throws Exception {
-        // todo: initial transaction currently returns Expires rather than Atomic-Expires, should handle beep beep
-        // final String expiry;
-        final String location;
+        final String expiry;
+        final FcrepoResponse.TransactionURI location;
+        final var formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
-        try (final var response = client.transaction(new URI(SERVER_ADDRESS)).start().perform()) {
+        try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
             assertEquals(CREATED.getStatusCode(), response.getStatusCode());
 
-            location = response.getTransactionUri();
-            // expiry = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
+            location = response.getTransactionUri().orElseThrow(() -> new IllegalStateException("No tx found"));
+            // the initial transaction currently returns Expires rather than Atomic-Expires
+            expiry = response.getHeaderValue("Expires");
         }
 
-        try (final var response = client.transaction(new URI(location)).keepAlive().perform()) {
+        try (final var response = client.transaction().keepAlive(location).perform()) {
             assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
 
             final var expiryFromStatus = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
             assertNotNull(expiryFromStatus);
-            // assertBefore(expiry, expiryFromStatus);
+
+            final var initialExpiration = Instant.from(formatter.parse(expiry));
+            final var updatedExpiration = Instant.from(formatter.parse(expiryFromStatus));
+            assertTrue(initialExpiration.isBefore(updatedExpiration));
         }
     }
 
     @Test
     public void testTransactionStatus() throws Exception {
-        // todo: initial transaction currently returns Expires rather than Atomic-Expires, should handle beep beep
-        // final String expiry;
-        final String location;
+        // the initial transaction currently returns Expires rather than Atomic-Expires, update if changed
+        final String expiry;
+        final FcrepoResponse.TransactionURI location;
 
-        try (final var response = client.transaction(new URI(SERVER_ADDRESS)).start().perform()) {
+        try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
             assertEquals(CREATED.getStatusCode(), response.getStatusCode());
 
-            location = response.getTransactionUri();
-            // expiry = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
+            location = response.getTransactionUri().orElseThrow(() -> new IllegalStateException("No tx found"));
+            expiry = response.getHeaderValue("Expires");
         }
 
-        try (final var response = client.transaction(new URI(location)).status().perform()) {
+        try (final var response = client.transaction().status(location).perform()) {
             assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
 
             final var expiryFromStatus = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
             assertNotNull(expiryFromStatus);
-            // assertEquals(expiry, expiryFromStatus);
+            assertEquals(expiry, expiryFromStatus);
         }
     }
 
     @Test
     public void testTransactionRollback() throws Exception {
-        final String location;
+        final FcrepoResponse.TransactionURI location;
 
-        try (final var response = client.transaction(new URI(SERVER_ADDRESS)).start().perform()) {
+        try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
             assertEquals(CREATED.getStatusCode(), response.getStatusCode());
-            location = response.getTransactionUri();
+            location = response.getTransactionUri().orElseThrow(() -> new IllegalStateException("No tx found"));
         }
 
-        try (final var response = client.transaction(new URI(location)).rollback().perform()) {
+        try (final var response = client.transaction().rollback(location).perform()) {
             assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
         }
     }

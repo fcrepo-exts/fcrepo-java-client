@@ -8,6 +8,7 @@ package org.fcrepo.client;
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
+import org.fcrepo.client.FcrepoResponse.TransactionURI;
 
 /**
  * Builds a request to delete a resource
@@ -37,7 +38,7 @@ public class DeleteBuilder extends RequestBuilder {
     }
 
     @Override
-    public DeleteBuilder addTransaction(final String transaction) {
+    public DeleteBuilder addTransaction(final TransactionURI transaction) {
         return (DeleteBuilder) super.addTransaction(transaction);
     }
 

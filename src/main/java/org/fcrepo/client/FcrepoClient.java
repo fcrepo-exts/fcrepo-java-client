@@ -155,11 +155,10 @@ public class FcrepoClient implements Closeable {
     /**
      * Interact with the Transaction API (rewrite this comment)
      *
-     * @param url The transaction being worked on
      * @return a transaction request builder object
      */
-    public TransactionBuilder transaction(final URI url) {
-        return new TransactionBuilder(url, this);
+    public TransactionBuilder transaction() {
+        return new TransactionBuilder(this);
     }
 
     /**

@@ -11,6 +11,8 @@ import static org.fcrepo.client.FedoraHeaderConstants.MEMENTO_DATETIME;
 import java.net.URI;
 import java.time.Instant;
 
+import org.fcrepo.client.FcrepoResponse.TransactionURI;
+
 /**
  * Builds a POST request for creating a memento (LDPRm) with the state given in the request body
  * and the datetime given in the Memento-Datetime request header.
@@ -47,7 +49,7 @@ public class HistoricMementoBuilder extends PostBuilder {
     }
 
     @Override
-    public HistoricMementoBuilder addTransaction(final String transaction) {
+    public HistoricMementoBuilder addTransaction(final TransactionURI transaction) {
         throw new UnsupportedOperationException("Mementos are not allowed in transactions");
     }
 }

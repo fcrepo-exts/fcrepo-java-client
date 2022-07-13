@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
+import org.fcrepo.client.FcrepoResponse.TransactionURI;
 
 /**
  * Builds a PUT request for interacting with the Fedora HTTP API in order to modify the triples associated with a
@@ -103,7 +104,7 @@ public class PatchBuilder extends BodyRequestBuilder {
     }
 
     @Override
-    public PatchBuilder addTransaction(final String transaction) {
+    public PatchBuilder addTransaction(final TransactionURI transaction) {
         return (PatchBuilder) super.addTransaction(transaction);
     }
 }

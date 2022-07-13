@@ -21,6 +21,8 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import org.apache.http.HeaderElement;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicHeader;
@@ -57,7 +59,7 @@ public class FcrepoResponse implements Closeable {
 
     private InputStream body;
 
-    private String transactionUri;
+    private TransactionURI transactionUri;
 
     private String contentType;
 
@@ -322,12 +324,28 @@ public class FcrepoResponse implements Closeable {
      *
      * @return the transaction location or null
      */
-    public String getTransactionUri() {
+    public Optional<TransactionURI> getTransactionUri() {
         if (transactionUri == null && headers.containsKey(LOCATION)) {
             final var location = getHeaderValue(LOCATION);
-            transactionUri = location.contains(TRANSACTION_ENDPOINT) ? location : null;
+            transactionUri = location.contains(TRANSACTION_ENDPOINT) ? new TransactionURI(location) : null;
         }
 
-        return transactionUri;
+        return Optional.ofNullable(transactionUri);
+    }
+
+    public static class TransactionURI {
+        private final String uri;
+
+        private TransactionURI(final String uri) {
+            this.uri = uri;
+        }
+
+        public URI get() {
+            return URI.create(uri);
+        }
+
+        public String asString() {
+            return uri;
+        }
     }
 }

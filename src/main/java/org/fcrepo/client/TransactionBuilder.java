@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.Args;
+import org.fcrepo.client.FcrepoResponse.TransactionURI;
 
 /**
  * Creates different RequestBuilders for interacting with the Fedora Transaction API.
@@ -20,35 +21,34 @@ public class TransactionBuilder {
 
     public static final String TRANSACTION_ENDPOINT = "fcr:tx";
 
-    private final URI uri;
+    // private final URI uri;
     private final FcrepoClient client;
 
     /**
      * Instantiate builder. Throws an IllegalArgumentException if either the uri or client are null.
      *
-     * @param uri    the transaction this request is being made to: either the repository root,
+     * uri    the transaction this request is being made to: either the repository root,
      *               the create transaction endpoint, or a transaction uri
      * @param client the client
      */
-    public TransactionBuilder(final URI uri, final FcrepoClient client) {
-        Args.notNull(uri, "uri");
+    public TransactionBuilder(final FcrepoClient client) {
         Args.notNull(client, "client");
 
-        this.uri = uri;
+        // this.uri = uri;
         this.client = client;
     }
 
     /**
      * Create a RequestBuilder to start a transaction
      *
+     * @param uri Either the base rest endpoint or the transaction endpoint
      * @return the RequestBuilder
      */
-    public RequestBuilder start() {
+    public RequestBuilder start(final URI uri) {
         final URI target;
         final var asString = uri.toString();
-        final var txPattern = Pattern.compile(TRANSACTION_ENDPOINT + "/?$");
+        final var txPattern = Pattern.compile("rest/" + TRANSACTION_ENDPOINT + "/?$");
         if (txPattern.matcher(asString).find()) {
-            checkTxUri(uri);
             target = uri;
         } else {
             // handle trailing slash in the given uri
@@ -67,11 +67,11 @@ public class TransactionBuilder {
     /**
      * Create a RequestBuilder for a commit action
      *
+     * @param txURI the transaction uri
      * @return a commit RequestBuilder
      */
-    public RequestBuilder commit() {
-        checkTxUri(uri);
-        return new RequestBuilder(uri, client) {
+    public RequestBuilder commit(final TransactionURI txURI) {
+        return new RequestBuilder(txURI.get(), client) {
             @Override
             protected HttpRequestBase createRequest() {
                 return HttpMethods.PUT.createRequest(targetUri);
@@ -82,11 +82,11 @@ public class TransactionBuilder {
     /**
      * Create a RequestBuilder for a KeepAlive action
      *
+     * @param txURI the transaction uri
      * @return a keepalive RequestBuilder
      */
-    public RequestBuilder keepAlive() {
-        checkTxUri(uri);
-        return new RequestBuilder(uri, client) {
+    public RequestBuilder keepAlive(final TransactionURI txURI) {
+        return new RequestBuilder(txURI.get(), client) {
             @Override
             protected HttpRequestBase createRequest() {
                 return HttpMethods.POST.createRequest(targetUri);
@@ -97,11 +97,11 @@ public class TransactionBuilder {
     /**
      * Create a RequestBuilder for a status action
      *
+     * @param txURI the transaction uri
      * @return a status RequestBuilder
      */
-    public RequestBuilder status() {
-        checkTxUri(uri);
-        return new RequestBuilder(uri, client) {
+    public RequestBuilder status(final TransactionURI txURI) {
+        return new RequestBuilder(txURI.get(), client) {
             @Override
             protected HttpRequestBase createRequest() {
                 return HttpMethods.GET.createRequest(targetUri);
@@ -112,11 +112,11 @@ public class TransactionBuilder {
     /**
      * Create a RequestBuilder for a rollback action
      *
+     * @param txURI the transaction uri
      * @return a rollback RequestBuilder
      */
-    public RequestBuilder rollback() {
-        checkTxUri(uri);
-        return new RequestBuilder(uri, client) {
+    public RequestBuilder rollback(final TransactionURI txURI) {
+        return new RequestBuilder(txURI.get(), client) {
             @Override
             protected HttpRequestBase createRequest() {
                 return HttpMethods.DELETE.createRequest(targetUri);
@@ -141,7 +141,6 @@ public class TransactionBuilder {
      *
      * @param uri the uri to validate
      * @throws IllegalArgumentException if the uri is not a transaction endpoint
-     */
     private void checkTxUri(final URI uri) {
         // regex taken from TransactionProvider in fcrepo
         final var transactionPattern = "rest/" + TRANSACTION_ENDPOINT + "(/?|/[0-9a-f\\-]+)$";
@@ -150,5 +149,6 @@ public class TransactionBuilder {
             throw new IllegalArgumentException("Uri is not a valid transaction endpoint");
         }
     }
+     */
 
 }

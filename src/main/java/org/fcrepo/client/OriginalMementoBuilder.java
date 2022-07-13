@@ -8,6 +8,7 @@ package org.fcrepo.client;
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
+import org.fcrepo.client.FcrepoResponse.TransactionURI;
 
 /**
  * Builds a POST request for creating a memento (LDPRm) from the current state of an LDPRv.
@@ -42,7 +43,7 @@ public class OriginalMementoBuilder extends RequestBuilder {
     }
 
     @Override
-    public OriginalMementoBuilder addTransaction(final String transaction) {
+    public OriginalMementoBuilder addTransaction(final TransactionURI transaction) {
         throw new IllegalStateException("Mementos are not allowed in transactions");
     }
 }

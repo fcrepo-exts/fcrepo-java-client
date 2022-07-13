@@ -8,6 +8,7 @@ package org.fcrepo.client;
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
+import org.fcrepo.client.FcrepoResponse.TransactionURI;
 
 /**
  * Builds an OPTIONS request to output information about the supported HTTP methods, etc.
@@ -42,7 +43,7 @@ public class OptionsBuilder extends RequestBuilder {
     }
 
     @Override
-    public OptionsBuilder addTransaction(final String transaction) {
+    public OptionsBuilder addTransaction(final TransactionURI transaction) {
         return (OptionsBuilder) super.addTransaction(transaction);
     }
 }
