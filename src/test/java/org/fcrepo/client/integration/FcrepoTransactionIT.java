@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 
 import org.fcrepo.client.FcrepoClient;
@@ -33,11 +34,13 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
 
     private static FcrepoClient client;
 
+    private static final String FEDORA_ADMIN = "fedoraAdmin";
+
     @BeforeClass
     public static void beforeClass() {
         client = FcrepoClient.client()
-                             .credentials("fedoraAdmin", "fedoraAdmin")
-                             .authScope("localhost")
+                             .credentials(FEDORA_ADMIN, FEDORA_ADMIN)
+                             .authScope(HOSTNAME)
                              .build();
     }
 
@@ -54,6 +57,20 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
             assertEquals(CREATED.getStatusCode(), response.getStatusCode());
             location = response.getTransactionUri().orElseThrow(() -> new IllegalStateException("No tx found"));
         }
+
+        final var transactionalClient = FcrepoClient.client()
+                                                    .credentials(FEDORA_ADMIN, FEDORA_ADMIN)
+                                                    .authScope(HOSTNAME)
+                                                    .transactionURI(location)
+                                                    .build();
+
+        final var container = UUID.randomUUID().toString();
+        try (final var response = transactionalClient.put(new URI(SERVER_ADDRESS + container)).perform()) {
+            assertEquals(CREATED.getStatusCode(), response.getStatusCode());
+            assertTrue(response.getTransactionUri().isPresent());
+            assertEquals(location.asString(), response.getTransactionUri().get().asString());
+        }
+
 
         try (final var response = client.transaction().commit(location).perform()) {
             assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
