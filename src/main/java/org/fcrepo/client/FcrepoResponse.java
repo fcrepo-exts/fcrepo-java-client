@@ -7,6 +7,7 @@ package org.fcrepo.client;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.fcrepo.client.FedoraHeaderConstants.ATOMIC_ID;
 import static org.fcrepo.client.TransactionBuilder.TRANSACTION_ENDPOINT;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
@@ -320,14 +321,21 @@ public class FcrepoResponse implements Closeable {
     }
 
     /**
-     * Get the transaction location. If the location is not for a transaction, return null.
+     * Get the transaction location. If the location is not for a transaction, check for the Atomic-ID,
+     * otherwise return null.
      *
      * @return the transaction location or null
      */
     public Optional<TransactionURI> getTransactionUri() {
-        if (transactionUri == null && headers.containsKey(LOCATION)) {
+        if (transactionUri == null) {
             final var location = getHeaderValue(LOCATION);
-            transactionUri = location.contains(TRANSACTION_ENDPOINT) ? new TransactionURI(location) : null;
+            final var atomicId = getHeaderValue(ATOMIC_ID);
+
+            if (location != null && location.contains(TRANSACTION_ENDPOINT)) {
+                transactionUri = new TransactionURI(location);
+            } else if (atomicId != null) {
+                transactionUri = new TransactionURI(atomicId);
+            }
         }
 
         return Optional.ofNullable(transactionUri);
