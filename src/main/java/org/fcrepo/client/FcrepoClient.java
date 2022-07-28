@@ -319,6 +319,8 @@ public class FcrepoClient implements Closeable {
 
         private String authHost;
 
+        private FcrepoResponse.TransactionURI transactionURI;
+
         private boolean throwExceptionOnFailure;
 
         /**
@@ -357,13 +359,28 @@ public class FcrepoClient implements Closeable {
         }
 
         /**
+         * Add a transaction to add to the client
+         *
+         * @param transactionURI the transaction uri
+         * @return this builder
+         */
+        public FcrepoClientBuilder transactionURI(final FcrepoResponse.TransactionURI transactionURI) {
+            this.transactionURI = transactionURI;
+            return this;
+        }
+
+        /**
          * Get the client
          *
          * @return the client constructed by this builder
          */
         public FcrepoClient build() {
             final FcrepoHttpClientBuilder httpClient = new FcrepoHttpClientBuilder(authUser, authPassword, authHost);
-            return new FcrepoClient(httpClient.build(), throwExceptionOnFailure);
+            if (transactionURI == null) {
+                return new FcrepoClient(httpClient.build(), throwExceptionOnFailure);
+            } else {
+                return new TransactionalFcrepoClient(transactionURI, httpClient.build(), throwExceptionOnFailure);
+            }
         }
     }
 }
