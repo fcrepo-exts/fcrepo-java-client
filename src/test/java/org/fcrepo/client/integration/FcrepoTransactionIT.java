@@ -5,6 +5,7 @@
  */
 package org.fcrepo.client.integration;
 
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.junit.Assert.assertEquals;
@@ -14,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -35,6 +37,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
     private static FcrepoClient client;
 
     private static final String FEDORA_ADMIN = "fedoraAdmin";
+    private static final DateTimeFormatter FORMATTER = RFC_1123_DATE_TIME.withZone(ZoneId.of("UTC"));
 
     @BeforeClass
     public static void beforeClass() {
@@ -71,7 +74,6 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
             assertEquals(location.asString(), response.getTransactionUri().get().asString());
         }
 
-
         try (final var response = client.transaction().commit(location).perform()) {
             assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
         }
@@ -81,7 +83,6 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
     public void testTransactionKeepAlive() throws Exception {
         final String expiry;
         final FcrepoResponse.TransactionURI location;
-        final var formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
         try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
             assertEquals(CREATED.getStatusCode(), response.getStatusCode());
@@ -97,8 +98,8 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
             final var expiryFromStatus = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
             assertNotNull(expiryFromStatus);
 
-            final var initialExpiration = Instant.from(formatter.parse(expiry));
-            final var updatedExpiration = Instant.from(formatter.parse(expiryFromStatus));
+            final var initialExpiration = Instant.from(FORMATTER.parse(expiry));
+            final var updatedExpiration = Instant.from(FORMATTER.parse(expiryFromStatus));
             assertTrue(initialExpiration.isBefore(updatedExpiration));
         }
     }
@@ -121,7 +122,10 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
 
             final var expiryFromStatus = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
             assertNotNull(expiryFromStatus);
-            assertEquals(expiry, expiryFromStatus);
+
+            final var initialExpiration = Instant.from(FORMATTER.parse(expiry));
+            final var updatedExpiration = Instant.from(FORMATTER.parse(expiryFromStatus));
+            assertEquals(initialExpiration, updatedExpiration);
         }
     }
 
