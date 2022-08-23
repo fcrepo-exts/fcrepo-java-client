@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 public class FcrepoClient implements Closeable {
 
     private CloseableHttpClient httpclient;
+    private FcrepoHttpClientBuilder httpClientBuilder;
 
     private Boolean throwExceptionOnFailure = true;
 
@@ -72,7 +73,19 @@ public class FcrepoClient implements Closeable {
      */
     protected FcrepoClient(final String username, final String password, final String host,
             final Boolean throwExceptionOnFailure) {
-        this(new FcrepoHttpClientBuilder(username, password, host).build(), throwExceptionOnFailure);
+        this(new FcrepoHttpClientBuilder(username, password, host), throwExceptionOnFailure);
+    }
+
+    /**
+     * Create a FcrepoClient which uses the given {@link FcrepoHttpClientBuilder} to manage its http client.
+     * FcrepoClient will close the httpClient when {@link #close()} is called.
+     * @param httpClientBuilder http client builder to use to connect to the repository
+     * @param throwExceptionOnFailure whether to throw an exception on any non-2xx or 3xx HTTP responses
+     */
+    protected FcrepoClient(final FcrepoHttpClientBuilder httpClientBuilder, final Boolean throwExceptionOnFailure) {
+        this.throwExceptionOnFailure = throwExceptionOnFailure;
+        this.httpclient = httpClientBuilder.build();
+        this.httpClientBuilder = httpClientBuilder;
     }
 
     /**
@@ -153,12 +166,23 @@ public class FcrepoClient implements Closeable {
     }
 
     /**
-     * Interact with the Transaction API (rewrite this comment)
+     * Interact with the Transaction API - start, commit, etc
      *
      * @return a transaction request builder object
      */
     public TransactionBuilder transaction() {
         return new TransactionBuilder(this);
+    }
+
+    /**
+     * Create a new {@link TransactionalFcrepoClient} which adds the
+     * {@link org.fcrepo.client.FcrepoResponse.TransactionURI} to each request
+     *
+     * @param uri the Transaction to add to each request
+     * @return a TransactionFcrepoClient
+     */
+    public TransactionalFcrepoClient transactionalClient(final FcrepoResponse.TransactionURI uri) {
+        return new TransactionalFcrepoClient(uri, httpClientBuilder, throwExceptionOnFailure);
     }
 
     /**
@@ -359,7 +383,7 @@ public class FcrepoClient implements Closeable {
         }
 
         /**
-         * Add a transaction to add to the client
+         * The transaction uri for the client to add to requests
          *
          * @param transactionURI the transaction uri
          * @return this builder
@@ -377,9 +401,9 @@ public class FcrepoClient implements Closeable {
         public FcrepoClient build() {
             final FcrepoHttpClientBuilder httpClient = new FcrepoHttpClientBuilder(authUser, authPassword, authHost);
             if (transactionURI == null) {
-                return new FcrepoClient(httpClient.build(), throwExceptionOnFailure);
+                return new FcrepoClient(httpClient, throwExceptionOnFailure);
             } else {
-                return new TransactionalFcrepoClient(transactionURI, httpClient.build(), throwExceptionOnFailure);
+                return new TransactionalFcrepoClient(transactionURI, httpClient, throwExceptionOnFailure);
             }
         }
     }

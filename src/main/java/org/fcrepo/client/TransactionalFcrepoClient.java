@@ -7,8 +7,6 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-
 /**
  * A Transaction aware client which adds the Atomic_ID header to requests
  *
@@ -21,13 +19,13 @@ public class TransactionalFcrepoClient extends FcrepoClient {
     /**
      *
      * @param transactionURI the transaction to append to all requests
-     * @param httpClient the httpclient
+     * @param httpClientBuilder the httpclient
      * @param throwExceptionOnFailure whether to throw an exception on any non-2xx or 3xx HTTP responses
      */
     public TransactionalFcrepoClient(final FcrepoResponse.TransactionURI transactionURI,
-                                     final CloseableHttpClient httpClient,
+                                     final FcrepoHttpClientBuilder httpClientBuilder,
                                      final Boolean throwExceptionOnFailure) {
-        super(httpClient, throwExceptionOnFailure);
+        super(httpClientBuilder, throwExceptionOnFailure);
         this.transactionURI = transactionURI;
     }
 
