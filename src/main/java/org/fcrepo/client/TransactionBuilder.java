@@ -5,6 +5,7 @@
  */
 package org.fcrepo.client;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.regex.Pattern;
 
@@ -34,6 +35,25 @@ public class TransactionBuilder {
         Args.notNull(client, "client");
 
         this.client = client;
+    }
+
+    /**
+     * Execute {@link TransactionBuilder#start} and return a new {@link TransactionalFcrepoClient} using the Atomic-Id
+     * from the response
+     *
+     * @param uri the uri to start the transaction with
+     * @return a Transactional client
+     * @throws FcrepoOperationFailedException If the underlying HTTP request results in an error
+     * @throws IOException If there is an error closing the underlying HTTP response stream
+     */
+    public TransactionalFcrepoClient startTransactionalClient(final URI uri)
+        throws FcrepoOperationFailedException, IOException {
+        try (final FcrepoResponse response = start(uri).perform()) {
+            return response.getTransactionUri()
+                           .map(client::transactionalClient)
+                           .orElseThrow(() -> new FcrepoOperationFailedException(uri, response.getStatusCode(),
+                                                                                 "No Atomic-Id found"));
+        }
     }
 
     /**
