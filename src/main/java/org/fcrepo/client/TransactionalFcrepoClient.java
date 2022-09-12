@@ -29,6 +29,10 @@ public class TransactionalFcrepoClient extends FcrepoClient {
         this.transactionURI = transactionURI;
     }
 
+    public FcrepoResponse.TransactionURI getTransactionURI() {
+        return transactionURI;
+    }
+
     @Override
     public GetBuilder get(final URI url) {
         final var builder = super.get(url);

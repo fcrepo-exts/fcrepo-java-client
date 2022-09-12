@@ -61,11 +61,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
             location = response.getTransactionUri().orElseThrow(() -> new IllegalStateException("No tx found"));
         }
 
-        final var transactionalClient = FcrepoClient.client()
-                                                    .credentials(FEDORA_ADMIN, FEDORA_ADMIN)
-                                                    .authScope(HOSTNAME)
-                                                    .transactionURI(location)
-                                                    .build();
+        final var transactionalClient = client.transactionalClient(location);
 
         final var container = UUID.randomUUID().toString();
         try (final var response = transactionalClient.put(new URI(SERVER_ADDRESS + container)).perform()) {
@@ -76,6 +72,25 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
 
         try (final var response = client.transaction().commit(location).perform()) {
             assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
+        }
+    }
+
+    @Test
+    public void testStartTransactionalClient() throws Exception {
+        // the same as testTransactionCommit but using startTransactionalClient
+        try (final var transactionalClient = client.transaction().startTransactionalClient(new URI(SERVER_ADDRESS))) {
+            final var txURI = transactionalClient.getTransactionURI();
+
+            final var container = UUID.randomUUID().toString();
+            try (final var response = transactionalClient.put(new URI(SERVER_ADDRESS + container)).perform()) {
+                assertEquals(CREATED.getStatusCode(), response.getStatusCode());
+                assertTrue(response.getTransactionUri().isPresent());
+                assertEquals(txURI.asString(), response.getTransactionUri().get().asString());
+            }
+
+            try (final var response = client.transaction().commit(txURI).perform()) {
+                assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
+            }
         }
     }
 
