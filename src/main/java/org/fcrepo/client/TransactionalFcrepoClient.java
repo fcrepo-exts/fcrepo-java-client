@@ -26,6 +26,10 @@ public class TransactionalFcrepoClient extends FcrepoClient {
                                      final FcrepoHttpClientBuilder httpClientBuilder,
                                      final Boolean throwExceptionOnFailure) {
         super(httpClientBuilder, throwExceptionOnFailure);
+
+        if (transactionURI == null) {
+            throw new IllegalArgumentException("TransactionURI cannot be null");
+        }
         this.transactionURI = transactionURI;
     }
 

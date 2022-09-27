@@ -22,7 +22,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.http.HeaderElement;
 import org.apache.http.NameValuePair;
@@ -326,7 +325,7 @@ public class FcrepoResponse implements Closeable {
      *
      * @return the transaction location or null
      */
-    public Optional<TransactionURI> getTransactionUri() {
+    public TransactionURI getTransactionUri() {
         if (transactionUri == null) {
             final var location = getHeaderValue(LOCATION);
             final var atomicId = getHeaderValue(ATOMIC_ID);
@@ -338,7 +337,7 @@ public class FcrepoResponse implements Closeable {
             }
         }
 
-        return Optional.ofNullable(transactionUri);
+        return transactionUri;
     }
 
     public static class TransactionURI {

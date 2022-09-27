@@ -58,7 +58,8 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
 
         try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
             assertEquals(CREATED.getStatusCode(), response.getStatusCode());
-            location = response.getTransactionUri().orElseThrow(() -> new IllegalStateException("No tx found"));
+            location = response.getTransactionUri();
+            assertNotNull(location);
         }
 
         final var transactionalClient = client.transactionalClient(location);
@@ -66,8 +67,8 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
         final var container = UUID.randomUUID().toString();
         try (final var response = transactionalClient.put(new URI(SERVER_ADDRESS + container)).perform()) {
             assertEquals(CREATED.getStatusCode(), response.getStatusCode());
-            assertTrue(response.getTransactionUri().isPresent());
-            assertEquals(location.asString(), response.getTransactionUri().get().asString());
+            assertNotNull(response.getTransactionUri());
+            assertEquals(location.asString(), response.getTransactionUri().asString());
         }
 
         try (final var response = client.transaction().commit(location).perform()) {
@@ -84,8 +85,8 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
             final var container = UUID.randomUUID().toString();
             try (final var response = transactionalClient.put(new URI(SERVER_ADDRESS + container)).perform()) {
                 assertEquals(CREATED.getStatusCode(), response.getStatusCode());
-                assertTrue(response.getTransactionUri().isPresent());
-                assertEquals(txURI.asString(), response.getTransactionUri().get().asString());
+                assertNotNull(response.getTransactionUri());
+                assertEquals(txURI.asString(), response.getTransactionUri().asString());
             }
 
             try (final var response = client.transaction().commit(txURI).perform()) {
@@ -102,9 +103,11 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
         try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
             assertEquals(CREATED.getStatusCode(), response.getStatusCode());
 
-            location = response.getTransactionUri().orElseThrow(() -> new IllegalStateException("No tx found"));
+            location = response.getTransactionUri();
+            assertNotNull(location);
             // the initial transaction currently returns Expires rather than Atomic-Expires
             expiry = response.getHeaderValue("Expires");
+            assertNotNull(expiry);
         }
 
         try (final var response = client.transaction().keepAlive(location).perform()) {
@@ -128,8 +131,11 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
         try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
             assertEquals(CREATED.getStatusCode(), response.getStatusCode());
 
-            location = response.getTransactionUri().orElseThrow(() -> new IllegalStateException("No tx found"));
+            location = response.getTransactionUri();
+            assertNotNull(location);
+
             expiry = response.getHeaderValue("Expires");
+            assertNotNull(expiry);
         }
 
         try (final var response = client.transaction().status(location).perform()) {
@@ -150,7 +156,8 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
 
         try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
             assertEquals(CREATED.getStatusCode(), response.getStatusCode());
-            location = response.getTransactionUri().orElseThrow(() -> new IllegalStateException("No tx found"));
+            location = response.getTransactionUri();
+            assertNotNull(location);
         }
 
         try (final var response = client.transaction().rollback(location).perform()) {

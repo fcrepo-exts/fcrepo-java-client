@@ -49,10 +49,7 @@ public class TransactionBuilder {
     public TransactionalFcrepoClient startTransactionalClient(final URI uri)
         throws FcrepoOperationFailedException, IOException {
         try (final FcrepoResponse response = start(uri).perform()) {
-            return response.getTransactionUri()
-                           .map(client::transactionalClient)
-                           .orElseThrow(() -> new FcrepoOperationFailedException(uri, response.getStatusCode(),
-                                                                                 "No Atomic-Id found"));
+            return client.transactionalClient(response.getTransactionUri());
         }
     }
 
