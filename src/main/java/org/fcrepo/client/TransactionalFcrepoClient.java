@@ -37,6 +37,46 @@ public class TransactionalFcrepoClient extends FcrepoClient {
         return transactionURI;
     }
 
+    /**
+     * A shorthand for calling {@link TransactionBuilder#commit(FcrepoResponse.TransactionURI)} with the URI of the
+     * TransactionalFcrepoClient
+     *
+     * @return the commit RequestBuilder
+     */
+    public RequestBuilder transactionCommit() {
+        return transaction().commit(transactionURI);
+    }
+
+    /**
+     * A shorthand for calling {@link TransactionBuilder#status(FcrepoResponse.TransactionURI)} with the URI of the
+     * TransactionalFcrepoClient
+     *
+     * @return the status RequestBuilder
+     */
+    public RequestBuilder transactionStatus() {
+        return transaction().status(transactionURI);
+    }
+
+    /**
+     * A shorthand for calling {@link TransactionBuilder#keepAlive(FcrepoResponse.TransactionURI)} with the URI of the
+     * TransactionalFcrepoClient
+     *
+     * @return the keep alive RequestBuilder
+     */
+    public RequestBuilder transactionKeepAlive() {
+        return transaction().keepAlive(transactionURI);
+    }
+
+    /**
+     * A shorthand for calling {@link TransactionBuilder#rollback(FcrepoResponse.TransactionURI)} with the URI of the
+     * TransactionalFcrepoClient
+     *
+     * @return the rollback RequestBuilder
+     */
+    public RequestBuilder transactionRollback() {
+        return transaction().rollback(transactionURI);
+    }
+
     @Override
     public GetBuilder get(final URI url) {
         final var builder = super.get(url);
