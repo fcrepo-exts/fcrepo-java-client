@@ -7,6 +7,8 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
+import org.apache.http.client.methods.HttpRequestBase;
+
 /**
  * A Transaction aware client which adds the Atomic_ID header to requests
  *
@@ -38,43 +40,59 @@ public class TransactionalFcrepoClient extends FcrepoClient {
     }
 
     /**
-     * A shorthand for calling {@link TransactionBuilder#commit(FcrepoResponse.TransactionURI)} with the URI of the
-     * TransactionalFcrepoClient
+     * Commit a transaction by performing a PUT
      *
      * @return the commit RequestBuilder
      */
     public RequestBuilder transactionCommit() {
-        return transaction().commit(transactionURI);
+        return new RequestBuilder(transactionURI.get(), this) {
+            @Override
+            protected HttpRequestBase createRequest() {
+                return HttpMethods.PUT.createRequest(targetUri);
+            }
+        };
     }
 
     /**
-     * A shorthand for calling {@link TransactionBuilder#status(FcrepoResponse.TransactionURI)} with the URI of the
-     * TransactionalFcrepoClient
+     * Retrieve the status of a transaction by performing a GET
      *
      * @return the status RequestBuilder
      */
     public RequestBuilder transactionStatus() {
-        return transaction().status(transactionURI);
+        return new RequestBuilder(transactionURI.get(), this) {
+            @Override
+            protected HttpRequestBase createRequest() {
+                return HttpMethods.GET.createRequest(targetUri);
+            }
+        };
     }
 
     /**
-     * A shorthand for calling {@link TransactionBuilder#keepAlive(FcrepoResponse.TransactionURI)} with the URI of the
-     * TransactionalFcrepoClient
+     * Keep a transaction alive by performing a POST
      *
      * @return the keep alive RequestBuilder
      */
     public RequestBuilder transactionKeepAlive() {
-        return transaction().keepAlive(transactionURI);
+        return new RequestBuilder(transactionURI.get(), this) {
+            @Override
+            protected HttpRequestBase createRequest() {
+                return HttpMethods.POST.createRequest(targetUri);
+            }
+        };
     }
 
     /**
-     * A shorthand for calling {@link TransactionBuilder#rollback(FcrepoResponse.TransactionURI)} with the URI of the
-     * TransactionalFcrepoClient
+     * Rollback a transaction by performing a DELETE
      *
      * @return the rollback RequestBuilder
      */
     public RequestBuilder transactionRollback() {
-        return transaction().rollback(transactionURI);
+        return new RequestBuilder(transactionURI.get(), this) {
+            @Override
+            protected HttpRequestBase createRequest() {
+                return HttpMethods.DELETE.createRequest(targetUri);
+            }
+        };
     }
 
     @Override
