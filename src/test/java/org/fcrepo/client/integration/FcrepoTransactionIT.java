@@ -8,6 +8,7 @@ package org.fcrepo.client.integration;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static org.fcrepo.client.FcrepoClient.TRANSACTION_ENDPOINT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -54,42 +55,19 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
 
     @Test
     public void testTransactionCommit() throws Exception {
-        final FcrepoResponse.TransactionURI location;
+        try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS + TRANSACTION_ENDPOINT))) {
+            final var txURI = txClient.getTransactionURI();
 
-        try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
-            assertEquals(CREATED.getStatusCode(), response.getStatusCode());
-            location = response.getTransactionUri();
-            assertNotNull(location);
-        }
-
-        final var transactionalClient = client.transactionalClient(location);
-
-        final var container = UUID.randomUUID().toString();
-        try (final var response = transactionalClient.put(new URI(SERVER_ADDRESS + container)).perform()) {
-            assertEquals(CREATED.getStatusCode(), response.getStatusCode());
-            assertNotNull(response.getTransactionUri());
-            assertEquals(location.asString(), response.getTransactionUri().asString());
-        }
-
-        try (final var response = client.transaction().commit(location).perform()) {
-            assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
-        }
-    }
-
-    @Test
-    public void testStartTransactionalClient() throws Exception {
-        // the same as testTransactionCommit but using startTransactionalClient
-        try (final var transactionalClient = client.transaction().startTransactionalClient(new URI(SERVER_ADDRESS))) {
-            final var txURI = transactionalClient.getTransactionURI();
-
+            // create a container
             final var container = UUID.randomUUID().toString();
-            try (final var response = transactionalClient.put(new URI(SERVER_ADDRESS + container)).perform()) {
+            try (final var response = txClient.put(new URI(SERVER_ADDRESS + container)).perform()) {
                 assertEquals(CREATED.getStatusCode(), response.getStatusCode());
                 assertNotNull(response.getTransactionUri());
                 assertEquals(txURI.asString(), response.getTransactionUri().asString());
             }
 
-            try (final var response = client.transaction().commit(txURI).perform()) {
+            // commit tx
+            try (final var response = txClient.transactionCommit().perform()) {
                 assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
             }
         }
@@ -100,53 +78,44 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
         final String expiry;
         final FcrepoResponse.TransactionURI location;
 
-        try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
-            assertEquals(CREATED.getStatusCode(), response.getStatusCode());
+        try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS + TRANSACTION_ENDPOINT))) {
+            location = txClient.getTransactionURI();
+        assertNotNull(location);
 
-            location = response.getTransactionUri();
-            assertNotNull(location);
             // the initial transaction currently returns Expires rather than Atomic-Expires
-            expiry = response.getHeaderValue("Expires");
-            assertNotNull(expiry);
-        }
+            try (var response = txClient.transactionStatus().perform()) {
+                expiry = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
+                assertNotNull(expiry);
+            }
 
-        try (final var response = client.transaction().keepAlive(location).perform()) {
-            assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
+            // perform the keep-alive
+            try (final var response = txClient.transactionKeepAlive().perform()) {
+                assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
 
-            final var expiryFromStatus = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
-            assertNotNull(expiryFromStatus);
+                final var expiryFromStatus = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
+                assertNotNull(expiryFromStatus);
 
-            final var initialExpiration = Instant.from(FORMATTER.parse(expiry));
-            final var updatedExpiration = Instant.from(FORMATTER.parse(expiryFromStatus));
-            assertTrue(initialExpiration.isBefore(updatedExpiration));
+                final var initialExpiration = Instant.from(FORMATTER.parse(expiry));
+                final var updatedExpiration = Instant.from(FORMATTER.parse(expiryFromStatus));
+                assertTrue(initialExpiration.isBefore(updatedExpiration));
+            }
         }
     }
 
     @Test
     public void testTransactionStatus() throws Exception {
-        // the initial transaction currently returns Expires rather than Atomic-Expires, update if changed
-        final String expiry;
         final FcrepoResponse.TransactionURI location;
 
-        try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
-            assertEquals(CREATED.getStatusCode(), response.getStatusCode());
-
-            location = response.getTransactionUri();
+        try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS + TRANSACTION_ENDPOINT))) {
+            location = txClient.getTransactionURI();
             assertNotNull(location);
 
-            expiry = response.getHeaderValue("Expires");
-            assertNotNull(expiry);
-        }
+            try (final var response = txClient.transactionStatus().perform()) {
+                assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
 
-        try (final var response = client.transaction().status(location).perform()) {
-            assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
-
-            final var expiryFromStatus = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
-            assertNotNull(expiryFromStatus);
-
-            final var initialExpiration = Instant.from(FORMATTER.parse(expiry));
-            final var updatedExpiration = Instant.from(FORMATTER.parse(expiryFromStatus));
-            assertEquals(initialExpiration, updatedExpiration);
+                final var expiryFromStatus = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
+                assertNotNull(expiryFromStatus);
+            }
         }
     }
 
@@ -154,14 +123,13 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
     public void testTransactionRollback() throws Exception {
         final FcrepoResponse.TransactionURI location;
 
-        try (final var response = client.transaction().start(new URI(SERVER_ADDRESS)).perform()) {
-            assertEquals(CREATED.getStatusCode(), response.getStatusCode());
-            location = response.getTransactionUri();
+        try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS + TRANSACTION_ENDPOINT))) {
+            location = txClient.getTransactionURI();
             assertNotNull(location);
-        }
 
-        try (final var response = client.transaction().rollback(location).perform()) {
-            assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
+            try (final var response = txClient.transactionRollback().perform()) {
+                assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
+            }
         }
     }
 
