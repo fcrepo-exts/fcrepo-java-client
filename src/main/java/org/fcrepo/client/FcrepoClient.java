@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -51,6 +52,8 @@ public class FcrepoClient implements Closeable {
     private FcrepoHttpClientBuilder httpClientBuilder;
 
     private Boolean throwExceptionOnFailure = true;
+
+    public static final String TRANSACTION_ENDPOINT = "fcr:tx";
 
     private static final Logger LOGGER = getLogger(FcrepoClient.class);
 
@@ -166,12 +169,24 @@ public class FcrepoClient implements Closeable {
     }
 
     /**
-     * Interact with the Transaction API - start, commit, etc
+     * Start a transaction and create a new {@link TransactionalFcrepoClient}
      *
-     * @return a transaction request builder object
+     * @param uri the uri of the transaction endpoint
+     * @return the TransactionalFcrepoClient
+     * @throws IOException if there's an error with the http request
+     * @throws IllegalArgumentException if the uri is not the Fedora transaction endpoint
+     * @throws FcrepoOperationFailedException if there's an error in the fcrepo operation
      */
-    public TransactionBuilder transaction() {
-        return new TransactionBuilder(this);
+    public TransactionalFcrepoClient startTransactionClient(final URI uri)
+        throws IOException, FcrepoOperationFailedException {
+        final var txPattern = Pattern.compile("rest/" + TRANSACTION_ENDPOINT + "/?$");
+        if (!txPattern.matcher(uri.toString()).find()) {
+            throw new IllegalArgumentException("Uri is not a valid transaction endpoint");
+        }
+
+        try (final var response = post(uri).perform()) {
+            return transactionalClient(response.getTransactionUri());
+        }
     }
 
     /**
