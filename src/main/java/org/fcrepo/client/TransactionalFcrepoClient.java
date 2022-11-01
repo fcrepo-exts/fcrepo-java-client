@@ -10,7 +10,8 @@ import java.net.URI;
 import org.apache.http.client.methods.HttpRequestBase;
 
 /**
- * A Transaction aware client which adds the Atomic_ID header to requests
+ * A Transaction aware client which adds the Atomic_ID header to requests and provides functionality for interacting
+ * with the Fedora Transaction API
  *
  * @author mikejritter
  */
@@ -44,7 +45,7 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      *
      * @return the commit RequestBuilder
      */
-    public RequestBuilder transactionCommit() {
+    public RequestBuilder commit() {
         return new RequestBuilder(transactionURI.get(), this) {
             @Override
             protected HttpRequestBase createRequest() {
@@ -58,7 +59,7 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      *
      * @return the status RequestBuilder
      */
-    public RequestBuilder transactionStatus() {
+    public RequestBuilder status() {
         return new RequestBuilder(transactionURI.get(), this) {
             @Override
             protected HttpRequestBase createRequest() {
@@ -72,7 +73,7 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      *
      * @return the keep alive RequestBuilder
      */
-    public RequestBuilder transactionKeepAlive() {
+    public RequestBuilder keepAlive() {
         return new RequestBuilder(transactionURI.get(), this) {
             @Override
             protected HttpRequestBase createRequest() {
@@ -86,7 +87,7 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      *
      * @return the rollback RequestBuilder
      */
-    public RequestBuilder transactionRollback() {
+    public RequestBuilder rollback() {
         return new RequestBuilder(transactionURI.get(), this) {
             @Override
             protected HttpRequestBase createRequest() {

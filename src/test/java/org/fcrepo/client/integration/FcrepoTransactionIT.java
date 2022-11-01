@@ -67,7 +67,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
             }
 
             // commit tx
-            try (final var response = txClient.transactionCommit().perform()) {
+            try (final var response = txClient.commit().perform()) {
                 assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
             }
         }
@@ -83,13 +83,13 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
         assertNotNull(location);
 
             // the initial transaction currently returns Expires rather than Atomic-Expires
-            try (var response = txClient.transactionStatus().perform()) {
+            try (var response = txClient.status().perform()) {
                 expiry = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
                 assertNotNull(expiry);
             }
 
             // perform the keep-alive
-            try (final var response = txClient.transactionKeepAlive().perform()) {
+            try (final var response = txClient.keepAlive().perform()) {
                 assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
 
                 final var expiryFromStatus = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
@@ -110,7 +110,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
             location = txClient.getTransactionURI();
             assertNotNull(location);
 
-            try (final var response = txClient.transactionStatus().perform()) {
+            try (final var response = txClient.status().perform()) {
                 assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
 
                 final var expiryFromStatus = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
@@ -127,7 +127,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
             location = txClient.getTransactionURI();
             assertNotNull(location);
 
-            try (final var response = txClient.transactionRollback().perform()) {
+            try (final var response = txClient.rollback().perform()) {
                 assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
             }
         }
