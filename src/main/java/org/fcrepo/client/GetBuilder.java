@@ -17,7 +17,6 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.apache.http.client.methods.HttpRequestBase;
-import org.fcrepo.client.FcrepoResponse.TransactionURI;
 
 /**
  * Builds a GET request to retrieve the content of a resource from the Fedora HTTP API
@@ -185,7 +184,7 @@ public class GetBuilder extends RetrieveRequestBuilder {
     }
 
     @Override
-    public GetBuilder addTransaction(final TransactionURI transaction) {
+    public GetBuilder addTransaction(final URI transaction) {
         return (GetBuilder) super.addTransaction(transaction);
     }
 }

@@ -59,7 +59,7 @@ public class FcrepoResponse implements Closeable {
 
     private InputStream body;
 
-    private TransactionURI transactionUri;
+    private URI transactionUri;
 
     private String contentType;
 
@@ -325,34 +325,19 @@ public class FcrepoResponse implements Closeable {
      *
      * @return the transaction location or null
      */
-    public TransactionURI getTransactionUri() {
+    public URI getTransactionUri() {
         if (transactionUri == null) {
             final var location = getHeaderValue(LOCATION);
             final var atomicId = getHeaderValue(ATOMIC_ID);
 
             if (location != null && location.contains(TRANSACTION_ENDPOINT)) {
-                transactionUri = new TransactionURI(location);
+                transactionUri = URI.create(location);
             } else if (atomicId != null) {
-                transactionUri = new TransactionURI(atomicId);
+                transactionUri = URI.create(atomicId);
             }
         }
 
         return transactionUri;
     }
 
-    public static class TransactionURI {
-        private final String uri;
-
-        private TransactionURI(final String uri) {
-            this.uri = uri;
-        }
-
-        public URI get() {
-            return URI.create(uri);
-        }
-
-        public String asString() {
-            return uri;
-        }
-    }
 }

@@ -17,15 +17,14 @@ import org.apache.http.client.methods.HttpRequestBase;
  */
 public class TransactionalFcrepoClient extends FcrepoClient {
 
-    private final FcrepoResponse.TransactionURI transactionURI;
+    private final URI transactionURI;
 
     /**
-     *
      * @param transactionURI the transaction to append to all requests
      * @param httpClientBuilder the httpclient
      * @param throwExceptionOnFailure whether to throw an exception on any non-2xx or 3xx HTTP responses
      */
-    public TransactionalFcrepoClient(final FcrepoResponse.TransactionURI transactionURI,
+    public TransactionalFcrepoClient(final URI transactionURI,
                                      final FcrepoHttpClientBuilder httpClientBuilder,
                                      final Boolean throwExceptionOnFailure) {
         super(httpClientBuilder, throwExceptionOnFailure);
@@ -36,7 +35,7 @@ public class TransactionalFcrepoClient extends FcrepoClient {
         this.transactionURI = transactionURI;
     }
 
-    public FcrepoResponse.TransactionURI getTransactionURI() {
+    public URI getTransactionURI() {
         return transactionURI;
     }
 
@@ -46,7 +45,7 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      * @return the commit RequestBuilder
      */
     public RequestBuilder commit() {
-        return new RequestBuilder(transactionURI.get(), this) {
+        return new RequestBuilder(transactionURI, this) {
             @Override
             protected HttpRequestBase createRequest() {
                 return HttpMethods.PUT.createRequest(targetUri);
@@ -60,7 +59,7 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      * @return the status RequestBuilder
      */
     public RequestBuilder status() {
-        return new RequestBuilder(transactionURI.get(), this) {
+        return new RequestBuilder(transactionURI, this) {
             @Override
             protected HttpRequestBase createRequest() {
                 return HttpMethods.GET.createRequest(targetUri);
@@ -74,7 +73,7 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      * @return the keep alive RequestBuilder
      */
     public RequestBuilder keepAlive() {
-        return new RequestBuilder(transactionURI.get(), this) {
+        return new RequestBuilder(transactionURI, this) {
             @Override
             protected HttpRequestBase createRequest() {
                 return HttpMethods.POST.createRequest(targetUri);
@@ -88,7 +87,7 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      * @return the rollback RequestBuilder
      */
     public RequestBuilder rollback() {
-        return new RequestBuilder(transactionURI.get(), this) {
+        return new RequestBuilder(transactionURI, this) {
             @Override
             protected HttpRequestBase createRequest() {
                 return HttpMethods.DELETE.createRequest(targetUri);

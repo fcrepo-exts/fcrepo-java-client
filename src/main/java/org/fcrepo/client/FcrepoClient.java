@@ -181,7 +181,7 @@ public class FcrepoClient implements Closeable {
         throws IOException, FcrepoOperationFailedException {
         final var target = getTxEndpoint(uri);
         try (final var response = post(target).perform()) {
-            return transactionalClient(response.getTransactionUri());
+            return transactionalClient(response);
         }
     }
 
@@ -201,14 +201,14 @@ public class FcrepoClient implements Closeable {
     }
 
     /**
-     * Create a new {@link TransactionalFcrepoClient} which adds the
-     * {@link org.fcrepo.client.FcrepoResponse.TransactionURI} to each request
+     * Create a new {@link TransactionalFcrepoClient} which adds the transaction {@link URI} to each request
      *
-     * @param uri the Transaction to add to each request
+     * @param response the FcrepoResponse with an Atomic-ID Header
      * @return a TransactionFcrepoClient
+     * @throws IllegalArgumentException if the FcrepoResponse does not contain a transaction location
      */
-    public TransactionalFcrepoClient transactionalClient(final FcrepoResponse.TransactionURI uri) {
-        return new TransactionalFcrepoClient(uri, httpClientBuilder, throwExceptionOnFailure);
+    public TransactionalFcrepoClient transactionalClient(final FcrepoResponse response) {
+        return new TransactionalFcrepoClient(response.getTransactionUri(), httpClientBuilder, throwExceptionOnFailure);
     }
 
     /**
@@ -369,8 +369,6 @@ public class FcrepoClient implements Closeable {
 
         private String authHost;
 
-        private FcrepoResponse.TransactionURI transactionURI;
-
         private boolean throwExceptionOnFailure;
 
         /**
@@ -409,28 +407,13 @@ public class FcrepoClient implements Closeable {
         }
 
         /**
-         * The transaction uri for the client to add to requests
-         *
-         * @param transactionURI the transaction uri
-         * @return this builder
-         */
-        public FcrepoClientBuilder transactionURI(final FcrepoResponse.TransactionURI transactionURI) {
-            this.transactionURI = transactionURI;
-            return this;
-        }
-
-        /**
          * Get the client
          *
          * @return the client constructed by this builder
          */
         public FcrepoClient build() {
             final FcrepoHttpClientBuilder httpClient = new FcrepoHttpClientBuilder(authUser, authPassword, authHost);
-            if (transactionURI == null) {
-                return new FcrepoClient(httpClient, throwExceptionOnFailure);
-            } else {
-                return new TransactionalFcrepoClient(transactionURI, httpClient, throwExceptionOnFailure);
-            }
+            return new FcrepoClient(httpClient, throwExceptionOnFailure);
         }
     }
 }

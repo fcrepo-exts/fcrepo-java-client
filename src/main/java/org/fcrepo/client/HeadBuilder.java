@@ -9,7 +9,6 @@ import java.net.URI;
 import java.time.Instant;
 
 import org.apache.http.client.methods.HttpRequestBase;
-import org.fcrepo.client.FcrepoResponse.TransactionURI;
 
 /**
  * Builds a HEAD request to retrieve resource headers.
@@ -70,7 +69,7 @@ public class HeadBuilder extends RetrieveRequestBuilder {
     }
 
     @Override
-    public HeadBuilder addTransaction(final TransactionURI transaction) {
+    public HeadBuilder addTransaction(final URI transaction) {
         return (HeadBuilder) super.addTransaction(transaction);
     }
 }

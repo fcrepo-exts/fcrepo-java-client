@@ -97,8 +97,8 @@ public abstract class RequestBuilder {
      * @param transaction transaction atomic id
      * @return this builder
      */
-    protected RequestBuilder addTransaction(final FcrepoResponse.TransactionURI transaction) {
-        request.addHeader(ATOMIC_ID, transaction.asString());
+    protected RequestBuilder addTransaction(final URI transaction) {
+        request.addHeader(ATOMIC_ID, transaction.toString());
         return this;
     }
 }

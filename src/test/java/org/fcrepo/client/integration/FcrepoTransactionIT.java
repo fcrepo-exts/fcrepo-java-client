@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -23,8 +22,6 @@ import java.util.UUID;
 
 
 import org.fcrepo.client.FcrepoClient;
-import org.fcrepo.client.FcrepoOperationFailedException;
-import org.fcrepo.client.FcrepoResponse;
 import org.fcrepo.client.FedoraHeaderConstants;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -56,7 +53,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
     }
 
     @Test
-    public void testStartWithTxEndpoint() throws Exception{
+    public void testStartWithTxEndpoint() throws Exception {
         try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS + TRANSACTION_ENDPOINT))) {
             final var txURI = txClient.getTransactionURI();
             assertNotNull(txURI);
@@ -73,7 +70,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
             try (final var response = txClient.put(new URI(SERVER_ADDRESS + container)).perform()) {
                 assertEquals(CREATED.getStatusCode(), response.getStatusCode());
                 assertNotNull(response.getTransactionUri());
-                assertEquals(txURI.asString(), response.getTransactionUri().asString());
+                assertEquals(txURI, response.getTransactionUri());
             }
 
             // commit tx
@@ -86,11 +83,11 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
     @Test
     public void testTransactionKeepAlive() throws Exception {
         final String expiry;
-        final FcrepoResponse.TransactionURI location;
+        final URI location;
 
         try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS))) {
             location = txClient.getTransactionURI();
-        assertNotNull(location);
+            assertNotNull(location);
 
             // the initial transaction currently returns Expires rather than Atomic-Expires
             try (var response = txClient.status().perform()) {
@@ -114,7 +111,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
 
     @Test
     public void testTransactionStatus() throws Exception {
-        final FcrepoResponse.TransactionURI location;
+        final URI location;
 
         try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS))) {
             location = txClient.getTransactionURI();
@@ -131,7 +128,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
 
     @Test
     public void testTransactionRollback() throws Exception {
-        final FcrepoResponse.TransactionURI location;
+        final URI location;
 
         try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS))) {
             location = txClient.getTransactionURI();

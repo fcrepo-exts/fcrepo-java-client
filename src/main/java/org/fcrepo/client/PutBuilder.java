@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
-import org.fcrepo.client.FcrepoResponse.TransactionURI;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.ContentDisposition.Builder;
 
@@ -123,7 +122,7 @@ public class PutBuilder extends BodyRequestBuilder {
     }
 
     @Override
-    public PutBuilder addTransaction(final TransactionURI transaction) {
+    public PutBuilder addTransaction(final URI transaction) {
         return (PutBuilder) super.addTransaction(transaction);
     }
 
