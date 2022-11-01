@@ -171,7 +171,7 @@ public class FcrepoClient implements Closeable {
     /**
      * Start a transaction and create a new {@link TransactionalFcrepoClient}
      *
-     * @param uri the uri of the transaction endpoint
+     * @param uri the base rest endpoint or the transaction endpoint
      * @return the TransactionalFcrepoClient
      * @throws IOException if there's an error with the http request
      * @throws IllegalArgumentException if the uri is not the Fedora transaction endpoint
@@ -179,13 +179,24 @@ public class FcrepoClient implements Closeable {
      */
     public TransactionalFcrepoClient startTransactionClient(final URI uri)
         throws IOException, FcrepoOperationFailedException {
-        final var txPattern = Pattern.compile("rest/" + TRANSACTION_ENDPOINT + "/?$");
-        if (!txPattern.matcher(uri.toString()).find()) {
-            throw new IllegalArgumentException("Uri is not a valid transaction endpoint");
-        }
-
-        try (final var response = post(uri).perform()) {
+        final var target = getTxEndpoint(uri);
+        try (final var response = post(target).perform()) {
             return transactionalClient(response.getTransactionUri());
+        }
+    }
+
+    private URI getTxEndpoint(final URI uri) {
+        final var isRoot = Pattern.compile("rest/?$").asPredicate();
+        final var isTx = Pattern.compile("rest/" + TRANSACTION_ENDPOINT + "/?$").asPredicate();
+        final var base = uri.toString();
+        if (isRoot.test(base)) {
+            LOGGER.debug("Start transaction request matches root, appending {}", TRANSACTION_ENDPOINT);
+            // preface with ./ so fcr:tx isn't interpreted as a scheme
+            return uri.resolve("./" + TRANSACTION_ENDPOINT);
+        } else if (isTx.test(base)) {
+            return uri;
+        } else {
+            throw new IllegalArgumentException("Uri is not the base rest endpoint or the transaction endpoint");
         }
     }
 
