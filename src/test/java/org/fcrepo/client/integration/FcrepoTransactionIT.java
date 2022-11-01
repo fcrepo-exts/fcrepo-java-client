@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 
 import org.fcrepo.client.FcrepoClient;
+import org.fcrepo.client.FcrepoOperationFailedException;
 import org.fcrepo.client.FcrepoResponse;
 import org.fcrepo.client.FedoraHeaderConstants;
 import org.junit.AfterClass;
@@ -54,8 +56,16 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
     }
 
     @Test
-    public void testTransactionCommit() throws Exception {
+    public void testStartWithTxEndpoint() throws Exception{
         try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS + TRANSACTION_ENDPOINT))) {
+            final var txURI = txClient.getTransactionURI();
+            assertNotNull(txURI);
+        }
+    }
+
+    @Test
+    public void testTransactionCommit() throws Exception {
+        try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS))) {
             final var txURI = txClient.getTransactionURI();
 
             // create a container
@@ -78,7 +88,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
         final String expiry;
         final FcrepoResponse.TransactionURI location;
 
-        try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS + TRANSACTION_ENDPOINT))) {
+        try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS))) {
             location = txClient.getTransactionURI();
         assertNotNull(location);
 
@@ -106,7 +116,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
     public void testTransactionStatus() throws Exception {
         final FcrepoResponse.TransactionURI location;
 
-        try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS + TRANSACTION_ENDPOINT))) {
+        try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS))) {
             location = txClient.getTransactionURI();
             assertNotNull(location);
 
@@ -123,7 +133,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
     public void testTransactionRollback() throws Exception {
         final FcrepoResponse.TransactionURI location;
 
-        try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS + TRANSACTION_ENDPOINT))) {
+        try (final var txClient = client.startTransactionClient(new URI(SERVER_ADDRESS))) {
             location = txClient.getTransactionURI();
             assertNotNull(location);
 
