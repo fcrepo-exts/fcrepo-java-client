@@ -7,8 +7,6 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpRequestBase;
-
 /**
  * A Transaction aware client which adds the Atomic_ID header to requests and provides functionality for interacting
  * with the Fedora Transaction API
@@ -44,13 +42,8 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      *
      * @return the commit RequestBuilder
      */
-    public RequestBuilder commit() {
-        return new RequestBuilder(transactionURI, this) {
-            @Override
-            protected HttpRequestBase createRequest() {
-                return HttpMethods.PUT.createRequest(targetUri);
-            }
-        };
+    public PutBuilder commit() {
+        return put(transactionURI);
     }
 
     /**
@@ -58,13 +51,8 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      *
      * @return the status RequestBuilder
      */
-    public RequestBuilder status() {
-        return new RequestBuilder(transactionURI, this) {
-            @Override
-            protected HttpRequestBase createRequest() {
-                return HttpMethods.GET.createRequest(targetUri);
-            }
-        };
+    public GetBuilder status() {
+        return get(transactionURI);
     }
 
     /**
@@ -72,13 +60,8 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      *
      * @return the keep alive RequestBuilder
      */
-    public RequestBuilder keepAlive() {
-        return new RequestBuilder(transactionURI, this) {
-            @Override
-            protected HttpRequestBase createRequest() {
-                return HttpMethods.POST.createRequest(targetUri);
-            }
-        };
+    public PostBuilder keepAlive() {
+        return post(transactionURI);
     }
 
     /**
@@ -86,13 +69,8 @@ public class TransactionalFcrepoClient extends FcrepoClient {
      *
      * @return the rollback RequestBuilder
      */
-    public RequestBuilder rollback() {
-        return new RequestBuilder(transactionURI, this) {
-            @Override
-            protected HttpRequestBase createRequest() {
-                return HttpMethods.DELETE.createRequest(targetUri);
-            }
-        };
+    public DeleteBuilder rollback() {
+        return delete(transactionURI);
     }
 
     @Override
