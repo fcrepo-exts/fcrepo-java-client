@@ -35,4 +35,10 @@ public class DeleteBuilder extends RequestBuilder {
     public DeleteBuilder addHeader(final String name, final String value) {
         return (DeleteBuilder) super.addHeader(name, value);
     }
+
+    @Override
+    public DeleteBuilder addTransaction(final URI transaction) {
+        return (DeleteBuilder) super.addTransaction(transaction);
+    }
+
 }

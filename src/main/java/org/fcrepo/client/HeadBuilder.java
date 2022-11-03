@@ -67,4 +67,9 @@ public class HeadBuilder extends RetrieveRequestBuilder {
     public HeadBuilder addLinkHeader(final FcrepoLink linkHeader) {
         return (HeadBuilder) super.addLinkHeader(linkHeader);
     }
+
+    @Override
+    public HeadBuilder addTransaction(final URI transaction) {
+        return (HeadBuilder) super.addTransaction(transaction);
+    }
 }

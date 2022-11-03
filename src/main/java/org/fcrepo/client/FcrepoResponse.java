@@ -7,6 +7,8 @@ package org.fcrepo.client;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.fcrepo.client.FcrepoClient.TRANSACTION_ENDPOINT;
+import static org.fcrepo.client.FedoraHeaderConstants.ATOMIC_ID;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
@@ -20,6 +22,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.http.HeaderElement;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicHeader;
@@ -55,6 +58,8 @@ public class FcrepoResponse implements Closeable {
     private Map<String, String> contentDisposition;
 
     private InputStream body;
+
+    private URI transactionUri;
 
     private String contentType;
 
@@ -313,4 +318,26 @@ public class FcrepoResponse implements Closeable {
         }
         return contentDisposition;
     }
+
+    /**
+     * Get the transaction location. If the location is not for a transaction, check for the Atomic-ID,
+     * otherwise return null.
+     *
+     * @return the transaction location or null
+     */
+    public URI getTransactionUri() {
+        if (transactionUri == null) {
+            final var location = getHeaderValue(LOCATION);
+            final var atomicId = getHeaderValue(ATOMIC_ID);
+
+            if (location != null && location.contains(TRANSACTION_ENDPOINT)) {
+                transactionUri = URI.create(location);
+            } else if (atomicId != null) {
+                transactionUri = URI.create(atomicId);
+            }
+        }
+
+        return transactionUri;
+    }
+
 }

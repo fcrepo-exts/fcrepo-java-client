@@ -182,4 +182,9 @@ public class GetBuilder extends RetrieveRequestBuilder {
     public GetBuilder addLinkHeader(final FcrepoLink linkHeader) {
         return (GetBuilder) super.addLinkHeader(linkHeader);
     }
+
+    @Override
+    public GetBuilder addTransaction(final URI transaction) {
+        return (GetBuilder) super.addTransaction(transaction);
+    }
 }

@@ -40,4 +40,5 @@ public class OriginalMementoBuilder extends RequestBuilder {
     public OriginalMementoBuilder addLinkHeader(final FcrepoLink linkHeader) {
         return (OriginalMementoBuilder) super.addLinkHeader(linkHeader);
     }
+
 }

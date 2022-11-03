@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -48,8 +49,11 @@ import org.slf4j.Logger;
 public class FcrepoClient implements Closeable {
 
     private CloseableHttpClient httpclient;
+    private FcrepoHttpClientBuilder httpClientBuilder;
 
     private Boolean throwExceptionOnFailure = true;
+
+    public static final String TRANSACTION_ENDPOINT = "fcr:tx";
 
     private static final Logger LOGGER = getLogger(FcrepoClient.class);
 
@@ -72,7 +76,19 @@ public class FcrepoClient implements Closeable {
      */
     protected FcrepoClient(final String username, final String password, final String host,
             final Boolean throwExceptionOnFailure) {
-        this(new FcrepoHttpClientBuilder(username, password, host).build(), throwExceptionOnFailure);
+        this(new FcrepoHttpClientBuilder(username, password, host), throwExceptionOnFailure);
+    }
+
+    /**
+     * Create a FcrepoClient which uses the given {@link FcrepoHttpClientBuilder} to manage its http client.
+     * FcrepoClient will close the httpClient when {@link #close()} is called.
+     * @param httpClientBuilder http client builder to use to connect to the repository
+     * @param throwExceptionOnFailure whether to throw an exception on any non-2xx or 3xx HTTP responses
+     */
+    protected FcrepoClient(final FcrepoHttpClientBuilder httpClientBuilder, final Boolean throwExceptionOnFailure) {
+        this.throwExceptionOnFailure = throwExceptionOnFailure;
+        this.httpclient = httpClientBuilder.build();
+        this.httpClientBuilder = httpClientBuilder;
     }
 
     /**
@@ -150,6 +166,49 @@ public class FcrepoClient implements Closeable {
      */
     public HistoricMementoBuilder createMemento(final URI url, final String mementoDatetime) {
         return new HistoricMementoBuilder(url, this, mementoDatetime);
+    }
+
+    /**
+     * Start a transaction and create a new {@link TransactionalFcrepoClient}
+     *
+     * @param uri the base rest endpoint or the transaction endpoint
+     * @return the TransactionalFcrepoClient
+     * @throws IOException if there's an error with the http request
+     * @throws IllegalArgumentException if the uri is not the Fedora transaction endpoint
+     * @throws FcrepoOperationFailedException if there's an error in the fcrepo operation
+     */
+    public TransactionalFcrepoClient startTransactionClient(final URI uri)
+        throws IOException, FcrepoOperationFailedException {
+        final var target = getTxEndpoint(uri);
+        try (final var response = post(target).perform()) {
+            return transactionalClient(response);
+        }
+    }
+
+    private URI getTxEndpoint(final URI uri) {
+        final var isRoot = Pattern.compile("rest/?$").asPredicate();
+        final var isTx = Pattern.compile("rest/" + TRANSACTION_ENDPOINT + "/?$").asPredicate();
+        final var base = uri.toString();
+        if (isRoot.test(base)) {
+            LOGGER.debug("Start transaction request matches root, appending {}", TRANSACTION_ENDPOINT);
+            // preface with ./ so fcr:tx isn't interpreted as a scheme
+            return uri.resolve("./" + TRANSACTION_ENDPOINT);
+        } else if (isTx.test(base)) {
+            return uri;
+        } else {
+            throw new IllegalArgumentException("Uri is not the base rest endpoint or the transaction endpoint");
+        }
+    }
+
+    /**
+     * Create a new {@link TransactionalFcrepoClient} which adds the transaction {@link URI} to each request
+     *
+     * @param response the FcrepoResponse with an Atomic-ID Header
+     * @return a TransactionFcrepoClient
+     * @throws IllegalArgumentException if the FcrepoResponse does not contain a transaction location
+     */
+    public TransactionalFcrepoClient transactionalClient(final FcrepoResponse response) {
+        return new TransactionalFcrepoClient(response.getTransactionUri(), httpClientBuilder, throwExceptionOnFailure);
     }
 
     /**
@@ -354,7 +413,7 @@ public class FcrepoClient implements Closeable {
          */
         public FcrepoClient build() {
             final FcrepoHttpClientBuilder httpClient = new FcrepoHttpClientBuilder(authUser, authPassword, authHost);
-            return new FcrepoClient(httpClient.build(), throwExceptionOnFailure);
+            return new FcrepoClient(httpClient, throwExceptionOnFailure);
         }
     }
 }

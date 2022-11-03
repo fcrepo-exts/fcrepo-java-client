@@ -40,4 +40,9 @@ public class OptionsBuilder extends RequestBuilder {
     public OptionsBuilder addLinkHeader(final FcrepoLink linkHeader) {
         return (OptionsBuilder) super.addLinkHeader(linkHeader);
     }
+
+    @Override
+    public OptionsBuilder addTransaction(final URI transaction) {
+        return (OptionsBuilder) super.addTransaction(transaction);
+    }
 }
