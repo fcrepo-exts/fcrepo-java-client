@@ -179,13 +179,6 @@
 
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <!-- Prepend the JaCoCo unit-test agent (set by prepare-agent via the argLine -->
-          <!-- property) so unit test coverage is recorded. @{argLine} is resolved late, -->
-          <!-- after prepare-agent runs. Without this the parent pom's argLine overrides -->
-          <!-- it and no unit coverage is captured. -->
-          <argLine>@{argLine} -Xms512m -Xmx1024m</argLine>
-        </configuration>
       </plugin>
 
       <plugin>
