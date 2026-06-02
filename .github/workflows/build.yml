@@ -22,6 +22,13 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     - name: Build with Maven
-      run: mvn install -B -V
-      env:
-        MAVEN_OPTS: "-Xmx512m"
+      run: >
+        mvn -B -U clean
+        org.jacoco:jacoco-maven-plugin:0.8.12:prepare-agent
+        install
+        org.jacoco:jacoco-maven-plugin:0.8.12:report
+    - name: Upload coverage to Codecov
+      if: matrix.os == 'ubuntu-latest'
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
