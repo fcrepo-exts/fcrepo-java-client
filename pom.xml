@@ -220,6 +220,14 @@
               <goal>verify</goal>
             </goals>
           </execution>
+          <execution>
+            <id>report</id>
+            <phase>verify</phase>
+            <goals><goal>report</goal></goals>
+            <configuration>
+              <destFile>${project.build.directory}/jacoco.exec</destFile>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
