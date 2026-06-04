@@ -19,15 +19,18 @@ import static org.fcrepo.client.HeaderHelpers.UTC_RFC_1123_FORMATTER;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.client.methods.HttpRequestBase;
@@ -181,6 +184,86 @@ public class GetBuilderTest {
 
         final HttpRequestBase request = getRequest();
         assertEquals(HISTORIC_DATETIME, request.getFirstHeader(ACCEPT_DATETIME).getValue());
+    }
+
+    @Test
+    public void testAcceptNull() throws Exception {
+        testBuilder.accept(null).perform();
+
+        final HttpRequestBase request = getRequest();
+        assertNull(request.getFirstHeader(ACCEPT));
+    }
+
+    @Test
+    public void testRangeNull() throws Exception {
+        testBuilder.range(null, null).perform();
+
+        final HttpRequestBase request = getRequest();
+        assertNull(request.getFirstHeader(RANGE));
+    }
+
+    @Test
+    public void testRangeNegativeBounds() throws Exception {
+        testBuilder.range(-1L, -1L).perform();
+
+        final HttpRequestBase request = getRequest();
+        assertEquals("bytes=-", request.getFirstHeader(RANGE).getValue());
+    }
+
+    @Test
+    public void testNullModificationHeaders() throws Exception {
+        testBuilder.ifNoneMatch(null).ifModifiedSince(null).perform();
+
+        final HttpRequestBase request = getRequest();
+        assertNull(request.getFirstHeader(IF_NONE_MATCH));
+        assertNull(request.getFirstHeader(IF_MODIFIED_SINCE));
+    }
+
+    @Test
+    public void testPreferOmit() throws Exception {
+        final List<URI> omits = Arrays.asList(
+                new URI("http://www.w3.org/ns/ldp#PreferMembership"));
+        testBuilder.preferRepresentation(null, omits).perform();
+
+        final HttpRequestBase request = getRequest();
+        assertEquals("return=representation; omit=\"http://www.w3.org/ns/ldp#PreferMembership\"",
+                request.getFirstHeader(PREFER).getValue());
+    }
+
+    @Test
+    public void testPreferEmptyLists() throws Exception {
+        testBuilder.preferRepresentation(Collections.emptyList(), Collections.emptyList()).perform();
+
+        final HttpRequestBase request = getRequest();
+        // Empty include/omit lists contribute nothing, leaving only the return token
+        assertEquals("return=representation", request.getFirstHeader(PREFER).getValue());
+    }
+
+    @Test
+    public void testWantDigestNull() throws Exception {
+        testBuilder.wantDigest(null).perform();
+
+        final HttpRequestBase request = getRequest();
+        assertNull(request.getFirstHeader(WANT_DIGEST));
+    }
+
+    @Test
+    public void testAcceptDatetimeInstant() throws Exception {
+        final Instant instant = LocalDateTime.of(2000, 1, 1, 0, 0).atZone(ZoneOffset.UTC).toInstant();
+        testBuilder.acceptDatetime(instant).perform();
+
+        final HttpRequestBase request = getRequest();
+        assertEquals(HISTORIC_DATETIME, request.getFirstHeader(ACCEPT_DATETIME).getValue());
+    }
+
+    @Test
+    public void testAcceptDatetimeNull() throws Exception {
+        testBuilder.acceptDatetime((Instant) null)
+                .acceptDatetime((String) null)
+                .perform();
+
+        final HttpRequestBase request = getRequest();
+        assertNull(request.getFirstHeader(ACCEPT_DATETIME));
     }
 
     @Test

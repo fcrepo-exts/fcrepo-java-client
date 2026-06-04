@@ -7,6 +7,7 @@ package org.fcrepo.client;
 
 import static java.net.URI.create;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.fcrepo.client.FedoraHeaderConstants.ATOMIC_ID;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION_FILENAME;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION_MODIFICATION_DATE;
@@ -19,6 +20,7 @@ import static org.fcrepo.client.LinkHeaderConstants.DESCRIBEDBY_REL;
 import static org.fcrepo.client.FedoraTypes.MEMENTO_ORIGINAL_TYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -275,6 +277,82 @@ public class FcrepoResponseTest {
 
             assertFalse(response.hasType("http://example.com/some_type"));
             assertFalse(response.hasType(URI.create("http://example.com/some_type")));
+        }
+    }
+
+    @Test
+    public void testNullHeaders() throws Exception {
+        try (final FcrepoResponse response = new FcrepoResponse(create("http://localhost/foo"), 200, null, null)) {
+            assertTrue(response.getHeaderValues("any").isEmpty());
+            assertNull(response.getHeaderValue("any"));
+            assertNull(response.getContentType());
+            assertNull(response.getLocation());
+            assertTrue(response.getLinkHeaders(TYPE_REL).isEmpty());
+        }
+    }
+
+    @Test
+    public void testGetHeaderValueMissing() throws Exception {
+        final Map<String, List<String>> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, Arrays.asList("text/plain"));
+        try (final FcrepoResponse response = new FcrepoResponse(create("http://localhost/foo"), 200, headers, null)) {
+            assertNull("A header that is not present should yield a null value", response.getHeaderValue(LOCATION));
+        }
+    }
+
+    @Test
+    public void testCloseWithNullBodyIsNoOp() throws Exception {
+        final FcrepoResponse response = new FcrepoResponse(create("http://localhost/foo"), 200, null, null);
+        response.close();
+        // With no body there is nothing to release, so the response is never marked closed
+        assertFalse(response.isClosed());
+    }
+
+    @Test
+    public void testContentDispositionAbsent() throws Exception {
+        final Map<String, List<String>> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, Arrays.asList("text/plain"));
+        try (final FcrepoResponse response = new FcrepoResponse(create("http://localhost/foo"), 200, headers, null)) {
+            assertNull(response.getContentDisposition());
+        }
+    }
+
+    @Test
+    public void testLocationAbsent() throws Exception {
+        final Map<String, List<String>> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, Arrays.asList("text/plain"));
+        try (final FcrepoResponse response = new FcrepoResponse(create("http://localhost/foo"), 200, headers, null)) {
+            assertNull("Without a location or describedby link, getLocation should be null", response.getLocation());
+        }
+    }
+
+    @Test
+    public void testTransactionUriFromLocation() throws Exception {
+        final Map<String, List<String>> headers = new HashMap<>();
+        final String txLocation = "http://localhost:8080/rest/fcr:tx/1234";
+        headers.put(LOCATION, Arrays.asList(txLocation));
+        try (final FcrepoResponse response = new FcrepoResponse(create("http://localhost/foo"), 201, headers, null)) {
+            assertEquals(create(txLocation), response.getTransactionUri());
+        }
+    }
+
+    @Test
+    public void testTransactionUriFromAtomicId() throws Exception {
+        final Map<String, List<String>> headers = new HashMap<>();
+        final String atomicId = "http://localhost:8080/rest/tx:1234";
+        headers.put(ATOMIC_ID, Arrays.asList(atomicId));
+        try (final FcrepoResponse response = new FcrepoResponse(create("http://localhost/foo"), 201, headers, null)) {
+            assertEquals(create(atomicId), response.getTransactionUri());
+        }
+    }
+
+    @Test
+    public void testTransactionUriAbsent() throws Exception {
+        final Map<String, List<String>> headers = new HashMap<>();
+        final String location = "http://localhost:8080/rest/foo";
+        headers.put(LOCATION, Arrays.asList(location));
+        try (final FcrepoResponse response = new FcrepoResponse(create("http://localhost/foo"), 201, headers, null)) {
+            assertNull("A non-transaction location should not yield a transaction uri", response.getTransactionUri());
         }
     }
 }
