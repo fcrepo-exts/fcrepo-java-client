@@ -102,6 +102,11 @@ public class PutBuilder extends BodyRequestBuilder {
     }
 
     @Override
+    public PutBuilder digestSha512(final String digest) {
+        return (PutBuilder) super.digestSha512(digest);
+    }
+
+    @Override
     public PutBuilder addInteractionModel(final String interactionModelUri) {
         return (PutBuilder) super.addInteractionModel(interactionModelUri);
     }

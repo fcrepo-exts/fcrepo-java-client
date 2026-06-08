@@ -39,43 +39,31 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class FcrepoHttpClientBuilderTest {
 
     @Test
-    public void testBuildWithNoCredentials() {
+    public void testBuildWithNoCredentials() throws Exception {
         final FcrepoHttpClientBuilder builder = new FcrepoHttpClientBuilder(null, null, null);
-        try (final CloseableHttpClient client = builder.build()) {
-            assertNotNull(client);
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
+        final CloseableHttpClient client = builder.build();
+        assertNotNull(client);
     }
 
     @Test
-    public void testBuildWithBlankPassword() {
+    public void testBuildWithBlankPassword() throws Exception {
         final FcrepoHttpClientBuilder builder = new FcrepoHttpClientBuilder("user", "", "localhost");
-        try (final CloseableHttpClient client = builder.build()) {
-            assertNotNull(client);
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
+        final CloseableHttpClient client = builder.build();
+        assertNotNull(client);
     }
 
     @Test
-    public void testBuildWithCredentialsNoHost() {
+    public void testBuildWithCredentialsNoHost() throws Exception {
         final FcrepoHttpClientBuilder builder = new FcrepoHttpClientBuilder("user", "password", null);
-        try (final CloseableHttpClient client = builder.build()) {
-            assertNotNull(client);
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
+        final CloseableHttpClient client = builder.build();
+        assertNotNull(client);
     }
 
     @Test
-    public void testBuildWithCredentialsAndHost() {
+    public void testBuildWithCredentialsAndHost() throws Exception {
         final FcrepoHttpClientBuilder builder = new FcrepoHttpClientBuilder("user", "password", "localhost");
-        try (final CloseableHttpClient client = builder.build()) {
-            assertNotNull(client);
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
+        final CloseableHttpClient client = builder.build();
+        assertNotNull(client);
     }
 
     @Test

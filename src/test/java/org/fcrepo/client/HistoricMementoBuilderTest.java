@@ -154,12 +154,14 @@ public class HistoricMementoBuilderTest {
         testBuilder.body(bodyStream, "plain/text")
                 .digestMd5("md5sum")
                 .digestSha256("sha256sum")
+                .digestSha512("sha512sum")
                 .digest("shasum", "sha")
                 .perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
         final HttpRequestBase request = requestCaptor.getValue();
-        assertEquals("md5=md5sum, sha256=sha256sum, sha=shasum", request.getFirstHeader(DIGEST).getValue());
+        assertEquals("md5=md5sum, sha256=sha256sum, sha512=sha512sum, sha=shasum",
+                request.getFirstHeader(DIGEST).getValue());
     }
 
     @Test

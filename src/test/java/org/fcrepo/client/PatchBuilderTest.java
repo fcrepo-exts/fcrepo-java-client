@@ -154,11 +154,12 @@ public class PatchBuilderTest {
                 .digestMd5("md5sum")
                 .digestSha1("sha1sum")
                 .digestSha256("sha256sum")
+                .digestSha512("sha512sum")
                 .perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
         final String digestHeader = requestCaptor.getValue().getFirstHeader(DIGEST).getValue();
-        assertEquals("md5=md5sum, sha=sha1sum, sha256=sha256sum", digestHeader);
+        assertEquals("md5=md5sum, sha=sha1sum, sha256=sha256sum, sha512=sha512sum", digestHeader);
     }
 
     @Test
