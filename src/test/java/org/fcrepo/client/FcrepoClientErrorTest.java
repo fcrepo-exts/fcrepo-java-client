@@ -14,7 +14,7 @@ import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.fcrepo.client.TestUtils.rdfXml;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -31,17 +31,17 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author acoburn
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FcrepoClientErrorTest {
 
     private FcrepoClient testClient;
@@ -55,12 +55,12 @@ public class FcrepoClientErrorTest {
     @Mock
     private CloseableHttpResponse mockResponse;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         testClient = new FcrepoClient(mockHttpclient, false);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         testClient.close();
     }

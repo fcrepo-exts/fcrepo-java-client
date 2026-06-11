@@ -5,17 +5,17 @@
  */
 package org.fcrepo.client.integration;
 
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.CONFLICT;
-import static javax.ws.rs.core.Response.Status.CREATED;
-import static javax.ws.rs.core.Response.Status.GONE;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
-import static javax.ws.rs.core.Response.Status.OK;
-import static javax.ws.rs.core.Response.Status.PARTIAL_CONTENT;
-import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
-import static javax.ws.rs.core.Response.Status.TEMPORARY_REDIRECT;
+import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
+import static jakarta.ws.rs.core.Response.Status.CONFLICT;
+import static jakarta.ws.rs.core.Response.Status.CREATED;
+import static jakarta.ws.rs.core.Response.Status.GONE;
+import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
+import static jakarta.ws.rs.core.Response.Status.NOT_MODIFIED;
+import static jakarta.ws.rs.core.Response.Status.NO_CONTENT;
+import static jakarta.ws.rs.core.Response.Status.OK;
+import static jakarta.ws.rs.core.Response.Status.PARTIAL_CONTENT;
+import static jakarta.ws.rs.core.Response.Status.PRECONDITION_FAILED;
+import static jakarta.ws.rs.core.Response.Status.TEMPORARY_REDIRECT;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_DISPOSITION_FILENAME;
 import static org.fcrepo.client.FedoraHeaderConstants.CONTENT_TYPE;
 import static org.fcrepo.client.FedoraHeaderConstants.DIGEST;
@@ -25,11 +25,11 @@ import static org.fcrepo.client.FedoraHeaderConstants.STATE_TOKEN;
 import static org.fcrepo.client.FedoraTypes.LDP_DIRECT_CONTAINER;
 import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.EntityTag;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -54,10 +54,10 @@ import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoOperationFailedException;
 import org.fcrepo.client.FcrepoResponse;
 import org.fcrepo.client.HeaderHelpers;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author bbpennel
@@ -70,7 +70,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
 
     final private String UNMODIFIED_DATE = "Mon, 1 Jan 2001 00:00:00 GMT";
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         client = FcrepoClient.client()
                 .credentials("fedoraAdmin", "fedoraAdmin")
@@ -78,12 +78,12 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .build();
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() throws IOException {
         client.close();
     }
 
-    @Before
+    @BeforeEach
     public void before() {
         url = URI.create(SERVER_ADDRESS + UUID.randomUUID().toString());
     }
@@ -115,11 +115,10 @@ public class FcrepoClientIT extends AbstractResourceIT {
             final int status = response.getStatusCode();
             createdResourceUri = response.getLocation();
 
-            assertEquals("Didn't get a CREATED response! Got content:\n" + content,
-                    CREATED.getStatusCode(), status);
-            assertEquals("Location did not match slug", SERVER_ADDRESS + slug, createdResourceUri.toString());
+            assertEquals(CREATED.getStatusCode(), status, "Didn't get a CREATED response! Got content:\n" + content);
+            assertEquals(SERVER_ADDRESS + slug, createdResourceUri.toString(), "Location did not match slug");
 
-            assertNotNull("Didn't find linked description!", response.getLinkHeaders("describedby").get(0));
+            assertNotNull(response.getLinkHeaders("describedby").get(0), "Didn't find linked description!");
         }
 
         try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
@@ -153,8 +152,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
             final int status = response.getStatusCode();
             createdResourceUri = response.getLocation();
 
-            assertEquals("Didn't get a CREATED response! Got content:\n" + content,
-                    CREATED.getStatusCode(), status);
+            assertEquals(CREATED.getStatusCode(), status, "Didn't get a CREATED response! Got content:\n" + content);
         }
 
         try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
@@ -179,7 +177,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .digestSha1(invalidDigest)
                 .perform()) {
 
-            assertEquals("Invalid checksum was not rejected", CONFLICT.getStatusCode(), response.getStatusCode());
+            assertEquals(CONFLICT.getStatusCode(), response.getStatusCode(), "Invalid checksum was not rejected");
         }
     }
 
@@ -195,7 +193,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .digestSha256("64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c")
                 .perform()) {
 
-            assertEquals("Checksums rejected", CREATED.getStatusCode(), response.getStatusCode());
+            assertEquals(CREATED.getStatusCode(), response.getStatusCode(), "Checksums rejected");
         }
     }
 
@@ -212,7 +210,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .digestSha256("123488ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c")
                 .perform()) {
 
-            assertEquals("Invalid checksum was not rejected", CONFLICT.getStatusCode(), response.getStatusCode());
+            assertEquals(CONFLICT.getStatusCode(), response.getStatusCode(), "Invalid checksum was not rejected");
         }
     }
 
@@ -226,7 +224,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .filename(null)
                 .perform()) {
 
-            assertEquals("Empty filename rejected", CREATED.getStatusCode(), response.getStatusCode());
+            assertEquals(CREATED.getStatusCode(), response.getStatusCode(), "Empty filename rejected");
         }
     }
 
@@ -241,11 +239,11 @@ public class FcrepoClientIT extends AbstractResourceIT {
             final int status = response.getStatusCode();
             createdResourceUri = response.getLocation();
 
-            assertEquals("Didn't get a CREATED response!", CREATED.getStatusCode(), status);
+            assertEquals(CREATED.getStatusCode(), status, "Didn't get a CREATED response!");
         }
 
         try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
-            assertTrue("Did not have ldp:DirectContainer type", getResponse.hasType(LDP_DIRECT_CONTAINER));
+            assertTrue(getResponse.hasType(LDP_DIRECT_CONTAINER), "Did not have ldp:DirectContainer type");
         }
     }
 
@@ -269,11 +267,10 @@ public class FcrepoClientIT extends AbstractResourceIT {
             final int status = response.getStatusCode();
             createdResourceUri = response.getLocation();
 
-            assertEquals("Didn't get a CREATED response! Got content:\n" + content,
-                    CREATED.getStatusCode(), status);
-            assertEquals("Location did not match slug", SERVER_ADDRESS + slug, response.getLocation().toString());
+            assertEquals(CREATED.getStatusCode(), status, "Didn't get a CREATED response! Got content:\n" + content);
+            assertEquals(SERVER_ADDRESS + slug, response.getLocation().toString(), "Location did not match slug");
 
-            assertNotNull("Didn't find linked description!", response.getLinkHeaders("describedby").get(0));
+            assertNotNull(response.getLinkHeaders("describedby").get(0), "Didn't find linked description!");
         }
 
         try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
@@ -306,11 +303,10 @@ public class FcrepoClientIT extends AbstractResourceIT {
             final int status = response.getStatusCode();
             createdResourceUri = response.getLocation();
 
-            assertEquals("Didn't get a CREATED response! Got content:\n" + content,
-                    CREATED.getStatusCode(), status);
-            assertEquals("Location did not match slug", SERVER_ADDRESS + id, response.getLocation().toString());
+            assertEquals(CREATED.getStatusCode(), status, "Didn't get a CREATED response! Got content:\n" + content);
+            assertEquals(SERVER_ADDRESS + id, response.getLocation().toString(), "Location did not match slug");
 
-            assertNotNull("Didn't find linked description!", response.getLinkHeaders("describedby").get(0));
+            assertNotNull(response.getLinkHeaders("describedby").get(0), "Didn't find linked description!");
         }
 
         try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
@@ -437,8 +433,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
             final int status = response.getStatusCode();
             createdResourceUri = response.getLocation();
 
-            assertEquals("Didn't get a CREATED response! Got content:\n" + content,
-                    CREATED.getStatusCode(), status);
+            assertEquals(CREATED.getStatusCode(), status, "Didn't get a CREATED response! Got content:\n" + content);
         }
 
         try (final FcrepoResponse getResponse = client.get(createdResourceUri).perform()) {
@@ -460,7 +455,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .body(new ByteArrayInputStream(bodyContent.getBytes()), "text/plain")
                 .filename(null)
                 .perform()) {
-            assertEquals("Empty filename rejected", CREATED.getStatusCode(), response.getStatusCode());
+            assertEquals(CREATED.getStatusCode(), response.getStatusCode(), "Empty filename rejected");
         }
     }
 
@@ -488,6 +483,10 @@ public class FcrepoClientIT extends AbstractResourceIT {
             createdEtag = EntityTag.valueOf(createResp.getHeaderValue(ETAG));
         }
 
+        // The weak ETag is derived from the last-modified timestamp, which has
+        // second granularity, so ensure the patch lands in a later second
+        Thread.sleep(1500);
+
         // Update triples with sparql update
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
         try (final FcrepoResponse response = client.patch(url)
@@ -495,10 +494,15 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .ifMatch("\"" + createdEtag.getValue() + "\"")
                 .perform()) {
 
+            assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
+        }
+
+        // As of Fedora 7 the PATCH response no longer carries the updated ETag,
+        // so retrieve it with a fresh request
+        try (final FcrepoResponse response = client.head(url).perform()) {
             final EntityTag updateEtag = EntityTag.valueOf(response.getHeaderValue(ETAG));
 
-            assertEquals(NO_CONTENT.getStatusCode(), response.getStatusCode());
-            assertNotEquals("Etag did not change after patch", createdEtag, updateEtag);
+            assertNotEquals(createdEtag, updateEtag, "Etag did not change after patch");
         }
     }
 
@@ -563,7 +567,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .perform()) {
 
             assertEquals(NOT_MODIFIED.getStatusCode(), modResp.getStatusCode());
-            assertNull("Response body should not be returned when unmodified", modResp.getBody());
+            assertNull(modResp.getBody(), "Response body should not be returned when unmodified");
         }
     }
 
@@ -587,7 +591,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .perform()) {
 
             assertEquals(OK.getStatusCode(), modResp.getStatusCode());
-            assertNotNull("GET response body should be normal when modified", modResp.getBody());
+            assertNotNull(modResp.getBody(), "GET response body should be normal when modified");
         }
     }
 
@@ -640,7 +644,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .perform()) {
 
             final String content = IOUtils.toString(rangeResp.getBody(), "UTF-8");
-            assertEquals("Body did not contain correct range of original content", "world", content);
+            assertEquals("world", content, "Body did not contain correct range of original content");
             assertEquals(PARTIAL_CONTENT.getStatusCode(), rangeResp.getStatusCode());
         }
     }
@@ -665,8 +669,8 @@ public class FcrepoClientIT extends AbstractResourceIT {
                 .disableRedirects()
                 .perform();
                 ) {
-            assertEquals("Didn't get a REDIRECT response!",
-                    TEMPORARY_REDIRECT.getStatusCode(), getResponse.getStatusCode());
+            assertEquals(TEMPORARY_REDIRECT.getStatusCode(), getResponse.getStatusCode(),
+                    "Didn't get a REDIRECT response!");
             assertEquals(mimetype, getResponse.getContentType());
 
             final Map<String, String> contentDisp = getResponse.getContentDisposition();
@@ -697,7 +701,7 @@ public class FcrepoClientIT extends AbstractResourceIT {
             assertEquals(OK.getStatusCode(), getResp.getStatusCode());
 
             final String digest = getResp.getHeaderValue(DIGEST);
-            assertTrue("Did not contain md5", digest.contains("md5=3e25960a79dbc69b674cd4ec67a72c62"));
+            assertTrue(digest.contains("md5=3e25960a79dbc69b674cd4ec67a72c62"), "Did not contain md5");
         }
     }
 
@@ -738,10 +742,10 @@ public class FcrepoClientIT extends AbstractResourceIT {
             assertEquals(OK.getStatusCode(), getResp.getStatusCode());
 
             final String digest = getResp.getHeaderValue(DIGEST);
-            assertTrue("Did not contain md5", digest.contains("md5=3e25960a79dbc69b674cd4ec67a72c62"));
-            assertTrue("Did not contain sha1", digest.contains("sha=7b502c3a1f48c8609ae212cdfb639dee39673f5e"));
-            assertTrue("Did not contain sha256", digest
-                    .contains("sha-256=64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c"));
+            assertTrue(digest.contains("md5=3e25960a79dbc69b674cd4ec67a72c62"), "Did not contain md5");
+            assertTrue(digest.contains("sha=7b502c3a1f48c8609ae212cdfb639dee39673f5e"), "Did not contain sha1");
+            assertTrue(digest.contains("sha-256=64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c"),
+                    "Did not contain sha256");
         }
     }
 

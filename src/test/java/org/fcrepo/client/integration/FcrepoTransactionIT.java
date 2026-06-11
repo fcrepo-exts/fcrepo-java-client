@@ -6,12 +6,12 @@
 package org.fcrepo.client.integration;
 
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
-import static javax.ws.rs.core.Response.Status.CREATED;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static jakarta.ws.rs.core.Response.Status.CREATED;
+import static jakarta.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.fcrepo.client.FcrepoClient.TRANSACTION_ENDPOINT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,9 +23,9 @@ import java.util.UUID;
 
 import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FedoraHeaderConstants;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests against the Fedora Transaction API
@@ -39,7 +39,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
     private static final String FEDORA_ADMIN = "fedoraAdmin";
     private static final DateTimeFormatter FORMATTER = RFC_1123_DATE_TIME.withZone(ZoneId.of("UTC"));
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         client = FcrepoClient.client()
                              .credentials(FEDORA_ADMIN, FEDORA_ADMIN)
@@ -47,7 +47,7 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
                              .build();
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() throws IOException {
         client.close();
     }
@@ -94,6 +94,10 @@ public class FcrepoTransactionIT extends AbstractResourceIT {
                 expiry = response.getHeaderValue(FedoraHeaderConstants.ATOMIC_EXPIRES);
                 assertNotNull(expiry);
             }
+
+            // Atomic-Expires has second granularity, so ensure the keep-alive
+            // lands in a later second than the initial expiration
+            Thread.sleep(1500);
 
             // perform the keep-alive
             try (final var response = txClient.keepAlive().perform()) {

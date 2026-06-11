@@ -8,7 +8,8 @@ package org.fcrepo.client;
 import static java.net.URI.create;
 import static org.fcrepo.client.FedoraHeaderConstants.ATOMIC_ID;
 import static org.fcrepo.client.TestUtils.baseUrl;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,20 +21,23 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * Tests for {@link TransactionalFcrepoClient}.
  *
  * @author surfrdan
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class TransactionalFcrepoClientTest {
 
     @Mock
@@ -57,7 +61,7 @@ public class TransactionalFcrepoClientTest {
 
     private TransactionalFcrepoClient txClient;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         when(httpClientBuilder.build()).thenReturn(httpClient);
         when(httpClient.execute(any(HttpRequestBase.class))).thenReturn(httpResponse);
@@ -70,9 +74,11 @@ public class TransactionalFcrepoClientTest {
         txClient = new TransactionalFcrepoClient(txUri, httpClientBuilder, true);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullTransactionUri() {
-        new TransactionalFcrepoClient(null, httpClientBuilder, true);
+        assertThrows(IllegalArgumentException.class, () -> {
+            new TransactionalFcrepoClient(null, httpClientBuilder, true);
+        });
     }
 
     @Test

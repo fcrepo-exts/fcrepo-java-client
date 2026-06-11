@@ -8,7 +8,7 @@ package org.fcrepo.client;
 import static java.net.URI.create;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.TestUtils.baseUrl;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -17,20 +17,20 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 
 import org.apache.http.client.methods.HttpRequestBase;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Tests for {@link OriginalMementoBuilder}.
  *
  * @author surfrdan
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OriginalMementoBuilderTest {
 
     @Mock
@@ -46,7 +46,7 @@ public class OriginalMementoBuilderTest {
 
     private URI uri;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
                 .thenReturn(fcrepoResponse);
