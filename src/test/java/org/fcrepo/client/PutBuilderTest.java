@@ -232,4 +232,37 @@ public class PutBuilderTest {
         final HttpRequestBase request = requestCaptor.getValue();
         assertEquals(link.toString(), request.getFirstHeader(LINK).getValue());
     }
+
+    @Test
+    public void testNullArgumentsAreNoOps() throws Exception {
+        testBuilder.body((InputStream) null)
+                .ifMatch(null)
+                .ifUnmodifiedSince(null)
+                .ifStateToken(null)
+                .digest(null, "sha")
+                .addInteractionModel(null)
+                .linkAcl(null)
+                .perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        assertNull("A null body stream should not set an entity", request.getEntity());
+        assertEquals("No headers should be added for null arguments", 0, request.getAllHeaders().length);
+    }
+
+    @Test
+    public void testExternalContentBlankType() throws Exception {
+        final URI contentURI = URI.create("file:///path/to/file");
+        testBuilder.externalContent(contentURI, "", PROXY).perform();
+
+        verify(client).executeRequest(eq(uri), requestCaptor.capture());
+
+        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final FcrepoLink extLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
+        assertEquals(EXTERNAL_CONTENT_REL, extLink.getRel());
+        assertEquals(PROXY, extLink.getParams().get(EXTERNAL_CONTENT_HANDLING));
+        // A blank content type should not contribute a type parameter to the link
+        assertNull(extLink.getType());
+    }
 }

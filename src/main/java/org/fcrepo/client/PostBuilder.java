@@ -87,6 +87,11 @@ public class PostBuilder extends BodyRequestBuilder {
     }
 
     @Override
+    public PostBuilder digestSha512(final String digest) {
+        return (PostBuilder) super.digestSha512(digest);
+    }
+
+    @Override
     public PostBuilder addInteractionModel(final String interactionModelUri) {
         return (PostBuilder) super.addInteractionModel(interactionModelUri);
     }

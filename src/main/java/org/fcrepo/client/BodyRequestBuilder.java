@@ -177,6 +177,16 @@ public abstract class BodyRequestBuilder extends
     }
 
     /**
+     * Provide a SHA-512 checksum for the body of this request
+     *
+     * @param digest sha-512 checksum to provide as the digest for the request body
+     * @return this builder
+     */
+    protected BodyRequestBuilder digestSha512(final String digest) {
+        return digest(digest, "sha512");
+    }
+
+    /**
      * Add an interaction model to the request
      *
      * @param interactionModelUri URI of the interaction model

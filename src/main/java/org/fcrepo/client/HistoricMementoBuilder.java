@@ -102,6 +102,11 @@ public class HistoricMementoBuilder extends BodyRequestBuilder {
     }
 
     @Override
+    public HistoricMementoBuilder digestSha512(final String digest) {
+        return (HistoricMementoBuilder) super.digestSha512(digest);
+    }
+
+    @Override
     public HistoricMementoBuilder addInteractionModel(final String interactionModelUri) {
         return (HistoricMementoBuilder) super.addInteractionModel(interactionModelUri);
     }

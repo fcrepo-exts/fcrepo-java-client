@@ -93,6 +93,11 @@ public class PatchBuilder extends BodyRequestBuilder {
     }
 
     @Override
+    public PatchBuilder digestSha512(final String digest) {
+        return (PatchBuilder) super.digestSha512(digest);
+    }
+
+    @Override
     public PatchBuilder addHeader(final String name, final String value) {
         return (PatchBuilder) super.addHeader(name, value);
     }
