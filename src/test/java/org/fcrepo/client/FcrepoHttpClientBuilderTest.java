@@ -6,6 +6,7 @@
 package org.fcrepo.client;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -88,7 +89,7 @@ public class FcrepoHttpClientBuilderTest {
         assertNotNull("Credentials should be set on the auth state", authState.getCredentials());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPreemptiveAuthInterceptorWithNullCredentials() throws Exception {
         final FcrepoHttpClientBuilder.PreemptiveAuthInterceptor interceptor =
                 new FcrepoHttpClientBuilder.PreemptiveAuthInterceptor();
@@ -105,7 +106,8 @@ public class FcrepoHttpClientBuilderTest {
 
         // With no credentials available, the interceptor attempts to update the auth state with a null
         // credential, which BasicScheme rejects.
-        interceptor.process(new BasicHttpRequest("GET", "/"), context);
+        assertThrows(IllegalArgumentException.class,
+                () -> interceptor.process(new BasicHttpRequest("GET", "/"), context));
     }
 
     @Test

@@ -83,67 +83,67 @@ public class TransactionalFcrepoClientTest {
     @Test
     public void testCommitPutsToTransactionUri() throws Exception {
         txClient.commit().perform();
-        assertRequest("PUT", txUri);
+        assertRequestAddsAtomicId("PUT", txUri);
     }
 
     @Test
     public void testStatusGetsTransactionUri() throws Exception {
         txClient.status().perform();
-        assertRequest("GET", txUri);
+        assertRequestAddsAtomicId("GET", txUri);
     }
 
     @Test
     public void testKeepAlivePostsToTransactionUri() throws Exception {
         txClient.keepAlive().perform();
-        assertRequest("POST", txUri);
+        assertRequestAddsAtomicId("POST", txUri);
     }
 
     @Test
     public void testRollbackDeletesTransactionUri() throws Exception {
         txClient.rollback().perform();
-        assertRequest("DELETE", txUri);
+        assertRequestAddsAtomicId("DELETE", txUri);
     }
 
     @Test
     public void testGetAddsAtomicIdHeader() throws Exception {
         txClient.get(resourceUri).perform();
-        assertRequest("GET", resourceUri);
+        assertRequestAddsAtomicId("GET", resourceUri);
     }
 
     @Test
     public void testHeadAddsAtomicIdHeader() throws Exception {
         txClient.head(resourceUri).perform();
-        assertRequest("HEAD", resourceUri);
+        assertRequestAddsAtomicId("HEAD", resourceUri);
     }
 
     @Test
     public void testDeleteAddsAtomicIdHeader() throws Exception {
         txClient.delete(resourceUri).perform();
-        assertRequest("DELETE", resourceUri);
+        assertRequestAddsAtomicId("DELETE", resourceUri);
     }
 
     @Test
     public void testOptionsAddsAtomicIdHeader() throws Exception {
         txClient.options(resourceUri).perform();
-        assertRequest("OPTIONS", resourceUri);
+        assertRequestAddsAtomicId("OPTIONS", resourceUri);
     }
 
     @Test
     public void testPatchAddsAtomicIdHeader() throws Exception {
         txClient.patch(resourceUri).perform();
-        assertRequest("PATCH", resourceUri);
+        assertRequestAddsAtomicId("PATCH", resourceUri);
     }
 
     @Test
     public void testPostAddsAtomicIdHeader() throws Exception {
         txClient.post(resourceUri).perform();
-        assertRequest("POST", resourceUri);
+        assertRequestAddsAtomicId("POST", resourceUri);
     }
 
     @Test
     public void testPutAddsAtomicIdHeader() throws Exception {
         txClient.put(resourceUri).perform();
-        assertRequest("PUT", resourceUri);
+        assertRequestAddsAtomicId("PUT", resourceUri);
     }
 
     @Test
@@ -158,7 +158,7 @@ public class TransactionalFcrepoClientTest {
      * Capture the request issued to the underlying http client and assert its method, target uri, and that the
      * transaction atomic-id header was added.
      */
-    private void assertRequest(final String method, final URI target) throws Exception {
+    private void assertRequestAddsAtomicId(final String method, final URI target) throws Exception {
         verify(httpClient).execute(requestCaptor.capture());
         final HttpRequestBase request = requestCaptor.getValue();
         assertEquals(method, request.getMethod());
