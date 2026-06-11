@@ -6,6 +6,7 @@
 package org.fcrepo.client;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -26,7 +27,6 @@ import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -89,24 +89,23 @@ public class FcrepoHttpClientBuilderTest {
 
     @Test
     public void testPreemptiveAuthInterceptorWithNullCredentials() throws Exception {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final FcrepoHttpClientBuilder.PreemptiveAuthInterceptor interceptor =
-                    new FcrepoHttpClientBuilder.PreemptiveAuthInterceptor();
+        final FcrepoHttpClientBuilder.PreemptiveAuthInterceptor interceptor =
+                new FcrepoHttpClientBuilder.PreemptiveAuthInterceptor();
 
-            final HttpHost targetHost = new HttpHost("localhost", 8080);
-            final CredentialsProvider credsProvider = mock(CredentialsProvider.class);
-            when(credsProvider.getCredentials(any(AuthScope.class))).thenReturn(null);
+        final HttpHost targetHost = new HttpHost("localhost", 8080);
+        final CredentialsProvider credsProvider = mock(CredentialsProvider.class);
+        when(credsProvider.getCredentials(any(AuthScope.class))).thenReturn(null);
 
-            final AuthState authState = new AuthState();
-            final HttpContext context = new BasicHttpContext();
-            context.setAttribute(HttpClientContext.TARGET_AUTH_STATE, authState);
-            context.setAttribute(HttpClientContext.CREDS_PROVIDER, credsProvider);
-            context.setAttribute(HttpCoreContext.HTTP_TARGET_HOST, targetHost);
+        final AuthState authState = new AuthState();
+        final HttpContext context = new BasicHttpContext();
+        context.setAttribute(HttpClientContext.TARGET_AUTH_STATE, authState);
+        context.setAttribute(HttpClientContext.CREDS_PROVIDER, credsProvider);
+        context.setAttribute(HttpCoreContext.HTTP_TARGET_HOST, targetHost);
 
-            // With no credentials available, the interceptor attempts to update the auth state with a null
-            // credential, which BasicScheme rejects.
-            interceptor.process(new BasicHttpRequest("GET", "/"), context);
-        });
+        // With no credentials available, the interceptor attempts to update the auth state with a null
+        // credential, which BasicScheme rejects.
+        assertThrows(IllegalArgumentException.class,
+                () -> interceptor.process(new BasicHttpRequest("GET", "/"), context));
     }
 
     @Test
