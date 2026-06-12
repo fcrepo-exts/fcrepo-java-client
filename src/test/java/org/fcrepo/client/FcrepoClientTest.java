@@ -96,13 +96,14 @@ public class FcrepoClientTest {
 
     @Test
     public void testGetError() throws Exception {
-        assertThrows(FcrepoOperationFailedException.class, () -> {
-            final int status = 400;
-            final URI uri = create(baseUrl);
-            final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
-            entity.setContentType(RDF_XML);
+        final int status = 400;
+        final URI uri = create(baseUrl);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
+        entity.setContentType(RDF_XML);
 
-            doSetupMockRequest(RDF_XML, entity, status);
+        doSetupMockRequest(RDF_XML, entity, status);
+
+        assertThrows(FcrepoOperationFailedException.class, () -> {
             testClient.get(uri)
                     .accept(RDF_XML)
                     .preferRepresentation()
@@ -112,13 +113,14 @@ public class FcrepoClientTest {
 
     @Test
     public void testGet100() throws Exception {
-        assertThrows(FcrepoOperationFailedException.class, () -> {
-            final int status = 100;
-            final URI uri = create(baseUrl);
-            final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
-            entity.setContentType(RDF_XML);
+        final int status = 100;
+        final URI uri = create(baseUrl);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
+        entity.setContentType(RDF_XML);
 
-            doSetupMockRequest(RDF_XML, entity, status);
+        doSetupMockRequest(RDF_XML, entity, status);
+
+        assertThrows(FcrepoOperationFailedException.class, () -> {
             testClient.get(uri)
                     .accept(RDF_XML)
                     .perform();
@@ -195,10 +197,9 @@ public class FcrepoClientTest {
 
     @Test
     public void testHeadError() throws IOException, FcrepoOperationFailedException {
-        assertThrows(FcrepoOperationFailedException.class, () -> {
-            doSetupMockRequest(TEXT_TURTLE, null, 404);
-            testClient.head(create(baseUrl)).perform();
-        });
+        doSetupMockRequest(TEXT_TURTLE, null, 404);
+
+        assertThrows(FcrepoOperationFailedException.class, () -> testClient.head(create(baseUrl)).perform());
     }
 
     @Test
@@ -254,12 +255,13 @@ public class FcrepoClientTest {
 
     @Test
     public void testPutError() throws IOException, FcrepoOperationFailedException {
-        assertThrows(FcrepoOperationFailedException.class, () -> {
-            final int status = 500;
-            final URI uri = create(baseUrl);
-            final InputStream body = new ByteArrayInputStream(rdfXml.getBytes());
+        final int status = 500;
+        final URI uri = create(baseUrl);
+        final InputStream body = new ByteArrayInputStream(rdfXml.getBytes());
 
-            doSetupMockRequest(RDF_XML, null, status);
+        doSetupMockRequest(RDF_XML, null, status);
+
+        assertThrows(FcrepoOperationFailedException.class, () -> {
             testClient.put(uri)
                     .body(body, RDF_XML)
                     .perform();
@@ -301,13 +303,12 @@ public class FcrepoClientTest {
 
     @Test
     public void testDeleteError() throws IOException, FcrepoOperationFailedException {
-        assertThrows(FcrepoOperationFailedException.class, () -> {
-            final int status = 401;
-            final URI uri = create(baseUrl);
+        final int status = 401;
+        final URI uri = create(baseUrl);
 
-            doSetupMockRequest(SPARQL_UPDATE, null, status);
-            testClient.delete(uri).perform();
-        });
+        doSetupMockRequest(SPARQL_UPDATE, null, status);
+
+        assertThrows(FcrepoOperationFailedException.class, () -> testClient.delete(uri).perform());
     }
 
     @Test
@@ -332,13 +333,12 @@ public class FcrepoClientTest {
     @Disabled
     @Test
     public void testPatchNoContent() throws IOException, FcrepoOperationFailedException {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final int status = 204;
-            final URI uri = create(baseUrl);
+        final int status = 204;
+        final URI uri = create(baseUrl);
 
-            doSetupMockRequest(SPARQL_UPDATE, null, status);
-            testClient.patch(uri).perform();
-        });
+        doSetupMockRequest(SPARQL_UPDATE, null, status);
+
+        assertThrows(IllegalArgumentException.class, () -> testClient.patch(uri).perform());
     }
 
     @Test
@@ -362,12 +362,13 @@ public class FcrepoClientTest {
 
     @Test
     public void testPatchError() throws IOException, FcrepoOperationFailedException {
-        assertThrows(FcrepoOperationFailedException.class, () -> {
-            final int status = 415;
-            final URI uri = create(baseUrl);
-            final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        final int status = 415;
+        final URI uri = create(baseUrl);
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
-            doSetupMockRequest(SPARQL_UPDATE, null, status);
+        doSetupMockRequest(SPARQL_UPDATE, null, status);
+
+        assertThrows(FcrepoOperationFailedException.class, () -> {
             testClient.patch(uri)
                     .body(body)
                     .perform();
@@ -432,12 +433,13 @@ public class FcrepoClientTest {
 
     @Test
     public void testPostError() throws IOException, FcrepoOperationFailedException {
-        assertThrows(FcrepoOperationFailedException.class, () -> {
-            final int status = 415;
-            final URI uri = create(baseUrl);
-            final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        final int status = 415;
+        final URI uri = create(baseUrl);
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
-            doSetupMockRequest(SPARQL_UPDATE, null, status);
+        doSetupMockRequest(SPARQL_UPDATE, null, status);
+
+        assertThrows(FcrepoOperationFailedException.class, () -> {
             testClient.post(uri)
                     .body(body, SPARQL_UPDATE)
                     .perform();
@@ -446,14 +448,15 @@ public class FcrepoClientTest {
 
     @Test
     public void testPostErrorNullUrl() throws Exception {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final int status = 401;
-            final String statusPhrase = "Unauthorized";
-            final String response = "Response error";
-            final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-            final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
+        final int status = 401;
+        final String statusPhrase = "Unauthorized";
+        final String response = "Response error";
+        final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
+        final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
 
-            doSetupMockRequest(SPARQL_UPDATE, responseBody, status, statusPhrase);
+        doSetupMockRequest(SPARQL_UPDATE, responseBody, status, statusPhrase);
+
+        assertThrows(IllegalArgumentException.class, () -> {
 
             testClient.post(null)
                     .body(body, SPARQL_UPDATE)

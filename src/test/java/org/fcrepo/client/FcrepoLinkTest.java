@@ -52,48 +52,40 @@ public class FcrepoLinkTest {
 
     @Test
     public void testLinkNoBrackets() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final String header = String.format("%s; rel=%s", TEST_URI, DESCRIBEDBY_REL);
-            new FcrepoLink(header);
-        });
+        final String header = String.format("%s; rel=%s", TEST_URI, DESCRIBEDBY_REL);
+
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(header));
     }
 
     @Test
     public void testLinkBadBrackets1() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final String header = String.format("<%s; rel=%s", TEST_URI, DESCRIBEDBY_REL);
-            new FcrepoLink(header);
-        });
+        final String header = String.format("<%s; rel=%s", TEST_URI, DESCRIBEDBY_REL);
+
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(header));
     }
 
     @Test
     public void testLinkBadBrackets2() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final String header = String.format("%s>; rel=%s", TEST_URI, DESCRIBEDBY_REL);
-            new FcrepoLink(header);
-        });
+        final String header = String.format("%s>; rel=%s", TEST_URI, DESCRIBEDBY_REL);
+
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(header));
     }
 
     @Test
     public void testLinkBadQuotes() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final String header = String.format("<%s>; rel=\"%s", TEST_URI, DESCRIBEDBY_REL);
-            new FcrepoLink(header);
-        });
+        final String header = String.format("<%s>; rel=\"%s", TEST_URI, DESCRIBEDBY_REL);
+
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(header));
     }
 
     @Test
     public void testNullLink() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new FcrepoLink(null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(null));
     }
 
     @Test
     public void testEmptyLink() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new FcrepoLink(" ");
-        });
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(" "));
     }
 
     @Test
@@ -128,9 +120,7 @@ public class FcrepoLinkTest {
 
     @Test
     public void testUnquotedParamWithDelimiters() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new FcrepoLink("<a>; foo=a;b");
-        });
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink("<a>; foo=a;b"));
     }
 
     @Test
@@ -149,9 +139,7 @@ public class FcrepoLinkTest {
 
     @Test
     public void testFromUriStringNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            FcrepoLink.fromUri((String) null).build();
-        });
+        assertThrows(IllegalArgumentException.class, () -> FcrepoLink.fromUri((String) null).build());
     }
 
     @Test
@@ -162,9 +150,7 @@ public class FcrepoLinkTest {
 
     @Test
     public void testFromUriNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            FcrepoLink.fromUri((URI) null).build();
-        });
+        assertThrows(IllegalArgumentException.class, () -> FcrepoLink.fromUri((URI) null).build());
     }
 
     @Test
@@ -224,9 +210,7 @@ public class FcrepoLinkTest {
 
     @Test
     public void testValueOfWithComma() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            FcrepoLink.valueOf(MULTI_LINK_HEADER);
-        });
+        assertThrows(IllegalArgumentException.class, () -> FcrepoLink.valueOf(MULTI_LINK_HEADER));
     }
 
     @Test
@@ -280,17 +264,15 @@ public class FcrepoLinkTest {
 
     @Test
     public void testFromHeaderUnterminatedUri() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final String header = String.format("<a; rel=\"%s\"", DESCRIBEDBY_REL);
-            FcrepoLink.fromHeader(header);
-        });
+        final String header = String.format("<a; rel=\"%s\"", DESCRIBEDBY_REL);
+
+        assertThrows(IllegalArgumentException.class, () -> FcrepoLink.fromHeader(header));
     }
 
     @Test
     public void testFromHeaderUnterminatedQuotes() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final String header = String.format("<a>; rel=\"%s, <b>", DESCRIBEDBY_REL);
-            FcrepoLink.fromHeader(header);
-        });
+        final String header = String.format("<a>; rel=\"%s, <b>", DESCRIBEDBY_REL);
+
+        assertThrows(IllegalArgumentException.class, () -> FcrepoLink.fromHeader(header));
     }
 }

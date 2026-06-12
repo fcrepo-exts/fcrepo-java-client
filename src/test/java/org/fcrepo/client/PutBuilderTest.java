@@ -137,12 +137,10 @@ public class PutBuilderTest {
 
     @Test
     public void testPostClientError() throws Exception {
-        assertThrows(FcrepoOperationFailedException.class, () -> {
-            when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
-                    .thenThrow(new FcrepoOperationFailedException(uri, 415, "status"));
+        when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
+                .thenThrow(new FcrepoOperationFailedException(uri, 415, "status"));
 
-            testBuilder.perform();
-        });
+        assertThrows(FcrepoOperationFailedException.class, () -> testBuilder.perform());
     }
 
     @Test

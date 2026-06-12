@@ -105,19 +105,18 @@ public class HistoricMementoBuilderTest {
 
     @Test
     public void testCreateWithNoDatetime() throws Exception {
-        assertThrows(NullPointerException.class, () -> {
-            testBuilder = new HistoricMementoBuilder(uri, client, (String) null);
-            testBuilder.perform();
-        });
+        // the builder validates the datetime in its constructor
+        assertThrows(NullPointerException.class,
+                () -> new HistoricMementoBuilder(uri, client, (String) null));
     }
 
     @Test
     public void testCreateWithNonRFC1123() throws Exception {
-        assertThrows(DateTimeParseException.class, () -> {
-            final String mementoDatetime = Instant.now().toString();
-            testBuilder = new HistoricMementoBuilder(uri, client, mementoDatetime);
-            testBuilder.perform();
-        });
+        final String mementoDatetime = Instant.now().toString();
+
+        // the builder parses the datetime in its constructor
+        assertThrows(DateTimeParseException.class,
+                () -> new HistoricMementoBuilder(uri, client, mementoDatetime));
     }
 
     @Test
