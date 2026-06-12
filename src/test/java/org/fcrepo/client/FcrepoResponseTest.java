@@ -18,12 +18,12 @@ import static org.fcrepo.client.FedoraHeaderConstants.LOCATION;
 import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
 import static org.fcrepo.client.LinkHeaderConstants.DESCRIBEDBY_REL;
 import static org.fcrepo.client.FedoraTypes.MEMENTO_ORIGINAL_TYPE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -42,16 +42,13 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.io.ByteStreams;
 
 /**
  * @author ajs6f
  */
-@RunWith(MockitoJUnitRunner.class)
 public class FcrepoResponseTest {
 
     @Test
@@ -111,7 +108,7 @@ public class FcrepoResponseTest {
         final FcrepoResponse underTest = new FcrepoResponse(
                 URI.create("http://localhost/foo"), 201, headers, mockBody);
 
-        assertFalse("FcrepoResponse objects should not be closed until close() is invoked.", underTest.isClosed());
+        assertFalse(underTest.isClosed(), "FcrepoResponse objects should not be closed until close() is invoked.");
 
         underTest.close();
         assertTrue(underTest.isClosed());
@@ -296,7 +293,7 @@ public class FcrepoResponseTest {
         final Map<String, List<String>> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, Arrays.asList("text/plain"));
         try (final FcrepoResponse response = new FcrepoResponse(create("http://localhost/foo"), 200, headers, null)) {
-            assertNull("A header that is not present should yield a null value", response.getHeaderValue(LOCATION));
+            assertNull(response.getHeaderValue(LOCATION), "A header that is not present should yield a null value");
         }
     }
 
@@ -322,7 +319,7 @@ public class FcrepoResponseTest {
         final Map<String, List<String>> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, Arrays.asList("text/plain"));
         try (final FcrepoResponse response = new FcrepoResponse(create("http://localhost/foo"), 200, headers, null)) {
-            assertNull("Without a location or describedby link, getLocation should be null", response.getLocation());
+            assertNull(response.getLocation(), "Without a location or describedby link, getLocation should be null");
         }
     }
 
@@ -352,7 +349,7 @@ public class FcrepoResponseTest {
         final String location = "http://localhost:8080/rest/foo";
         headers.put(LOCATION, Arrays.asList(location));
         try (final FcrepoResponse response = new FcrepoResponse(create("http://localhost/foo"), 201, headers, null)) {
-            assertNull("A non-transaction location should not yield a transaction uri", response.getTransactionUri());
+            assertNull(response.getTransactionUri(), "A non-transaction location should not yield a transaction uri");
         }
     }
 }

@@ -18,7 +18,8 @@ import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
 import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
 import static org.fcrepo.client.TestUtils.baseUrl;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -37,18 +38,21 @@ import java.time.format.DateTimeParseException;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * @author bbpennel
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class HistoricMementoBuilderTest {
 
     private final String HISTORIC_DATETIME =
@@ -67,7 +71,7 @@ public class HistoricMementoBuilderTest {
 
     private URI uri;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
                 .thenReturn(fcrepoResponse);
@@ -99,17 +103,20 @@ public class HistoricMementoBuilderTest {
         assertEquals(HISTORIC_DATETIME, request.getFirstHeader(MEMENTO_DATETIME).getValue());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testCreateWithNoDatetime() throws Exception {
-        testBuilder = new HistoricMementoBuilder(uri, client, (String) null);
-        testBuilder.perform();
+        // the builder validates the datetime in its constructor
+        assertThrows(NullPointerException.class,
+                () -> new HistoricMementoBuilder(uri, client, (String) null));
     }
 
-    @Test(expected = DateTimeParseException.class)
+    @Test
     public void testCreateWithNonRFC1123() throws Exception {
         final String mementoDatetime = Instant.now().toString();
-        testBuilder = new HistoricMementoBuilder(uri, client, mementoDatetime);
-        testBuilder.perform();
+
+        // the builder parses the datetime in its constructor
+        assertThrows(DateTimeParseException.class,
+                () -> new HistoricMementoBuilder(uri, client, mementoDatetime));
     }
 
     @Test

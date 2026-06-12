@@ -5,9 +5,10 @@
  */
 package org.fcrepo.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.fcrepo.client.LinkHeaderConstants.DESCRIBEDBY_REL;
 import static org.fcrepo.client.LinkHeaderConstants.MEMENTO_ORIGINAL_REL;
 import static org.fcrepo.client.LinkHeaderConstants.MEMENTO_TIME_MAP_REL;
@@ -15,14 +16,11 @@ import static org.fcrepo.client.LinkHeaderConstants.MEMENTO_TIME_MAP_REL;
 import java.net.URI;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author acoburn
  */
-@RunWith(MockitoJUnitRunner.class)
 public class FcrepoLinkTest {
 
     private static final String TEST_URI = "http://localhost/rest/a/b/c";
@@ -52,38 +50,42 @@ public class FcrepoLinkTest {
         assertEquals(DESCRIBEDBY_REL, link.getRel());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testLinkNoBrackets() {
         final String header = String.format("%s; rel=%s", TEST_URI, DESCRIBEDBY_REL);
-        new FcrepoLink(header);
+
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(header));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testLinkBadBrackets1() {
         final String header = String.format("<%s; rel=%s", TEST_URI, DESCRIBEDBY_REL);
-        new FcrepoLink(header);
+
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(header));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testLinkBadBrackets2() {
         final String header = String.format("%s>; rel=%s", TEST_URI, DESCRIBEDBY_REL);
-        new FcrepoLink(header);
+
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(header));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testLinkBadQuotes() {
         final String header = String.format("<%s>; rel=\"%s", TEST_URI, DESCRIBEDBY_REL);
-        new FcrepoLink(header);
+
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(header));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullLink() {
-        new FcrepoLink(null);
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testEmptyLink() {
-        new FcrepoLink(" ");
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink(" "));
     }
 
     @Test
@@ -116,9 +118,9 @@ public class FcrepoLinkTest {
         assertEquals("a,b;c=d", link.getParam("foo"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testUnquotedParamWithDelimiters() {
-        new FcrepoLink("<a>; foo=a;b");
+        assertThrows(IllegalArgumentException.class, () -> new FcrepoLink("<a>; foo=a;b"));
     }
 
     @Test
@@ -135,9 +137,9 @@ public class FcrepoLinkTest {
         assertEquals(URI.create("http://example.com/"), link.getUri());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testFromUriStringNull() {
-        FcrepoLink.fromUri((String) null).build();
+        assertThrows(IllegalArgumentException.class, () -> FcrepoLink.fromUri((String) null).build());
     }
 
     @Test
@@ -146,9 +148,9 @@ public class FcrepoLinkTest {
         assertEquals(URI.create("http://example.com/"), link.getUri());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testFromUriNull() {
-        FcrepoLink.fromUri((URI) null).build();
+        assertThrows(IllegalArgumentException.class, () -> FcrepoLink.fromUri((URI) null).build());
     }
 
     @Test
@@ -190,10 +192,10 @@ public class FcrepoLinkTest {
                 .build();
 
         final String header = link.toString();
-        assertTrue("Stringified link did not contain URI", header.contains(TEST_URI));
-        assertTrue("Stringified link did not contain rel", header.contains("; rel=\"bar\""));
-        assertTrue("Stringified link did not contain type", header.contains("; type=\"foo\""));
-        assertTrue("Stringified link did not contain param", header.contains("; special=\"val\""));
+        assertTrue(header.contains(TEST_URI), "Stringified link did not contain URI");
+        assertTrue(header.contains("; rel=\"bar\""), "Stringified link did not contain rel");
+        assertTrue(header.contains("; type=\"foo\""), "Stringified link did not contain type");
+        assertTrue(header.contains("; special=\"val\""), "Stringified link did not contain param");
     }
 
     @Test
@@ -206,9 +208,9 @@ public class FcrepoLinkTest {
         assertEquals(DESCRIBEDBY_REL, link.getRel());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testValueOfWithComma() {
-        FcrepoLink.valueOf(MULTI_LINK_HEADER);
+        assertThrows(IllegalArgumentException.class, () -> FcrepoLink.valueOf(MULTI_LINK_HEADER));
     }
 
     @Test
@@ -216,7 +218,7 @@ public class FcrepoLinkTest {
         final String header = String.format("<%s>; rel=\"%s\"", TEST_URI, DESCRIBEDBY_REL);
 
         final List<FcrepoLink> links = FcrepoLink.fromHeader(header);
-        assertEquals("Incorrect number of links returned", 1, links.size());
+        assertEquals(1, links.size(), "Incorrect number of links returned");
 
         assertEquals(TEST_URI, links.get(0).getUri().toString());
         assertEquals(DESCRIBEDBY_REL, links.get(0).getRel());
@@ -225,7 +227,7 @@ public class FcrepoLinkTest {
     @Test
     public void testFromHeaderMultipleLinks() {
         final List<FcrepoLink> links = FcrepoLink.fromHeader(MULTI_LINK_HEADER);
-        assertEquals("Incorrect number of links returned", 2, links.size());
+        assertEquals(2, links.size(), "Incorrect number of links returned");
 
         final FcrepoLink link1 = links.get(0);
         assertEquals("http://a.example.org/", link1.getUri().toString());
@@ -243,7 +245,7 @@ public class FcrepoLinkTest {
         final String header = String.format("<a,b>; rel=\"%s\"", DESCRIBEDBY_REL);
 
         final List<FcrepoLink> links = FcrepoLink.fromHeader(header);
-        assertEquals("Incorrect number of links returned", 1, links.size());
+        assertEquals(1, links.size(), "Incorrect number of links returned");
 
         assertEquals("a,b", links.get(0).getUri().toString());
         assertEquals(DESCRIBEDBY_REL, links.get(0).getRel());
@@ -254,21 +256,23 @@ public class FcrepoLinkTest {
         final String header = "<a>; param=\"value,with,commas\"";
 
         final List<FcrepoLink> links = FcrepoLink.fromHeader(header);
-        assertEquals("Incorrect number of links returned", 1, links.size());
+        assertEquals(1, links.size(), "Incorrect number of links returned");
 
         assertEquals("a", links.get(0).getUri().toString());
         assertEquals("value,with,commas", links.get(0).getParam("param"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testFromHeaderUnterminatedUri() {
         final String header = String.format("<a; rel=\"%s\"", DESCRIBEDBY_REL);
-        FcrepoLink.fromHeader(header);
+
+        assertThrows(IllegalArgumentException.class, () -> FcrepoLink.fromHeader(header));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testFromHeaderUnterminatedQuotes() {
         final String header = String.format("<a>; rel=\"%s, <b>", DESCRIBEDBY_REL);
-        FcrepoLink.fromHeader(header);
+
+        assertThrows(IllegalArgumentException.class, () -> FcrepoLink.fromHeader(header));
     }
 }

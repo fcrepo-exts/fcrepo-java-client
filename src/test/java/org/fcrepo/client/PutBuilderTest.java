@@ -21,8 +21,9 @@ import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
 import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
 import static org.fcrepo.client.TestUtils.baseUrl;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -35,18 +36,21 @@ import java.net.URI;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * @author bbpennel
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class PutBuilderTest {
 
     @Mock
@@ -62,7 +66,7 @@ public class PutBuilderTest {
 
     private URI uri;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
                 .thenReturn(fcrepoResponse);
@@ -78,7 +82,7 @@ public class PutBuilderTest {
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
-        assertNull("Request body should not be set", request.getEntity());
+        assertNull(request.getEntity(), "Request body should not be set");
         assertEquals(0, request.getAllHeaders().length);
     }
 
@@ -131,12 +135,12 @@ public class PutBuilderTest {
         assertEquals("attachment", request.getFirstHeader(CONTENT_DISPOSITION).getValue());
     }
 
-    @Test(expected = FcrepoOperationFailedException.class)
+    @Test
     public void testPostClientError() throws Exception {
         when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
                 .thenThrow(new FcrepoOperationFailedException(uri, 415, "status"));
 
-        testBuilder.perform();
+        assertThrows(FcrepoOperationFailedException.class, () -> testBuilder.perform());
     }
 
     @Test
@@ -247,8 +251,8 @@ public class PutBuilderTest {
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
         final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
-        assertNull("A null body stream should not set an entity", request.getEntity());
-        assertEquals("No headers should be added for null arguments", 0, request.getAllHeaders().length);
+        assertNull(request.getEntity(), "A null body stream should not set an entity");
+        assertEquals(0, request.getAllHeaders().length, "No headers should be added for null arguments");
     }
 
     @Test

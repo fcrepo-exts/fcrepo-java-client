@@ -5,13 +5,13 @@
  */
 package org.fcrepo.client.integration;
 
-import static javax.ws.rs.core.Response.Status.CREATED;
+import static jakarta.ws.rs.core.Response.Status.CREATED;
 import static org.apache.jena.rdf.model.ResourceFactory.createProperty;
 import static org.fcrepo.client.FedoraTypes.MEMENTO_TYPE;
 import static org.fcrepo.client.LinkHeaderConstants.MEMENTO_TIME_MAP_REL;
 import static org.fcrepo.client.TestUtils.rdfTtl;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -22,9 +22,9 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.fcrepo.client.FcrepoClient;
 import org.fcrepo.client.FcrepoResponse;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author bbpennel
@@ -35,7 +35,7 @@ public class VersioningIT extends AbstractResourceIT {
 
     private static final Property DC_TITLE = createProperty("http://purl.org/dc/elements/1.1/title");
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         client = FcrepoClient.client()
                 .credentials("fedoraAdmin", "fedoraAdmin")
@@ -43,7 +43,7 @@ public class VersioningIT extends AbstractResourceIT {
                 .build();
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() throws IOException {
         client.close();
     }
@@ -67,7 +67,7 @@ public class VersioningIT extends AbstractResourceIT {
         }
 
         try (final FcrepoResponse getResp = client.get(mementoURI).perform()) {
-            assertTrue("Retrieved object must be a memento", getResp.hasType(MEMENTO_TYPE));
+            assertTrue(getResp.hasType(MEMENTO_TYPE), "Retrieved object must be a memento");
             final Model respModel = getResponseModel(getResp);
             assertTrue(respModel.contains(null, DC_TITLE, "Test Object"));
         }

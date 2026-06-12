@@ -12,8 +12,8 @@ import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.fcrepo.client.HeaderHelpers.UTC_RFC_1123_FORMATTER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -25,18 +25,21 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import org.apache.http.client.methods.HttpRequestBase;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * @author escowles
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class HeadBuilderTest {
 
     private final String HISTORIC_DATETIME =
@@ -55,7 +58,7 @@ public class HeadBuilderTest {
     @Captor
     private ArgumentCaptor<HttpRequestBase> requestCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
                 .thenReturn(fcrepoResponse);

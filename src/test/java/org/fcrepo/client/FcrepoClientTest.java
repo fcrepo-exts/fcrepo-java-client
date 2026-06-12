@@ -14,7 +14,8 @@ import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
 import static org.fcrepo.client.TestUtils.baseUrl;
 import static org.fcrepo.client.TestUtils.rdfXml;
 import static org.fcrepo.client.TestUtils.sparqlUpdate;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -32,18 +33,21 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * @author acoburn
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class FcrepoClientTest {
 
     private FcrepoClient testClient;
@@ -60,12 +64,12 @@ public class FcrepoClientTest {
     @Mock
     private HttpEntity mockEntity;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         testClient = new FcrepoClient(mockHttpclient, true);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         testClient.close();
     }
@@ -90,7 +94,7 @@ public class FcrepoClientTest {
         assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), rdfXml);
     }
 
-    @Test(expected = FcrepoOperationFailedException.class)
+    @Test
     public void testGetError() throws Exception {
         final int status = 400;
         final URI uri = create(baseUrl);
@@ -98,13 +102,16 @@ public class FcrepoClientTest {
         entity.setContentType(RDF_XML);
 
         doSetupMockRequest(RDF_XML, entity, status);
-        testClient.get(uri)
-                .accept(RDF_XML)
-                .preferRepresentation()
-                .perform();
+
+        assertThrows(FcrepoOperationFailedException.class, () -> {
+            testClient.get(uri)
+                    .accept(RDF_XML)
+                    .preferRepresentation()
+                    .perform();
+        });
     }
 
-    @Test(expected = FcrepoOperationFailedException.class)
+    @Test
     public void testGet100() throws Exception {
         final int status = 100;
         final URI uri = create(baseUrl);
@@ -112,9 +119,12 @@ public class FcrepoClientTest {
         entity.setContentType(RDF_XML);
 
         doSetupMockRequest(RDF_XML, entity, status);
-        testClient.get(uri)
-                .accept(RDF_XML)
-                .perform();
+
+        assertThrows(FcrepoOperationFailedException.class, () -> {
+            testClient.get(uri)
+                    .accept(RDF_XML)
+                    .perform();
+        });
     }
 
     @Test
@@ -185,10 +195,11 @@ public class FcrepoClientTest {
         assertEquals(response.getHeaderValue("content-type"), TEXT_TURTLE);
     }
 
-    @Test(expected = FcrepoOperationFailedException.class)
+    @Test
     public void testHeadError() throws IOException, FcrepoOperationFailedException {
         doSetupMockRequest(TEXT_TURTLE, null, 404);
-        testClient.head(create(baseUrl)).perform();
+
+        assertThrows(FcrepoOperationFailedException.class, () -> testClient.head(create(baseUrl)).perform());
     }
 
     @Test
@@ -242,16 +253,19 @@ public class FcrepoClientTest {
         assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), uri.toString());
     }
 
-    @Test(expected = FcrepoOperationFailedException.class)
+    @Test
     public void testPutError() throws IOException, FcrepoOperationFailedException {
         final int status = 500;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(rdfXml.getBytes());
 
         doSetupMockRequest(RDF_XML, null, status);
-        testClient.put(uri)
-                .body(body, RDF_XML)
-                .perform();
+
+        assertThrows(FcrepoOperationFailedException.class, () -> {
+            testClient.put(uri)
+                    .body(body, RDF_XML)
+                    .perform();
+        });
     }
 
     @Test
@@ -287,13 +301,14 @@ public class FcrepoClientTest {
         assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), responseText);
     }
 
-    @Test(expected = FcrepoOperationFailedException.class)
+    @Test
     public void testDeleteError() throws IOException, FcrepoOperationFailedException {
         final int status = 401;
         final URI uri = create(baseUrl);
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
-        testClient.delete(uri).perform();
+
+        assertThrows(FcrepoOperationFailedException.class, () -> testClient.delete(uri).perform());
     }
 
     @Test
@@ -315,14 +330,15 @@ public class FcrepoClientTest {
         assertEquals(response.getBody(), null);
     }
 
-    @Ignore
-    @Test(expected = IllegalArgumentException.class)
+    @Disabled
+    @Test
     public void testPatchNoContent() throws IOException, FcrepoOperationFailedException {
         final int status = 204;
         final URI uri = create(baseUrl);
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
-        testClient.patch(uri).perform();
+
+        assertThrows(IllegalArgumentException.class, () -> testClient.patch(uri).perform());
     }
 
     @Test
@@ -344,16 +360,19 @@ public class FcrepoClientTest {
         assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), responseText);
     }
 
-    @Test(expected = FcrepoOperationFailedException.class)
+    @Test
     public void testPatchError() throws IOException, FcrepoOperationFailedException {
         final int status = 415;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
-        testClient.patch(uri)
-                .body(body)
-                .perform();
+
+        assertThrows(FcrepoOperationFailedException.class, () -> {
+            testClient.patch(uri)
+                    .body(body)
+                    .perform();
+        });
     }
 
     @Test
@@ -412,19 +431,22 @@ public class FcrepoClientTest {
         assertEquals(IOUtils.toString(response.getBody(), "UTF-8"), responseText);
     }
 
-    @Test(expected = FcrepoOperationFailedException.class)
+    @Test
     public void testPostError() throws IOException, FcrepoOperationFailedException {
         final int status = 415;
         final URI uri = create(baseUrl);
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
         doSetupMockRequest(SPARQL_UPDATE, null, status);
-        testClient.post(uri)
-                .body(body, SPARQL_UPDATE)
-                .perform();
+
+        assertThrows(FcrepoOperationFailedException.class, () -> {
+            testClient.post(uri)
+                    .body(body, SPARQL_UPDATE)
+                    .perform();
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPostErrorNullUrl() throws Exception {
         final int status = 401;
         final String statusPhrase = "Unauthorized";
@@ -434,9 +456,12 @@ public class FcrepoClientTest {
 
         doSetupMockRequest(SPARQL_UPDATE, responseBody, status, statusPhrase);
 
-        testClient.post(null)
-                .body(body, SPARQL_UPDATE)
-                .perform();
+        assertThrows(IllegalArgumentException.class, () -> {
+
+            testClient.post(null)
+                    .body(body, SPARQL_UPDATE)
+                    .perform();
+        });
     }
 
     @Test

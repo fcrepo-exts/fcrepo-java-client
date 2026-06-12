@@ -6,14 +6,14 @@
   <parent>
     <groupId>org.fcrepo</groupId>
     <artifactId>fcrepo-parent</artifactId>
-    <version>6.3.0</version>
+    <version>7.0.0</version>
   </parent>
 
   <groupId>org.fcrepo.client</groupId>
   <artifactId>fcrepo-java-client</artifactId>
   <packaging>jar</packaging>
 
-  <version>6.3.0-SNAPSHOT</version>
+  <version>7.0.0-SNAPSHOT</version>
 
   <name>Fedora Java Client Libraries</name>
   <description>Java libraries for interacting with a Fedora Repository</description>
@@ -37,20 +37,19 @@
     <github.global.server>github</github.global.server>
 
     <!-- dependencies -->
-    <fcrepo.version>6.3.0</fcrepo.version>
-    <commons.io.version>2.11.0</commons.io.version>
-    <commons.lang3.version>3.12.0</commons.lang3.version>
-    <httpclient.version>4.5.13</httpclient.version>
-    <javax.ws.rs-api.vesion>2.0.1</javax.ws.rs-api.vesion>
-    <jersey.version>2.35</jersey.version>
-    <logback.version>1.2.6</logback.version>
-    <mockito.version>2.23.0</mockito.version>
-    <junit.version>4.13.2</junit.version>
-    <mockserver.version>5.4.1</mockserver.version>
-    <slf4j.version>1.7.32</slf4j.version>
-    <spring.version>5.3.10</spring.version>
-    <jena.version>4.2.0</jena.version>
-    <jetty.version>9.4.44.v20210927</jetty.version>
+    <fcrepo.version>7.0.0</fcrepo.version>
+    <commons.io.version>2.22.0</commons.io.version>
+    <commons.lang3.version>3.20.0</commons.lang3.version>
+    <httpclient.version>4.5.14</httpclient.version>
+    <jersey.version>4.0.2</jersey.version>
+    <junit.version>5.14.4</junit.version>
+    <logback.version>1.5.34</logback.version>
+    <mockito.version>5.23.0</mockito.version>
+    <mockserver.version>7.0.0</mockserver.version>
+    <slf4j.version>2.0.18</slf4j.version>
+    <spring.version>7.0.8</spring.version>
+    <jena.version>6.1.0</jena.version>
+    <jetty.version>12.1.10</jetty.version>
     <jetty.users.file>${project.build.directory}/test-classes/jetty-users.properties</jetty.users.file>
 
   </properties>
@@ -103,9 +102,16 @@
 
     <!-- testing -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
       <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -192,7 +198,10 @@
           <!-- property) so unit test coverage is recorded. @{argLine} is resolved late, -->
           <!-- after prepare-agent runs. Without this the parent pom's argLine overrides -->
           <!-- it and no unit coverage is captured. -->
-          <argLine>@{argLine} -Xms512m -Xmx1024m</argLine>
+          <!-- Mockito is attached as an agent because JDK 21+ warns about (and will -->
+          <!-- eventually disallow) dynamic agent self-attachment. The path property is -->
+          <!-- set by the dependency-plugin properties goal. -->
+          <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar} -Xms512m -Xmx1024m</argLine>
         </configuration>
       </plugin>
 
@@ -281,60 +290,45 @@
 
       <!-- Launch jetty for integration testing with fedora -->
       <plugin>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
+        <groupId>org.eclipse.jetty.ee10</groupId>
+        <artifactId>jetty-ee10-maven-plugin</artifactId>
         <version>${jetty.version}</version>
         <configuration>
           <supportedPackagings>jar</supportedPackagings>
-          <systemProperties>
-            <force>true</force>
-            <systemProperty>
-              <name>fcrepo.home</name>
-              <value>${project.build.directory}/fcrepo-data</value>
-            </systemProperty>
-            <systemProperty>
-              <name>fcrepo.dynamic.test.port</name>
-              <value>${fcrepo.dynamic.test.port}</value>
-            </systemProperty>
-            <systemProperty>
-              <name>fcrepo.jms.enabled</name>
-              <value>false</value>
-            </systemProperty>
-            <systemProperty>
-              <name>fcrepo.home</name>
-              <value>${project.build.directory}/fcrepo-home</value>
-            </systemProperty>
-            <systemProperty>
-              <name>fcrepo.external.content.allowed</name>
-              <value>${project.build.directory}/test-classes/allowed_external_paths.txt</value>
-            </systemProperty>
-            <systemProperty>
-              <name>fcrepo.activemq.directory</name>
-              <value>${project.build.directory}/active-mq</value>
-            </systemProperty>	
-          </systemProperties>
-          <scanIntervalSeconds>10</scanIntervalSeconds>
           <stopKey>STOP</stopKey>
           <stopPort>${jetty.dynamic.stop.port}</stopPort>
-          <daemon>true</daemon>
+          <httpConnector>
+            <port>${fcrepo.dynamic.test.port}</port>
+          </httpConnector>
+          <loginServices>
+            <loginService implementation="org.eclipse.jetty.security.HashLoginService">
+              <name>fcrepo</name>
+              <config implementation="org.eclipse.jetty.maven.MavenResource">
+                <resourceAsString>${jetty.users.file}</resourceAsString>
+              </config>
+            </loginService>
+          </loginServices>
+          <systemProperties>
+            <fcrepo.home>${project.build.directory}/fcrepo-home</fcrepo.home>
+            <fcrepo.dynamic.test.port>${fcrepo.dynamic.test.port}</fcrepo.dynamic.test.port>
+            <fcrepo.jms.enabled>false</fcrepo.jms.enabled>
+            <fcrepo.external.content.allowed>${project.build.directory}/test-classes/allowed_external_paths.txt</fcrepo.external.content.allowed>
+            <fcrepo.activemq.directory>${project.build.directory}/active-mq</fcrepo.activemq.directory>
+            <jetty.users.file>${jetty.users.file}</jetty.users.file>
+          </systemProperties>
         </configuration>
         <executions>
           <execution>
             <id>start-jetty</id>
             <phase>pre-integration-test</phase>
             <goals>
-              <goal>start</goal>
+              <goal>start-war</goal>
             </goals>
             <configuration>
-              <jettyXml>${project.build.directory}/test-classes/jetty-test.xml</jettyXml>
-              <scanIntervalSeconds>0</scanIntervalSeconds>
-              <daemon>true</daemon>
-              <contextHandlers>
-                <contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
-                  <war>${project.build.directory}/fcrepo.war</war>
-                  <contextPath>/fcrepo</contextPath>
-                </contextHandler>
-              </contextHandlers>
+              <webApp>
+                <war>${project.build.directory}/fcrepo.war</war>
+                <contextPath>/fcrepo</contextPath>
+              </webApp>
             </configuration>
           </execution>
 
@@ -344,9 +338,6 @@
             <goals>
               <goal>stop</goal>
             </goals>
-            <configuration>
-              <stopPort>${jetty.dynamic.stop.port}</stopPort>
-            </configuration>
           </execution>
 
         </executions>
@@ -357,6 +348,14 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
+          <execution>
+            <!-- exposes dependency paths as properties, e.g. the mockito-core jar
+              used as a java agent in the surefire argLine -->
+            <id>properties</id>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
           <execution>
             <id>copy</id>
             <phase>package</phase>

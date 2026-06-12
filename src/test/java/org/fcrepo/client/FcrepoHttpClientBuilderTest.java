@@ -5,8 +5,8 @@
  */
 package org.fcrepo.client;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -27,16 +27,14 @@ import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link FcrepoHttpClientBuilder}.
  *
  * @author surfrdan
  */
-@RunWith(MockitoJUnitRunner.class)
 public class FcrepoHttpClientBuilderTest {
 
     @Test
@@ -85,8 +83,8 @@ public class FcrepoHttpClientBuilderTest {
 
         interceptor.process(new BasicHttpRequest("GET", "/"), context);
 
-        assertNotNull("Auth scheme should be initialized preemptively", authState.getAuthScheme());
-        assertNotNull("Credentials should be set on the auth state", authState.getCredentials());
+        assertNotNull(authState.getAuthScheme(), "Auth scheme should be initialized preemptively");
+        assertNotNull(authState.getCredentials(), "Credentials should be set on the auth state");
     }
 
     @Test
