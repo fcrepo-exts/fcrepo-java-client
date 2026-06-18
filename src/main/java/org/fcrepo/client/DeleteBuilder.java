@@ -7,7 +7,7 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
  * Builds a request to delete a resource
@@ -27,7 +27,7 @@ public class DeleteBuilder extends RequestBuilder {
     }
 
     @Override
-    protected HttpRequestBase createRequest() {
+    protected HttpUriRequestBase createRequest() {
         return HttpMethods.DELETE.createRequest(targetUri);
     }
 

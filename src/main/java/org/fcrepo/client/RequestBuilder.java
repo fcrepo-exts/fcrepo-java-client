@@ -11,8 +11,8 @@ import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.util.Args;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.util.Args;
 import org.slf4j.Logger;
 
 /**
@@ -31,7 +31,7 @@ public abstract class RequestBuilder {
     protected URI targetUri;
 
     // The request being built
-    protected HttpRequestBase request;
+    protected HttpUriRequestBase request;
 
     /**
      * Instantiate builder. Throws an IllegalArgumentException if either the uri or client are null.
@@ -53,7 +53,7 @@ public abstract class RequestBuilder {
      *
      * @return HTTP request object for this builder
      */
-    protected abstract HttpRequestBase createRequest();
+    protected abstract HttpUriRequestBase createRequest();
 
     /**
      * Performs the request constructed in this builder and returns the response
@@ -63,7 +63,7 @@ public abstract class RequestBuilder {
      */
     public FcrepoResponse perform() throws FcrepoOperationFailedException {
         LOGGER.debug("Fcrepo {} request to {} with headers: {}", request.getMethod(), targetUri,
-                request.getAllHeaders());
+                request.getHeaders());
 
         return client.executeRequest(targetUri, request);
     }

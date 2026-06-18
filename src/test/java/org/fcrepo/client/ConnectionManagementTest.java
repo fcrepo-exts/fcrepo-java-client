@@ -10,12 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -23,13 +21,15 @@ import java.util.stream.Stream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.io.output.NullOutputStream;
-import org.apache.http.HttpClientConnection;
-import org.apache.http.HttpStatus;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.util.Timeout;
+import org.apache.hc.client5.http.HttpRoute;
+import org.apache.hc.client5.http.io.ConnectionEndpoint;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,11 +67,12 @@ public class ConnectionManagementTest {
     private static void verifyConnectionRequestedAndClosed(final int connectionCount,
                                                      final HttpClientConnectionManager connectionManager) {
         // A new connection was requested by the Http client ...
-        verify(connectionManager, times(connectionCount)).requestConnection(any(HttpRoute.class), any());
+        verify(connectionManager, times(connectionCount))
+                .lease(any(), any(HttpRoute.class), any(Timeout.class), any());
 
         // Verify it was released.
-        verify(connectionManager, times(connectionCount)).
-                releaseConnection(any(HttpClientConnection.class), any(), anyLong(), any(TimeUnit.class));
+        verify(connectionManager, times(connectionCount))
+                .release(any(ConnectionEndpoint.class), any(), any(TimeValue.class));
     }
 
     /**
@@ -83,11 +84,12 @@ public class ConnectionManagementTest {
     private static void verifyConnectionRequestedButNotClosed(final int connectionCount,
                                                     final HttpClientConnectionManager connectionManager) {
         // A new connection was requested by the Http client ...
-        verify(connectionManager, times(connectionCount)).requestConnection(any(HttpRoute.class), any());
+        verify(connectionManager, times(connectionCount))
+                .lease(any(), any(HttpRoute.class), any(Timeout.class), any());
 
         // Verify it was NOT released.
-        verify(connectionManager, times(0)).
-                releaseConnection(any(HttpClientConnection.class), any(), anyLong(), any(TimeUnit.class));
+        verify(connectionManager, times(0))
+                .release(any(ConnectionEndpoint.class), any(), any(TimeValue.class));
     }
 
     /**
@@ -131,7 +133,7 @@ public class ConnectionManagementTest {
     private CloseableHttpClient underTest;
 
     /**
-     * The {@link org.apache.http.conn.HttpClientConnectionManager} implementation that the {@link #underTest
+     * The {@link org.apache.hc.client5.http.io.HttpClientConnectionManager} implementation that the {@link #underTest
      * HttpClient} is configured to used.
      */
     @Spy

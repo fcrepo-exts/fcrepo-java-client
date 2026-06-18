@@ -24,7 +24,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,11 +56,11 @@ public class HeadBuilderTest {
     private URI uri;
 
     @Captor
-    private ArgumentCaptor<HttpRequestBase> requestCaptor;
+    private ArgumentCaptor<HttpUriRequestBase> requestCaptor;
 
     @BeforeEach
     public void setUp() throws Exception {
-        when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
+        when(client.executeRequest(any(URI.class), any(HttpUriRequestBase.class)))
                 .thenReturn(fcrepoResponse);
 
         uri = create(baseUrl);
@@ -85,7 +85,7 @@ public class HeadBuilderTest {
         testBuilder.wantDigest("md5").perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals("md5", request.getFirstHeader(WANT_DIGEST).getValue());
     }
 
@@ -94,7 +94,7 @@ public class HeadBuilderTest {
         testBuilder.noCache().perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals("no-cache", request.getFirstHeader(CACHE_CONTROL).getValue());
     }
 
@@ -103,7 +103,7 @@ public class HeadBuilderTest {
         testBuilder.acceptDatetime(HISTORIC_DATETIME).perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals(HISTORIC_DATETIME, request.getFirstHeader(ACCEPT_DATETIME).getValue());
     }
 
@@ -113,7 +113,7 @@ public class HeadBuilderTest {
         testBuilder.acceptDatetime(datetime).perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals(HISTORIC_DATETIME, request.getFirstHeader(ACCEPT_DATETIME).getValue());
     }
 
@@ -122,7 +122,7 @@ public class HeadBuilderTest {
         testBuilder.addHeader("my-header", "head-val").perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals("head-val", request.getFirstHeader("my-header").getValue());
     }
 
@@ -132,7 +132,7 @@ public class HeadBuilderTest {
         testBuilder.addLinkHeader(link).perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals(link.toString(), request.getFirstHeader(LINK).getValue());
     }
 }

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
  * Builds a GET request to retrieve the content of a resource from the Fedora HTTP API
@@ -36,7 +36,7 @@ public class GetBuilder extends RetrieveRequestBuilder {
     }
 
     @Override
-    protected HttpRequestBase createRequest() {
+    protected HttpUriRequestBase createRequest() {
         return HttpMethods.GET.createRequest(targetUri);
     }
 

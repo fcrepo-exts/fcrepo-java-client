@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +41,7 @@ public class OptionsBuilderTest {
     private FcrepoResponse fcrepoResponse;
 
     @Captor
-    private ArgumentCaptor<HttpRequestBase> requestCaptor;
+    private ArgumentCaptor<HttpUriRequestBase> requestCaptor;
 
     private OptionsBuilder testBuilder;
 
@@ -49,7 +49,7 @@ public class OptionsBuilderTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
+        when(client.executeRequest(any(URI.class), any(HttpUriRequestBase.class)))
                 .thenReturn(fcrepoResponse);
         uri = create(baseUrl);
         testBuilder = new OptionsBuilder(uri, client);

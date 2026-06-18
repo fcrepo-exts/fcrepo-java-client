@@ -23,9 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HeaderElement;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicHeader;
+import org.apache.hc.core5.http.HeaderElement;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.http.message.MessageSupport;
 
 /**
  * Represents a response from a fedora repository using a {@link FcrepoClient}.
@@ -310,7 +311,7 @@ public class FcrepoResponse implements Closeable {
             contentDisposition = new HashMap<>();
             final String value = values.get(0);
             final BasicHeader header = new BasicHeader(CONTENT_DISPOSITION, value);
-            for (final HeaderElement headEl : header.getElements()) {
+            for (final HeaderElement headEl : MessageSupport.parse(header)) {
                 for (final NameValuePair pair : headEl.getParameters()) {
                     contentDisposition.put(pair.getName(), pair.getValue());
                 }

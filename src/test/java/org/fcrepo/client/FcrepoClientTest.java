@@ -25,14 +25,14 @@ import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicHeader;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -58,8 +58,6 @@ public class FcrepoClientTest {
     @Mock
     private CloseableHttpResponse mockResponse;
 
-    @Mock
-    private StatusLine mockStatus;
 
     @Mock
     private HttpEntity mockEntity;
@@ -78,8 +76,7 @@ public class FcrepoClientTest {
     public void testGet() throws IOException, FcrepoOperationFailedException {
         final int status = 200;
         final URI uri = create(baseUrl);
-        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
-        entity.setContentType(RDF_XML);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes(), ContentType.parse(RDF_XML));
 
         doSetupMockRequest(RDF_XML, entity, status);
 
@@ -98,8 +95,7 @@ public class FcrepoClientTest {
     public void testGetError() throws Exception {
         final int status = 400;
         final URI uri = create(baseUrl);
-        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
-        entity.setContentType(RDF_XML);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes(), ContentType.parse(RDF_XML));
 
         doSetupMockRequest(RDF_XML, entity, status);
 
@@ -115,8 +111,7 @@ public class FcrepoClientTest {
     public void testGet100() throws Exception {
         final int status = 100;
         final URI uri = create(baseUrl);
-        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
-        entity.setContentType(RDF_XML);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes(), ContentType.parse(RDF_XML));
 
         doSetupMockRequest(RDF_XML, entity, status);
 
@@ -137,7 +132,7 @@ public class FcrepoClientTest {
         final Header[] headers = new Header[] { contentType, linkHeader };
         final CloseableHttpResponse mockResponse = doSetupMockRequest(RDF_XML, null, status);
 
-        when(mockResponse.getAllHeaders()).thenReturn(headers);
+        when(mockResponse.getHeaders()).thenReturn(headers);
 
         final FcrepoResponse response = testClient.get(uri)
                 .accept(RDF_XML)
@@ -242,7 +237,7 @@ public class FcrepoClientTest {
         final int status = 201;
         final URI uri = create(baseUrl);
 
-        doSetupMockRequest(null, new ByteArrayEntity(uri.toString().getBytes()), status);
+        doSetupMockRequest(null, new ByteArrayEntity(uri.toString().getBytes(), (ContentType) null), status);
 
         final FcrepoResponse response = testClient.put(uri).perform();
 
@@ -290,7 +285,7 @@ public class FcrepoClientTest {
         final URI uri = create(baseUrl);
         final String responseText = "tombstone found";
 
-        doSetupMockRequest(null, new ByteArrayEntity(responseText.getBytes()), status);
+        doSetupMockRequest(null, new ByteArrayEntity(responseText.getBytes(), (ContentType) null), status);
 
         final FcrepoResponse response = testClient.delete(uri).perform();
 
@@ -348,7 +343,7 @@ public class FcrepoClientTest {
         final String responseText = "Sparql-update response";
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
-        doSetupMockRequest(SPARQL_UPDATE, new ByteArrayEntity(responseText.getBytes()), status);
+        doSetupMockRequest(SPARQL_UPDATE, new ByteArrayEntity(responseText.getBytes(), (ContentType) null), status);
 
         final FcrepoResponse response = testClient.patch(uri)
                 .body(body)
@@ -401,7 +396,7 @@ public class FcrepoClientTest {
         final String responseText = baseUrl + "/bar";
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
 
-        doSetupMockRequest(SPARQL_UPDATE, new ByteArrayEntity(responseText.getBytes()), status);
+        doSetupMockRequest(SPARQL_UPDATE, new ByteArrayEntity(responseText.getBytes(), (ContentType) null), status);
 
         final FcrepoResponse response = testClient.post(uri)
                 .body(body, SPARQL_UPDATE)
@@ -420,7 +415,7 @@ public class FcrepoClientTest {
         final URI uri = create(baseUrl);
         final String responseText = baseUrl + "/bar";
 
-        doSetupMockRequest(null, new ByteArrayEntity(responseText.getBytes()), status);
+        doSetupMockRequest(null, new ByteArrayEntity(responseText.getBytes(), (ContentType) null), status);
 
         final FcrepoResponse response = testClient.post(uri).perform();
 
@@ -452,11 +447,13 @@ public class FcrepoClientTest {
         final String statusPhrase = "Unauthorized";
         final String response = "Response error";
         final InputStream body = new ByteArrayInputStream(sparqlUpdate.getBytes());
-        final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes());
+        final ByteArrayEntity responseBody = new ByteArrayEntity(response.getBytes(), (ContentType) null);
 
         doSetupMockRequest(SPARQL_UPDATE, responseBody, status, statusPhrase);
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        // HttpClient 5's Args.notNull (used by RequestBuilder to validate the uri) throws
+        // NullPointerException, where HttpClient 4 threw IllegalArgumentException.
+        assertThrows(NullPointerException.class, () -> {
 
             testClient.post(null)
                     .body(body, SPARQL_UPDATE)
@@ -486,11 +483,12 @@ public class FcrepoClientTest {
     public void testBadResponseBody() throws IOException, FcrepoOperationFailedException {
         final int status = 200;
         final URI uri = create(baseUrl);
-        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
-        entity.setContentType(RDF_XML);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes(), ContentType.parse(RDF_XML));
 
         doSetupMockRequest(RDF_XML, entity, status);
         when(mockResponse.getEntity()).thenReturn(mockEntity);
+        // a non-empty entity whose content stream errors when read
+        when(mockEntity.getContentLength()).thenReturn((long) rdfXml.length());
         when(mockEntity.getContent()).thenThrow(new IOException("Expected IO error"));
 
         final FcrepoResponse response = testClient.get(uri)
@@ -515,11 +513,10 @@ public class FcrepoClientTest {
         final Header[] responseHeaders = new Header[] { locationHeader, contentTypeHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
-        when(mockResponse.getAllHeaders()).thenReturn(responseHeaders);
+        when(mockResponse.getHeaders()).thenReturn(responseHeaders);
         when(mockResponse.getEntity()).thenReturn(entity);
-        when(mockResponse.getStatusLine()).thenReturn(mockStatus);
-        when(mockStatus.getStatusCode()).thenReturn(status);
-        when(mockStatus.getReasonPhrase()).thenReturn(statusPhrase);
+        when(mockResponse.getCode()).thenReturn(status);
+        when(mockResponse.getReasonPhrase()).thenReturn(statusPhrase);
 
         return mockResponse;
     }

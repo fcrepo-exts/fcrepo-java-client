@@ -30,9 +30,8 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +56,7 @@ public class PostBuilderTest {
     private FcrepoResponse fcrepoResponse;
 
     @Captor
-    private ArgumentCaptor<HttpRequestBase> requestCaptor;
+    private ArgumentCaptor<HttpUriRequestBase> requestCaptor;
 
     private PostBuilder testBuilder;
 
@@ -65,7 +64,7 @@ public class PostBuilderTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
+        when(client.executeRequest(any(URI.class), any(HttpUriRequestBase.class)))
                 .thenReturn(fcrepoResponse);
 
         uri = create(baseUrl);
@@ -78,9 +77,9 @@ public class PostBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertNull(request.getEntity(), "Request body should not be set");
-        assertEquals(0, request.getAllHeaders().length);
+        assertEquals(0, request.getHeaders().length);
     }
 
     @Test
@@ -95,7 +94,7 @@ public class PostBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         final HttpEntity bodyEntity = request.getEntity();
         assertEquals(bodyStream, bodyEntity.getContent());
 
@@ -112,7 +111,7 @@ public class PostBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         final HttpEntity bodyEntity = request.getEntity();
         assertEquals(bodyStream, bodyEntity.getContent());
         assertEquals("attachment", request.getFirstHeader(CONTENT_DISPOSITION).getValue());
@@ -129,7 +128,7 @@ public class PostBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         final HttpEntity bodyEntity = request.getEntity();
         assertEquals(bodyStream, bodyEntity.getContent());
 
@@ -145,7 +144,7 @@ public class PostBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         final HttpEntity bodyEntity = request.getEntity();
         assertEquals(bodyStream, bodyEntity.getContent());
         assertEquals("application/octet-stream", request.getFirstHeader(CONTENT_TYPE).getValue());
@@ -153,7 +152,7 @@ public class PostBuilderTest {
 
     @Test
     public void testPostClientError() throws Exception {
-        when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
+        when(client.executeRequest(any(URI.class), any(HttpUriRequestBase.class)))
                 .thenThrow(new FcrepoOperationFailedException(uri, 415, "status"));
 
         assertThrows(FcrepoOperationFailedException.class, () -> testBuilder.perform());
@@ -167,7 +166,7 @@ public class PostBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
 
         final FcrepoLink extLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
         assertEquals(EXTERNAL_CONTENT_REL, extLink.getRel());
@@ -183,7 +182,7 @@ public class PostBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
 
         final FcrepoLink extLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
         assertEquals(EXTERNAL_CONTENT_REL, extLink.getRel());
@@ -198,7 +197,7 @@ public class PostBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
 
         final FcrepoLink interLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
         assertEquals(TYPE_REL, interLink.getRel());
@@ -212,7 +211,7 @@ public class PostBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
 
         final FcrepoLink aclLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
         assertEquals(ACL_REL, aclLink.getRel());
@@ -224,7 +223,7 @@ public class PostBuilderTest {
         testBuilder.addHeader("my-header", "head-val").perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals("head-val", request.getFirstHeader("my-header").getValue());
     }
 
@@ -234,7 +233,7 @@ public class PostBuilderTest {
         testBuilder.addLinkHeader(link).perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals(link.toString(), request.getFirstHeader(LINK).getValue());
     }
 }

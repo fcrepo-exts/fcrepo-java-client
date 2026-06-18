@@ -12,17 +12,49 @@ The project inherits from `fcrepo-parent` 7.0.0, which compiles with
 `--release 21` (previously Java 11). Consumers must run on a Java 21 (or
 newer) runtime to use this version of the client.
 
-### Public API is unchanged
+### Breaking: migrated to Apache HttpClient 5
 
-No classes, methods, or signatures in `org.fcrepo.client` were added, removed,
-or modified. Apart from the new platform requirements below, this version is a
-drop-in replacement.
+This is the headline change of the major version. The client was migrated from
+Apache HttpClient 4.x (`org.apache.httpcomponents:httpclient`) to **HttpClient 5**
+(`org.apache.httpcomponents.client5:httpclient5` 5.6.1), which is a separate
+artifact in a new package namespace (`org.apache.hc.client5` / `org.apache.hc.core5`).
 
-The client continues to expose Apache HttpClient 4.x types
-(`CloseableHttpClient`, `CloseableHttpResponse`, etc.) in its API. It was
-deliberately **not** migrated to HttpClient 5 (`org.apache.httpcomponents.client5`),
-which is a different artifact with an incompatible API; `httpclient` 4.5.14 is
-the latest release of the 4.x line and remains maintained.
+HttpClient 5 types are part of this library's **public API**, so consumers that
+reference those types must update their imports and code:
+
+| Public API element | Before (HttpClient 4) | After (HttpClient 5) |
+|---|---|---|
+| `FcrepoClient(CloseableHttpClient, Boolean)` constructor | `org.apache.http.impl.client.CloseableHttpClient` | `org.apache.hc.client5.http.impl.classic.CloseableHttpClient` |
+| `FcrepoHttpClientBuilder.build()` return type | `org.apache.http.impl.client.CloseableHttpClient` | `org.apache.hc.client5.http.impl.classic.CloseableHttpClient` |
+| `FcrepoClient.executeRequest(URI, …)` parameter | `org.apache.http.client.methods.HttpRequestBase` | `org.apache.hc.client5.http.classic.methods.HttpUriRequestBase` |
+| `RequestBuilder.createRequest()` / `request` field (affects subclasses) | `HttpRequestBase` | `HttpUriRequestBase` |
+| `HttpMethods.createRequest(URI)` return type, and `HttpMethods.HttpMove` / `HttpMethods.HttpCopy` base class | `HttpRequestBase` | `HttpUriRequestBase` |
+
+Applications that only use the high-level `FcrepoClient` request builders
+(`client.get(...).perform()` etc.) and read responses through `FcrepoResponse`
+are unaffected at the source level, but **must still update their dependency**
+from `httpclient` to `httpclient5` since the transitive coordinates changed.
+
+Behaviour change: passing a `null` URI to a request builder now throws
+`NullPointerException` (HttpClient 5's argument validation), where HttpClient 4
+threw `IllegalArgumentException`.
+
+Connection handling: a latent connection-leak path was fixed as part of the
+migration — responses with no body now release their connection immediately
+rather than relying on the framework's implicit release (which HttpClient 5, unlike
+4.x, does not perform). Callers should continue to close `FcrepoResponse` (ideally
+via try-with-resources) for responses that *do* carry a body.
+
+### Breaking: Spring Framework dependency removed
+
+The client previously pulled in `org.springframework:spring-web` solely to use
+`org.springframework.http.ContentDisposition` when formatting the
+`Content-Disposition` header for the `filename(...)` builder methods. That one
+use was replaced with a small internal helper
+(`HeaderHelpers.attachmentContentDisposition`), and **the Spring dependency is
+gone entirely**. The emitted header value is unchanged
+(`attachment` / `attachment; filename="…"`). Applications that were relying on
+this library to put Spring on their classpath must now declare Spring themselves.
 
 ### Transitive (compile-scope) dependency upgrades
 
@@ -31,9 +63,9 @@ to interact with other libraries in your application:
 
 | Dependency | Old | New | Notes |
 |---|---|---|---|
-| `org.springframework:spring-web` | 5.3.10 | 7.0.8 | Spring Framework 7 is Jakarta-based and requires Java 17+. The client only uses `org.springframework.http.ContentDisposition` (for the `filename(...)` builder methods), so any Spring 6.x/7.x on your classpath is compatible. Applications still pinned to Spring 5 should manage the version down locally — the `ContentDisposition` usage is source-compatible back to 5.3. |
+| `org.apache.httpcomponents:httpclient` → `org.apache.httpcomponents.client5:httpclient5` | 4.5.13 | 5.6.1 | New artifact and package namespace — see the migration table above. |
+| `org.springframework:spring-web` | 5.3.10 | *removed* | No longer a dependency of this library. |
 | `org.slf4j:slf4j-api` | 1.7.32 | 2.0.18 | Requires an SLF4J 2-compatible logging backend (Logback ≥ 1.3, `log4j-slf4j2-impl`, etc.). SLF4J 1.x bindings such as Logback 1.2 are **not** picked up by SLF4J 2. |
-| `org.apache.httpcomponents:httpclient` | 4.5.13 | 4.5.14 | Patch release, no API changes. |
 | `org.apache.commons:commons-lang3` | 3.12.0 | 3.20.0 | No API changes affecting this library. |
 
 ### Fedora compatibility

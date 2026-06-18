@@ -13,9 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpRequestBase;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.ContentDisposition.Builder;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
  * Builds a post request for interacting with the Fedora HTTP API in order to create a new resource within an LDP
@@ -36,7 +34,7 @@ public class PostBuilder extends BodyRequestBuilder {
     }
 
     @Override
-    protected HttpRequestBase createRequest() {
+    protected HttpUriRequestBase createRequest() {
         return HttpMethods.POST.createRequest(targetUri);
     }
 
@@ -124,11 +122,7 @@ public class PostBuilder extends BodyRequestBuilder {
      * @throws FcrepoOperationFailedException if unable to encode filename
      */
     public PostBuilder filename(final String filename) throws FcrepoOperationFailedException {
-        final Builder builder = ContentDisposition.builder("attachment");
-        if (filename != null) {
-            builder.filename(filename);
-        }
-        request.addHeader(CONTENT_DISPOSITION, builder.build().toString());
+        request.addHeader(CONTENT_DISPOSITION, HeaderHelpers.attachmentContentDisposition(filename));
         return this;
     }
 

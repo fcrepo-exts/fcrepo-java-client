@@ -7,7 +7,7 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
  * Builds a POST request for creating a memento (LDPRm) from the current state of an LDPRv.
@@ -27,7 +27,7 @@ public class OriginalMementoBuilder extends RequestBuilder {
     }
 
     @Override
-    protected HttpRequestBase createRequest() {
+    protected HttpUriRequestBase createRequest() {
         return HttpMethods.POST.createRequest(targetUri);
     }
 

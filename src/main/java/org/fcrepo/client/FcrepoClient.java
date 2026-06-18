@@ -7,6 +7,7 @@ package org.fcrepo.client;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,13 +19,14 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.slf4j.Logger;
 
 /**
@@ -92,7 +94,7 @@ public class FcrepoClient implements Closeable {
     }
 
     /**
-     * Create a FcrepoClient which uses the given {@link org.apache.http.impl.client.CloseableHttpClient}.
+     * Create a FcrepoClient which uses the given {@link org.apache.hc.client5.http.impl.classic.CloseableHttpClient}.
      * FcrepoClient will close the httpClient when {@link #close()} is called.
      *
      * @param httpClient http client to use to connect to the repository
@@ -264,10 +266,10 @@ public class FcrepoClient implements Closeable {
      * @return the repository response
      * @throws FcrepoOperationFailedException when the underlying HTTP request results in an error
      */
-    public FcrepoResponse executeRequest(final URI url, final HttpRequestBase request)
+    public FcrepoResponse executeRequest(final URI url, final HttpUriRequestBase request)
             throws FcrepoOperationFailedException {
         LOGGER.debug("Fcrepo {} request to resource {}", request.getMethod(), url);
-        final CloseableHttpResponse response = executeRequest(request);
+        final CloseableHttpResponse response = executeHttpRequest(url, request);
 
         return fcrepoGenericResponse(url, response, throwExceptionOnFailure);
     }
@@ -275,13 +277,14 @@ public class FcrepoClient implements Closeable {
     /**
      * Execute the HTTP request
      */
-    private CloseableHttpResponse executeRequest(final HttpRequestBase request)
+    @SuppressWarnings("deprecation")
+    private CloseableHttpResponse executeHttpRequest(final URI url, final HttpUriRequestBase request)
             throws FcrepoOperationFailedException {
         try {
             return httpclient.execute(request);
         } catch (final IOException ex) {
             LOGGER.debug("HTTP Operation failed: ", ex);
-            throw new FcrepoOperationFailedException(request.getURI(), -1, ex.getMessage());
+            throw new FcrepoOperationFailedException(url, -1, ex.getMessage());
         }
     }
 
@@ -290,21 +293,33 @@ public class FcrepoClient implements Closeable {
      */
     private FcrepoResponse fcrepoGenericResponse(final URI url, final CloseableHttpResponse response,
             final Boolean throwExceptionOnFailure) throws FcrepoOperationFailedException {
-        final int status = response.getStatusLine().getStatusCode();
+        final int status = response.getCode();
         final Map<String, List<String>> headers = getHeaders(response);
 
         if ((status >= HttpStatus.SC_OK && status < HttpStatus.SC_BAD_REQUEST) || !throwExceptionOnFailure) {
+            final HttpEntity entity = response.getEntity();
+            if (entity == null) {
+                // No response body at all (e.g. HEAD, 204). Release the connection now since the caller has no
+                // stream to close. (HttpClient 4 freed entity-less responses automatically; HttpClient 5 does not.)
+                free(response);
+                return new FcrepoResponse(url, status, headers, null);
+            }
+            if (entity.getContentLength() == 0) {
+                // A present but empty body: there is nothing to stream, so release the connection now to avoid a
+                // leak, but still hand the caller a non-null (empty) stream, matching HttpClient 4's behaviour.
+                free(response);
+                return new FcrepoResponse(url, status, headers, new ByteArrayInputStream(new byte[0]));
+            }
             return new FcrepoResponse(url, status, headers, getEntityContent(response));
         } else {
             free(response);
-            throw new FcrepoOperationFailedException(url, status,
-                    response.getStatusLine().getReasonPhrase());
+            throw new FcrepoOperationFailedException(url, status, response.getReasonPhrase());
         }
     }
 
     /**
      * Frees resources associated with the HTTP response. Specifically, closing the {@code response} frees the
-     * connection of the {@link org.apache.http.conn.HttpClientConnectionManager} underlying this {@link #httpclient}.
+     * connection of the {@link org.apache.hc.client5.http.io.HttpClientConnectionManager} underlying this {@link #httpclient}.
      *
      * @param response the response object to close
      */
@@ -320,7 +335,7 @@ public class FcrepoClient implements Closeable {
     /**
      * Extract the response body as an input stream
      */
-    private static InputStream getEntityContent(final HttpResponse response) {
+    private static InputStream getEntityContent(final ClassicHttpResponse response) {
         try {
             final HttpEntity entity = response.getEntity();
             if (entity == null) {
@@ -343,7 +358,7 @@ public class FcrepoClient implements Closeable {
     private static Map<String, List<String>> getHeaders(final HttpResponse response) {
         final Map<String, List<String>> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-        for (final Header header : response.getAllHeaders()) {
+        for (final Header header : response.getHeaders()) {
             final List<String> values;
             if (headers.containsKey(header.getName())) {
                 values = headers.get(header.getName());

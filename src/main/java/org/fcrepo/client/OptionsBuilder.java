@@ -7,7 +7,7 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
  * Builds an OPTIONS request to output information about the supported HTTP methods, etc.
@@ -27,7 +27,7 @@ public class OptionsBuilder extends RequestBuilder {
     }
 
     @Override
-    protected HttpRequestBase createRequest() {
+    protected HttpUriRequestBase createRequest() {
         return HttpMethods.OPTIONS.createRequest(targetUri);
     }
 

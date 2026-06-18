@@ -8,7 +8,7 @@ package org.fcrepo.client;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
  * Builds a PUT request for interacting with the Fedora HTTP API in order to modify the triples associated with a
@@ -31,7 +31,7 @@ public class PatchBuilder extends BodyRequestBuilder {
     }
 
     @Override
-    protected HttpRequestBase createRequest() {
+    protected HttpUriRequestBase createRequest() {
         return HttpMethods.PATCH.createRequest(targetUri);
     }
 

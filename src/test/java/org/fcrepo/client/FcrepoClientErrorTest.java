@@ -24,13 +24,13 @@ import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicHeader;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,8 +49,6 @@ public class FcrepoClientErrorTest {
     @Mock
     private CloseableHttpClient mockHttpclient;
 
-    @Mock
-    private StatusLine mockStatus;
 
     @Mock
     private CloseableHttpResponse mockResponse;
@@ -69,9 +67,7 @@ public class FcrepoClientErrorTest {
     public void testGet() throws IOException, FcrepoOperationFailedException {
         final int status = 100;
         final URI uri = create(baseUrl);
-        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
-
-        entity.setContentType(RDF_XML);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes(), ContentType.parse(RDF_XML));
         doSetupMockRequest(RDF_XML, entity, status);
 
         final FcrepoResponse response = testClient.get(uri).accept(RDF_XML).perform();
@@ -87,9 +83,7 @@ public class FcrepoClientErrorTest {
     public void testGetError() throws Exception {
         final int status = 400;
         final URI uri = create(baseUrl);
-        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes());
-
-        entity.setContentType(RDF_XML);
+        final ByteArrayEntity entity = new ByteArrayEntity(rdfXml.getBytes(), ContentType.parse(RDF_XML));
         doSetupMockRequest(RDF_XML, entity, status);
 
         final FcrepoResponse response = testClient.get(uri)
@@ -293,9 +287,8 @@ public class FcrepoClientErrorTest {
         final Header[] headers = new Header[]{ locationHeader, contentTypeHeader, linkHeader, linkFooHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
-        when(mockResponse.getAllHeaders()).thenReturn(headers);
-        when(mockResponse.getStatusLine()).thenReturn(mockStatus);
-        when(mockStatus.getStatusCode()).thenReturn(status);
+        when(mockResponse.getHeaders()).thenReturn(headers);
+        when(mockResponse.getCode()).thenReturn(status);
 
         final FcrepoResponse response = testClient.head(uri).perform();
 
@@ -317,9 +310,8 @@ public class FcrepoClientErrorTest {
         final Header[] headers = new Header[]{ locationHeader, contentTypeHeader, linkHeader, linkFooHeader };
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
-        when(mockResponse.getAllHeaders()).thenReturn(headers);
-        when(mockResponse.getStatusLine()).thenReturn(mockStatus);
-        when(mockStatus.getStatusCode()).thenReturn(status);
+        when(mockResponse.getHeaders()).thenReturn(headers);
+        when(mockResponse.getCode()).thenReturn(status);
 
         final FcrepoResponse response = testClient.head(uri).perform();
 
@@ -339,8 +331,7 @@ public class FcrepoClientErrorTest {
 
         when(mockHttpclient.execute(any(HttpUriRequest.class))).thenReturn(mockResponse);
         when(mockResponse.getEntity()).thenReturn(entity);
-        when(mockResponse.getStatusLine()).thenReturn(mockStatus);
-        when(mockStatus.getStatusCode()).thenReturn(status);
-        when(mockResponse.getAllHeaders()).thenReturn(responseHeaders);
+        when(mockResponse.getCode()).thenReturn(status);
+        when(mockResponse.getHeaders()).thenReturn(responseHeaders);
     }
 }

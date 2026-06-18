@@ -16,8 +16,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.time.Instant;
 
-import org.apache.http.client.methods.HttpRequestBase;
-import org.springframework.http.ContentDisposition;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
  * Builds a POST request for creating a memento (LDPRm) with the state given in the request body
@@ -55,7 +54,7 @@ public class HistoricMementoBuilder extends BodyRequestBuilder {
     }
 
     @Override
-    protected HttpRequestBase createRequest() {
+    protected HttpUriRequestBase createRequest() {
         return HttpMethods.POST.createRequest(targetUri);
     }
 
@@ -134,11 +133,7 @@ public class HistoricMementoBuilder extends BodyRequestBuilder {
      * @throws FcrepoOperationFailedException if unable to encode filename
      */
     public HistoricMementoBuilder filename(final String filename) throws FcrepoOperationFailedException {
-        final ContentDisposition.Builder builder = ContentDisposition.builder("attachment");
-        if (filename != null) {
-            builder.filename(filename);
-        }
-        request.addHeader(CONTENT_DISPOSITION, builder.build().toString());
+        request.addHeader(CONTENT_DISPOSITION, HeaderHelpers.attachmentContentDisposition(filename));
         return this;
     }
 

@@ -10,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpOptions;
+import org.apache.hc.client5.http.classic.methods.HttpPatch;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 import org.junit.jupiter.api.Test;
 
@@ -38,26 +38,26 @@ public class HttpMethodsTest {
     }
 
     @Test
-    public void testCreateRequestSetsUri() {
+    public void testCreateRequestSetsUri() throws Exception {
         final URI uri = create("http://localhost:8080/rest/foo");
-        final HttpRequestBase request = HttpMethods.GET.createRequest(uri);
-        assertEquals(uri, request.getURI());
+        final HttpUriRequestBase request = HttpMethods.GET.createRequest(uri);
+        assertEquals(uri, request.getUri());
         assertEquals("GET", request.getMethod());
     }
 
     @Test
-    public void testMoveRequest() {
+    public void testMoveRequest() throws Exception {
         final URI uri = create("http://localhost:8080/rest/foo");
-        final HttpRequestBase request = HttpMethods.MOVE.createRequest(uri);
+        final HttpUriRequestBase request = HttpMethods.MOVE.createRequest(uri);
         assertEquals("MOVE", request.getMethod());
-        assertEquals(uri, request.getURI());
+        assertEquals(uri, request.getUri());
     }
 
     @Test
-    public void testCopyRequest() {
+    public void testCopyRequest() throws Exception {
         final URI uri = create("http://localhost:8080/rest/foo");
-        final HttpRequestBase request = HttpMethods.COPY.createRequest(uri);
+        final HttpUriRequestBase request = HttpMethods.COPY.createRequest(uri);
         assertEquals("COPY", request.getMethod());
-        assertEquals(uri, request.getURI());
+        assertEquals(uri, request.getUri());
     }
 }

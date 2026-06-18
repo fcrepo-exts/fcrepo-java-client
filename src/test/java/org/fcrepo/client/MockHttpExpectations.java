@@ -10,7 +10,7 @@ import static org.mockserver.model.HttpResponse.response;
 
 import java.net.URI;
 
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.mockserver.client.MockServerClient;
 
 /**

@@ -40,14 +40,13 @@
     <fcrepo.version>7.0.0</fcrepo.version>
     <commons.io.version>2.22.0</commons.io.version>
     <commons.lang3.version>3.20.0</commons.lang3.version>
-    <httpclient.version>4.5.14</httpclient.version>
+    <httpclient5.version>5.6.1</httpclient5.version>
     <jersey.version>4.0.2</jersey.version>
     <junit.version>5.14.4</junit.version>
     <logback.version>1.5.34</logback.version>
     <mockito.version>5.23.0</mockito.version>
     <mockserver.version>7.0.0</mockserver.version>
     <slf4j.version>2.0.18</slf4j.version>
-    <spring.version>7.0.8</spring.version>
     <jena.version>6.1.0</jena.version>
     <jetty.version>12.1.10</jetty.version>
     <jetty.users.file>${project.build.directory}/test-classes/jetty-users.properties</jetty.users.file>
@@ -82,22 +81,16 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>${httpclient.version}</version>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+      <version>${httpclient5.version}</version>
     </dependency>
-    
+
     <!-- logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-web</artifactId>
-      <version>${spring.version}</version>
     </dependency>
 
     <!-- testing -->
