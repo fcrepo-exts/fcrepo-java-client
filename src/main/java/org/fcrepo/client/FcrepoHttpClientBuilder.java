@@ -9,6 +9,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import org.apache.hc.core5.http.EntityDetails;
 import org.apache.hc.core5.http.HttpException;
@@ -19,7 +21,6 @@ import org.apache.hc.core5.http.HttpRequestInterceptor;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.impl.auth.BasicScheme;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -107,14 +108,13 @@ public class FcrepoHttpClientBuilder {
                 LOGGER.debug("Cannot initiate preemptive authentication, Credentials not found!");
                 throw new HttpException("Credentials not found for preemptive authentication");
             }
-            // Generate the Basic Authorization header up front so it is sent on the first request
-            final BasicScheme scheme = new BasicScheme();
-            scheme.initPreemptive(creds);
-            try {
-                request.setHeader(HttpHeaders.AUTHORIZATION, scheme.generateAuthResponse(targetHost, request, context));
-            } catch (final org.apache.hc.client5.http.auth.AuthenticationException ex) {
-                throw new HttpException("Unable to generate preemptive authentication header", ex);
-            }
+            // Generate the Basic Authorization header up front so it is sent on the first request. The
+            // credentials always carry a password here, since build() only installs this interceptor when a
+            // non-blank password was supplied.
+            final String token = creds.getUserPrincipal().getName() + ":" + new String(creds.getPassword());
+            final String authHeader = "Basic " +
+                    Base64.getEncoder().encodeToString(token.getBytes(StandardCharsets.UTF_8));
+            request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
         }
     }
 }

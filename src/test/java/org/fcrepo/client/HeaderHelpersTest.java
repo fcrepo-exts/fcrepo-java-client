@@ -86,4 +86,16 @@ public class HeaderHelpersTest {
         assertEquals("attachment; filename=\"a\\\"b\\\\c.txt\"",
                 HeaderHelpers.attachmentContentDisposition("a\"b\\c.txt"));
     }
+
+    @Test
+    public void testAttachmentContentDispositionEscapesQuoteOnly() {
+        assertEquals("attachment; filename=\"a\\\"b.txt\"",
+                HeaderHelpers.attachmentContentDisposition("a\"b.txt"));
+    }
+
+    @Test
+    public void testAttachmentContentDispositionEscapesBackslashOnly() {
+        assertEquals("attachment; filename=\"a\\\\b.txt\"",
+                HeaderHelpers.attachmentContentDisposition("a\\b.txt"));
+    }
 }
