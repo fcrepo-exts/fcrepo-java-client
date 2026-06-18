@@ -68,4 +68,22 @@ public class HeaderHelpersTest {
         // can't guarantee order
         assertTrue(result.contains("md5,sha") || result.contains("sha,md5"));
     }
+
+    @Test
+    public void testAttachmentContentDispositionNoFilename() {
+        assertEquals("attachment", HeaderHelpers.attachmentContentDisposition(null));
+    }
+
+    @Test
+    public void testAttachmentContentDispositionWithFilename() {
+        assertEquals("attachment; filename=\"file.txt\"",
+                HeaderHelpers.attachmentContentDisposition("file.txt"));
+    }
+
+    @Test
+    public void testAttachmentContentDispositionEscapesQuotesAndBackslashes() {
+        // a filename containing a double-quote and a backslash must have both escaped
+        assertEquals("attachment; filename=\"a\\\"b\\\\c.txt\"",
+                HeaderHelpers.attachmentContentDisposition("a\"b\\c.txt"));
+    }
 }
