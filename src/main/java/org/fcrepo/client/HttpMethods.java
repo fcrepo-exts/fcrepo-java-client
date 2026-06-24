@@ -7,15 +7,14 @@ package org.fcrepo.client;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpOptions;
+import org.apache.hc.client5.http.classic.methods.HttpPatch;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
  * Represents an HTTP method to pass to the underlying client
@@ -25,23 +24,34 @@ import org.apache.http.client.methods.HttpRequestBase;
  */
 public enum HttpMethods {
 
-    GET(HttpGet.class),
-    PATCH(HttpPatch.class),
-    POST(HttpPost.class),
-    PUT(HttpPut.class),
-    DELETE(HttpDelete.class),
-    HEAD(HttpHead.class),
-    OPTIONS(HttpOptions.class),
-    MOVE(HttpMove.class),
-    COPY(HttpCopy.class);
+    GET(HttpGet.class, false),
+    PATCH(HttpPatch.class, true),
+    POST(HttpPost.class, true),
+    PUT(HttpPut.class, true),
+    DELETE(HttpDelete.class, false),
+    HEAD(HttpHead.class, false),
+    OPTIONS(HttpOptions.class, false),
+    /**
+     * @deprecated Fedora has not supported the MOVE operation since Fedora 5; retained only for use against
+     *      Fedora 4/5 repositories and slated for removal in a future release.
+     */
+    @Deprecated
+    MOVE(HttpMove.class, false),
+    /**
+     * @deprecated Fedora has not supported the COPY operation since Fedora 5; retained only for use against
+     *      Fedora 4/5 repositories and slated for removal in a future release.
+     */
+    @Deprecated
+    COPY(HttpCopy.class, false);
 
-    final Class<? extends HttpRequestBase> clazz;
+    final Class<? extends HttpUriRequestBase> clazz;
 
+    // whether requests of this method may carry a request body/entity
     final boolean entity;
 
-    HttpMethods(final Class<? extends HttpRequestBase> clazz) {
+    HttpMethods(final Class<? extends HttpUriRequestBase> clazz, final boolean entity) {
         this.clazz = clazz;
-        entity = HttpEntityEnclosingRequestBase.class.isAssignableFrom(clazz);
+        this.entity = entity;
     }
 
     /**
@@ -50,7 +60,7 @@ public enum HttpMethods {
      * @param url the URI that is part of the request
      * @return an instance of the corresponding request class
      */
-    public HttpRequestBase createRequest(final URI url) {
+    public HttpUriRequestBase createRequest(final URI url) {
         try {
             return clazz.getDeclaredConstructor(URI.class).newInstance(url);
         } catch (ReflectiveOperationException ex) {
@@ -60,51 +70,45 @@ public enum HttpMethods {
 
     /**
      * HTTP MOVE method.
-     * 
+     *
      * @author bbpennel
+     * @deprecated Fedora has not supported the MOVE operation since Fedora 5; retained only for use against
+     *      Fedora 4/5 repositories and slated for removal in a future release.
      */
-    public static class HttpMove extends HttpRequestBase {
+    @Deprecated
+    public static class HttpMove extends HttpUriRequestBase {
 
         public final static String METHOD_NAME = "MOVE";
 
         /**
          * Instantiate MOVE request base
-         * 
+         *
          * @param uri uri for the request
          */
         public HttpMove(final URI uri) {
-            super();
-            setURI(uri);
-        }
-
-        @Override
-        public String getMethod() {
-            return METHOD_NAME;
+            super(METHOD_NAME, uri);
         }
     }
 
     /**
      * HTTP COPY method.
-     * 
+     *
      * @author bbpennel
+     * @deprecated Fedora has not supported the COPY operation since Fedora 5; retained only for use against
+     *      Fedora 4/5 repositories and slated for removal in a future release.
      */
-    public static class HttpCopy extends HttpRequestBase {
+    @Deprecated
+    public static class HttpCopy extends HttpUriRequestBase {
 
         public final static String METHOD_NAME = "COPY";
 
         /**
          * Instantiate COPY request base
-         * 
+         *
          * @param uri uri for the request
          */
         public HttpCopy(final URI uri) {
-            super();
-            setURI(uri);
-        }
-
-        @Override
-        public String getMethod() {
-            return METHOD_NAME;
+            super(METHOD_NAME, uri);
         }
     }
 }

@@ -8,32 +8,35 @@ package org.fcrepo.client;
 import static java.net.URI.create;
 import static org.fcrepo.client.FedoraHeaderConstants.ATOMIC_ID;
 import static org.fcrepo.client.TestUtils.baseUrl;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
 
-import org.apache.http.Header;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * Tests for {@link TransactionalFcrepoClient}.
  *
  * @author surfrdan
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class TransactionalFcrepoClientTest {
 
     @Mock
@@ -45,11 +48,9 @@ public class TransactionalFcrepoClientTest {
     @Mock
     private CloseableHttpResponse httpResponse;
 
-    @Mock
-    private StatusLine statusLine;
 
     @Captor
-    private ArgumentCaptor<HttpRequestBase> requestCaptor;
+    private ArgumentCaptor<HttpUriRequestBase> requestCaptor;
 
     private URI txUri;
 
@@ -57,22 +58,23 @@ public class TransactionalFcrepoClientTest {
 
     private TransactionalFcrepoClient txClient;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         when(httpClientBuilder.build()).thenReturn(httpClient);
-        when(httpClient.execute(any(HttpRequestBase.class))).thenReturn(httpResponse);
-        when(httpResponse.getStatusLine()).thenReturn(statusLine);
-        when(statusLine.getStatusCode()).thenReturn(200);
-        when(httpResponse.getAllHeaders()).thenReturn(new Header[0]);
+        when(httpClient.execute(any(HttpUriRequestBase.class))).thenReturn(httpResponse);
+        when(httpResponse.getCode()).thenReturn(200);
+        when(httpResponse.getHeaders()).thenReturn(new Header[0]);
 
         txUri = create("http://localhost:8080/rest/tx:1234");
         resourceUri = create(baseUrl);
         txClient = new TransactionalFcrepoClient(txUri, httpClientBuilder, true);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullTransactionUri() {
-        new TransactionalFcrepoClient(null, httpClientBuilder, true);
+        assertThrows(IllegalArgumentException.class, () -> {
+            new TransactionalFcrepoClient(null, httpClientBuilder, true);
+        });
     }
 
     @Test
@@ -160,9 +162,9 @@ public class TransactionalFcrepoClientTest {
      */
     private void assertRequestAddsAtomicId(final String method, final URI target) throws Exception {
         verify(httpClient).execute(requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals(method, request.getMethod());
-        assertEquals(target, request.getURI());
+        assertEquals(target, request.getUri());
         assertEquals(txUri.toString(), request.getFirstHeader(ATOMIC_ID).getValue());
     }
 }

@@ -17,9 +17,9 @@ import static org.fcrepo.client.FedoraHeaderConstants.RANGE;
 import static org.fcrepo.client.FedoraHeaderConstants.WANT_DIGEST;
 import static org.fcrepo.client.HeaderHelpers.UTC_RFC_1123_FORMATTER;
 import static org.fcrepo.client.TestUtils.baseUrl;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -33,18 +33,21 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.http.client.methods.HttpRequestBase;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * @author bbpennel
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class GetBuilderTest {
 
     private final String HISTORIC_DATETIME =
@@ -60,9 +63,9 @@ public class GetBuilderTest {
 
     private URI uri;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
+        when(client.executeRequest(any(URI.class), any(HttpUriRequestBase.class)))
                 .thenReturn(fcrepoResponse);
 
         uri = create(baseUrl);
@@ -73,11 +76,11 @@ public class GetBuilderTest {
     public void testGet() throws Exception {
         testBuilder.perform();
 
-        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+        final ArgumentCaptor<HttpUriRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpUriRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpRequestBase request = getRequest();
-        assertEquals(0, request.getAllHeaders().length);
+        final HttpUriRequestBase request = getRequest();
+        assertEquals(0, request.getHeaders().length);
     }
 
     @Test
@@ -86,7 +89,7 @@ public class GetBuilderTest {
                 URI.create("http://www.w3.org/ns/ldp#PreferMinimalContainer")), null)
                 .perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("return=representation; include=\"http://www.w3.org/ns/ldp#PreferMinimalContainer\"",
                 request.getFirstHeader(PREFER).getValue());
     }
@@ -95,7 +98,7 @@ public class GetBuilderTest {
     public void testPreferRepresentation() throws Exception {
         testBuilder.preferRepresentation().perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("return=representation", request.getFirstHeader(PREFER).getValue());
     }
 
@@ -106,7 +109,7 @@ public class GetBuilderTest {
                 new URI("http://www.w3.org/ns/ldp#PreferMembership"));
         testBuilder.preferRepresentation(includes, null).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("return=representation; include=\"" +
                 "http://fedora.info/definitions/v4/repository#InboundReferences" +
                 " http://www.w3.org/ns/ldp#PreferMembership\"",
@@ -119,7 +122,7 @@ public class GetBuilderTest {
         final String lastModified = "Mon, 19 May 2014 19:44:59 GMT";
         testBuilder.ifNoneMatch(etag).ifModifiedSince(lastModified).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals(etag, request.getFirstHeader(IF_NONE_MATCH).getValue());
         assertEquals(lastModified, request.getFirstHeader(IF_MODIFIED_SINCE).getValue());
     }
@@ -128,7 +131,7 @@ public class GetBuilderTest {
     public void testRange() throws Exception {
         testBuilder.range(5L, 100L).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("bytes=5-100", request.getFirstHeader(RANGE).getValue());
     }
 
@@ -136,7 +139,7 @@ public class GetBuilderTest {
     public void testStartRange() throws Exception {
         testBuilder.range(5L, null).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("bytes=5-", request.getFirstHeader(RANGE).getValue());
     }
 
@@ -144,7 +147,7 @@ public class GetBuilderTest {
     public void testEndRange() throws Exception {
         testBuilder.range(null, 100L).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("bytes=-100", request.getFirstHeader(RANGE).getValue());
     }
 
@@ -152,7 +155,7 @@ public class GetBuilderTest {
     public void testAccept() throws Exception {
         testBuilder.accept("text/turtle").perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("text/turtle", request.getFirstHeader(ACCEPT).getValue());
     }
 
@@ -166,7 +169,7 @@ public class GetBuilderTest {
     public void testWantDigest() throws Exception {
         testBuilder.wantDigest("md5").perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("md5", request.getFirstHeader(WANT_DIGEST).getValue());
     }
 
@@ -174,7 +177,7 @@ public class GetBuilderTest {
     public void testNoCache() throws Exception {
         testBuilder.noCache().perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("no-cache", request.getFirstHeader(CACHE_CONTROL).getValue());
     }
 
@@ -182,7 +185,7 @@ public class GetBuilderTest {
     public void testAcceptDatetime() throws Exception {
         testBuilder.acceptDatetime(HISTORIC_DATETIME).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals(HISTORIC_DATETIME, request.getFirstHeader(ACCEPT_DATETIME).getValue());
     }
 
@@ -190,7 +193,7 @@ public class GetBuilderTest {
     public void testAcceptNull() throws Exception {
         testBuilder.accept(null).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertNull(request.getFirstHeader(ACCEPT));
     }
 
@@ -198,7 +201,7 @@ public class GetBuilderTest {
     public void testRangeNull() throws Exception {
         testBuilder.range(null, null).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertNull(request.getFirstHeader(RANGE));
     }
 
@@ -206,7 +209,7 @@ public class GetBuilderTest {
     public void testRangeNegativeBounds() throws Exception {
         testBuilder.range(-1L, -1L).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("bytes=-", request.getFirstHeader(RANGE).getValue());
     }
 
@@ -214,7 +217,7 @@ public class GetBuilderTest {
     public void testNullModificationHeaders() throws Exception {
         testBuilder.ifNoneMatch(null).ifModifiedSince(null).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertNull(request.getFirstHeader(IF_NONE_MATCH));
         assertNull(request.getFirstHeader(IF_MODIFIED_SINCE));
     }
@@ -225,7 +228,7 @@ public class GetBuilderTest {
                 new URI("http://www.w3.org/ns/ldp#PreferMembership"));
         testBuilder.preferRepresentation(null, omits).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("return=representation; omit=\"http://www.w3.org/ns/ldp#PreferMembership\"",
                 request.getFirstHeader(PREFER).getValue());
     }
@@ -234,7 +237,7 @@ public class GetBuilderTest {
     public void testPreferEmptyLists() throws Exception {
         testBuilder.preferRepresentation(Collections.emptyList(), Collections.emptyList()).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         // Empty include/omit lists contribute nothing, leaving only the return token
         assertEquals("return=representation", request.getFirstHeader(PREFER).getValue());
     }
@@ -243,7 +246,7 @@ public class GetBuilderTest {
     public void testWantDigestNull() throws Exception {
         testBuilder.wantDigest(null).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertNull(request.getFirstHeader(WANT_DIGEST));
     }
 
@@ -252,7 +255,7 @@ public class GetBuilderTest {
         final Instant instant = LocalDateTime.of(2000, 1, 1, 0, 0).atZone(ZoneOffset.UTC).toInstant();
         testBuilder.acceptDatetime(instant).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals(HISTORIC_DATETIME, request.getFirstHeader(ACCEPT_DATETIME).getValue());
     }
 
@@ -262,7 +265,7 @@ public class GetBuilderTest {
                 .acceptDatetime((String) null)
                 .perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertNull(request.getFirstHeader(ACCEPT_DATETIME));
     }
 
@@ -270,7 +273,7 @@ public class GetBuilderTest {
     public void testAddHeader() throws Exception {
         testBuilder.addHeader("my-header", "head-val").perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals("head-val", request.getFirstHeader("my-header").getValue());
     }
 
@@ -279,12 +282,12 @@ public class GetBuilderTest {
         final FcrepoLink link = FcrepoLink.fromUri("http://example.com/link").type("foo").build();
         testBuilder.addLinkHeader(link).perform();
 
-        final HttpRequestBase request = getRequest();
+        final HttpUriRequestBase request = getRequest();
         assertEquals(link.toString(), request.getFirstHeader(LINK).getValue());
     }
 
-    private HttpRequestBase getRequest() throws FcrepoOperationFailedException {
-        final ArgumentCaptor<HttpRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpRequestBase.class);
+    private HttpUriRequestBase getRequest() throws FcrepoOperationFailedException {
+        final ArgumentCaptor<HttpUriRequestBase> requestCaptor = ArgumentCaptor.forClass(HttpUriRequestBase.class);
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
         return requestCaptor.getValue();

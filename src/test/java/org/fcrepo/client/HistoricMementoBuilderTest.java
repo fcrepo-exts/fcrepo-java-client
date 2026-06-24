@@ -18,7 +18,8 @@ import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_HANDLING;
 import static org.fcrepo.client.LinkHeaderConstants.EXTERNAL_CONTENT_REL;
 import static org.fcrepo.client.LinkHeaderConstants.TYPE_REL;
 import static org.fcrepo.client.TestUtils.baseUrl;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -34,21 +35,23 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 /**
  * @author bbpennel
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class HistoricMementoBuilderTest {
 
     private final String HISTORIC_DATETIME =
@@ -61,15 +64,15 @@ public class HistoricMementoBuilderTest {
     private FcrepoResponse fcrepoResponse;
 
     @Captor
-    private ArgumentCaptor<HttpRequestBase> requestCaptor;
+    private ArgumentCaptor<HttpUriRequestBase> requestCaptor;
 
     private HistoricMementoBuilder testBuilder;
 
     private URI uri;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
+        when(client.executeRequest(any(URI.class), any(HttpUriRequestBase.class)))
                 .thenReturn(fcrepoResponse);
 
         uri = create(baseUrl);
@@ -84,7 +87,7 @@ public class HistoricMementoBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals(HISTORIC_DATETIME, request.getFirstHeader(MEMENTO_DATETIME).getValue());
     }
 
@@ -95,21 +98,24 @@ public class HistoricMementoBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals(HISTORIC_DATETIME, request.getFirstHeader(MEMENTO_DATETIME).getValue());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testCreateWithNoDatetime() throws Exception {
-        testBuilder = new HistoricMementoBuilder(uri, client, (String) null);
-        testBuilder.perform();
+        // the builder validates the datetime in its constructor
+        assertThrows(NullPointerException.class,
+                () -> new HistoricMementoBuilder(uri, client, (String) null));
     }
 
-    @Test(expected = DateTimeParseException.class)
+    @Test
     public void testCreateWithNonRFC1123() throws Exception {
         final String mementoDatetime = Instant.now().toString();
-        testBuilder = new HistoricMementoBuilder(uri, client, mementoDatetime);
-        testBuilder.perform();
+
+        // the builder parses the datetime in its constructor
+        assertThrows(DateTimeParseException.class,
+                () -> new HistoricMementoBuilder(uri, client, mementoDatetime));
     }
 
     @Test
@@ -125,7 +131,7 @@ public class HistoricMementoBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         final HttpEntity bodyEntity = request.getEntity();
         assertEquals(bodyStream, bodyEntity.getContent());
         assertEquals("plain/text", request.getFirstHeader(CONTENT_TYPE).getValue());
@@ -142,7 +148,7 @@ public class HistoricMementoBuilderTest {
         testBuilder.body(bodyStream).perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals(bodyStream, request.getEntity().getContent());
     }
 
@@ -159,7 +165,7 @@ public class HistoricMementoBuilderTest {
                 .perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals("md5=md5sum, sha256=sha256sum, sha512=sha512sum, sha=shasum",
                 request.getFirstHeader(DIGEST).getValue());
     }
@@ -172,7 +178,7 @@ public class HistoricMementoBuilderTest {
         testBuilder.externalContent(contentURI, "plain/text", PROXY).perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
 
         final FcrepoLink extLink = new FcrepoLink(request.getFirstHeader(LINK).getValue());
         assertEquals(EXTERNAL_CONTENT_REL, extLink.getRel());
@@ -212,7 +218,7 @@ public class HistoricMementoBuilderTest {
                 .perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals("head-val", request.getFirstHeader("my-header").getValue());
         assertEquals(link.toString(), request.getFirstHeader(LINK).getValue());
     }
@@ -223,7 +229,7 @@ public class HistoricMementoBuilderTest {
         testBuilder.slug(null).filename(null).perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         // a null slug adds no header; a null filename still produces a bare attachment disposition
         assertEquals(null, request.getFirstHeader(SLUG));
         assertEquals("attachment", request.getFirstHeader(CONTENT_DISPOSITION).getValue());

@@ -13,7 +13,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.ACCEPT_DATETIME;
 import java.net.URI;
 import java.time.Instant;
 
-import org.apache.http.client.config.RequestConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
 
 /**
  * Abstract builder for requests to retrieve information from the server

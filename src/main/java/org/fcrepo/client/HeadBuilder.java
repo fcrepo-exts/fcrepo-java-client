@@ -8,7 +8,7 @@ package org.fcrepo.client;
 import java.net.URI;
 import java.time.Instant;
 
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
  * Builds a HEAD request to retrieve resource headers.
@@ -29,7 +29,7 @@ public class HeadBuilder extends RetrieveRequestBuilder {
     }
 
     @Override
-    protected HttpRequestBase createRequest() {
+    protected HttpUriRequestBase createRequest() {
         return HttpMethods.HEAD.createRequest(targetUri);
     }
 

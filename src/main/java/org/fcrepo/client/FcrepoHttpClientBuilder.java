@@ -9,23 +9,24 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.AuthState;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpCoreContext;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.routing.RoutingSupport;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.slf4j.Logger;
 
 /**
@@ -70,42 +71,50 @@ public class FcrepoHttpClientBuilder {
         } else {
             LOGGER.debug("Accessing fcrepo with user credentials");
 
-            final CredentialsProvider credsProvider = new BasicCredentialsProvider();
-            AuthScope scope = null;
+            final BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+            final AuthScope scope;
 
             if (isBlank(host)) {
-                scope = new AuthScope(AuthScope.ANY);
+                // match any host/port/realm
+                scope = new AuthScope(null, null, -1, null, null);
             } else {
                 scope = new AuthScope(new HttpHost(host));
             }
             credsProvider.setCredentials(
                     scope,
-                    new UsernamePasswordCredentials(username, password));
+                    new UsernamePasswordCredentials(username, password.toCharArray()));
             return HttpClients.custom()
                     .setDefaultCredentialsProvider(credsProvider)
                     .useSystemProperties()
-                    .addInterceptorFirst(new PreemptiveAuthInterceptor())
+                    .addRequestInterceptorFirst(new PreemptiveAuthInterceptor())
                     .build();
         }
     }
 
     static class PreemptiveAuthInterceptor implements HttpRequestInterceptor {
 
-        public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
-            final AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
-            // If no auth scheme available yet, try to initialize it
-            // preemptively
-            if (authState.getAuthScheme() == null) {
-                final CredentialsProvider credsProvider = (CredentialsProvider)
-                        context.getAttribute(HttpClientContext.CREDS_PROVIDER);
-                final HttpHost targetHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
-                final AuthScope authScope = new AuthScope(targetHost.getHostName(), targetHost.getPort());
-                final Credentials creds = credsProvider.getCredentials(authScope);
-                if (creds == null) {
-                    LOGGER.debug("Cannot initiate preemtive authentication, Credentials not found!");
-                }
-                authState.update(new BasicScheme(), creds);
+        @Override
+        public void process(final HttpRequest request, final EntityDetails entity, final HttpContext context)
+                throws HttpException, IOException {
+            // If the request already carries an Authorization header, leave it untouched
+            if (request.containsHeader(HttpHeaders.AUTHORIZATION)) {
+                return;
             }
+            final HttpClientContext clientContext = HttpClientContext.cast(context);
+            final HttpHost targetHost = RoutingSupport.determineHost(request);
+            final AuthScope authScope = new AuthScope(targetHost);
+            final Credentials creds = clientContext.getCredentialsProvider().getCredentials(authScope, context);
+            if (creds == null) {
+                LOGGER.debug("Cannot initiate preemptive authentication, Credentials not found!");
+                throw new HttpException("Credentials not found for preemptive authentication");
+            }
+            // Generate the Basic Authorization header up front so it is sent on the first request. The
+            // credentials always carry a password here, since build() only installs this interceptor when a
+            // non-blank password was supplied.
+            final String token = creds.getUserPrincipal().getName() + ":" + new String(creds.getPassword());
+            final String authHeader = "Basic " +
+                    Base64.getEncoder().encodeToString(token.getBytes(StandardCharsets.UTF_8));
+            request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
         }
     }
 }

@@ -58,6 +58,38 @@ public class HeaderHelpers {
                 .collect(Collectors.joining(", "));
     }
 
+    /**
+     * Build an {@code attachment} Content-Disposition header value, optionally with a filename parameter.
+     * <p>
+     * When a filename is supplied it is rendered as a quoted-string ({@code attachment; filename="name"}), with any
+     * embedded backslash or double-quote characters escaped per RFC 6266 / RFC 2616 quoted-pair rules. When no
+     * filename is supplied the bare {@code attachment} disposition is returned.
+     *
+     * @param filename the filename to include, or null for no filename parameter
+     * @return the formatted Content-Disposition header value
+     */
+    public static String attachmentContentDisposition(final String filename) {
+        if (filename == null) {
+            return "attachment";
+        }
+        return "attachment; filename=\"" + escapeQuotedString(filename) + "\"";
+    }
+
+    private static String escapeQuotedString(final String value) {
+        if (value.indexOf('"') == -1 && value.indexOf('\\') == -1) {
+            return value;
+        }
+        final StringBuilder sb = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            final char c = value.charAt(i);
+            if (c == '"' || c == '\\') {
+                sb.append('\\');
+            }
+            sb.append(c);
+        }
+        return sb.toString();
+    }
+
     private HeaderHelpers() {
     }
 }

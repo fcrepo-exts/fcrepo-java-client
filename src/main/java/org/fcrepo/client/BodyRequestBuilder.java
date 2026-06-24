@@ -24,8 +24,7 @@ import java.net.URI;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.entity.InputStreamEntity;
+import org.apache.hc.core5.http.io.entity.InputStreamEntity;
 import org.fcrepo.client.FcrepoLink.Builder;
 
 /**
@@ -72,7 +71,8 @@ public abstract class BodyRequestBuilder extends
                 type = "application/octet-stream";
             }
 
-            ((HttpEntityEnclosingRequestBase) request).setEntity(new InputStreamEntity(stream));
+            // length -1 signals unknown length (chunked); the Content-Type is set as a header below
+            request.setEntity(new InputStreamEntity(stream, -1, null));
             request.addHeader(CONTENT_TYPE, type);
         }
 

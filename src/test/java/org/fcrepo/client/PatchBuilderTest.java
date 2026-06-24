@@ -14,7 +14,7 @@ import static org.fcrepo.client.FedoraHeaderConstants.IF_STATE_TOKEN;
 import static org.fcrepo.client.FedoraHeaderConstants.IF_UNMODIFIED_SINCE;
 import static org.fcrepo.client.FedoraHeaderConstants.LINK;
 import static org.fcrepo.client.TestUtils.baseUrl;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -24,21 +24,20 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author bbpennel
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PatchBuilderTest {
 
     @Mock
@@ -48,15 +47,15 @@ public class PatchBuilderTest {
     private FcrepoResponse fcrepoResponse;
 
     @Captor
-    private ArgumentCaptor<HttpRequestBase> requestCaptor;
+    private ArgumentCaptor<HttpUriRequestBase> requestCaptor;
 
     private PatchBuilder testBuilder;
 
     private URI uri;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        when(client.executeRequest(any(URI.class), any(HttpRequestBase.class)))
+        when(client.executeRequest(any(URI.class), any(HttpUriRequestBase.class)))
                 .thenReturn(fcrepoResponse);
 
         uri = create(baseUrl);
@@ -72,7 +71,7 @@ public class PatchBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         final HttpEntity bodyEntity = request.getEntity();
         assertEquals(bodyStream, bodyEntity.getContent());
 
@@ -88,7 +87,7 @@ public class PatchBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         final HttpEntity bodyEntity = request.getEntity();
         assertEquals(bodyStream, bodyEntity.getContent());
 
@@ -106,7 +105,7 @@ public class PatchBuilderTest {
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
 
-        final HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase) requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals(token, request.getFirstHeader(IF_STATE_TOKEN).getValue());
     }
 
@@ -115,7 +114,7 @@ public class PatchBuilderTest {
         testBuilder.addHeader("my-header", "head-val").perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals("head-val", request.getFirstHeader("my-header").getValue());
     }
 
@@ -125,7 +124,7 @@ public class PatchBuilderTest {
         testBuilder.addLinkHeader(link).perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals(link.toString(), request.getFirstHeader(LINK).getValue());
     }
 
@@ -141,7 +140,7 @@ public class PatchBuilderTest {
                 .perform();
 
         verify(client).executeRequest(eq(uri), requestCaptor.capture());
-        final HttpRequestBase request = requestCaptor.getValue();
+        final HttpUriRequestBase request = requestCaptor.getValue();
         assertEquals(etag, request.getFirstHeader(IF_MATCH).getValue());
         assertEquals(lastModified, request.getFirstHeader(IF_UNMODIFIED_SINCE).getValue());
     }

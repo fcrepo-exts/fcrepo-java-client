@@ -6,16 +6,14 @@
 package org.fcrepo.client;
 
 import static org.fcrepo.client.TestUtils.TEXT_TURTLE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -23,39 +21,35 @@ import java.util.stream.Stream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.io.output.NullOutputStream;
-import org.apache.http.HttpClientConnection;
-import org.apache.http.HttpStatus;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.util.Timeout;
+import org.apache.hc.client5.http.HttpRoute;
+import org.apache.hc.client5.http.io.ConnectionEndpoint;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.MockServerRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockserver.integration.ClientAndServer;
 
 /**
  * Integration test used to demonstrate connection management issues with the FcrepoClient.
  *
  * @author esm
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ConnectionManagementTest {
 
     /**
-     * Starts a mock HTTP server on a free port
+     * The mock HTTP server, started on a free port per test, initialized on @BeforeEach via MockHttpExpectations
      */
-    @Rule
-    public MockServerRule mockServerRule = new MockServerRule(this);
-
-    // Set by the above @Rule, initialized on @Before via MockHttpExpectations
-    private MockServerClient mockServerClient;
+    private ClientAndServer mockServer;
 
     /**
      * URIs that our Mock HTTP server responds to.
@@ -73,11 +67,12 @@ public class ConnectionManagementTest {
     private static void verifyConnectionRequestedAndClosed(final int connectionCount,
                                                      final HttpClientConnectionManager connectionManager) {
         // A new connection was requested by the Http client ...
-        verify(connectionManager, times(connectionCount)).requestConnection(any(HttpRoute.class), any());
+        verify(connectionManager, times(connectionCount))
+                .lease(any(), any(HttpRoute.class), any(Timeout.class), any());
 
         // Verify it was released.
-        verify(connectionManager, times(connectionCount)).
-                releaseConnection(any(HttpClientConnection.class), any(), anyLong(), any(TimeUnit.class));
+        verify(connectionManager, times(connectionCount))
+                .release(any(ConnectionEndpoint.class), any(), any(TimeValue.class));
     }
 
     /**
@@ -89,11 +84,12 @@ public class ConnectionManagementTest {
     private static void verifyConnectionRequestedButNotClosed(final int connectionCount,
                                                     final HttpClientConnectionManager connectionManager) {
         // A new connection was requested by the Http client ...
-        verify(connectionManager, times(connectionCount)).requestConnection(any(HttpRoute.class), any());
+        verify(connectionManager, times(connectionCount))
+                .lease(any(), any(HttpRoute.class), any(Timeout.class), any());
 
         // Verify it was NOT released.
-        verify(connectionManager, times(0)).
-                releaseConnection(any(HttpClientConnection.class), any(), anyLong(), any(TimeUnit.class));
+        verify(connectionManager, times(0))
+                .release(any(ConnectionEndpoint.class), any(), any(TimeValue.class));
     }
 
     /**
@@ -116,7 +112,7 @@ public class ConnectionManagementTest {
          * Reads the InputStream that constitutes the response body.
          */
         private static Consumer<FcrepoResponse> readEntityBody = response -> {
-            assertNotNull("Expected a non-null InputStream.", response.getBody());
+            assertNotNull(response.getBody(), "Expected a non-null InputStream.");
             try {
                 IOUtils.copy(response.getBody(), NullOutputStream.NULL_OUTPUT_STREAM);
             } catch (final IOException e) {
@@ -137,21 +133,22 @@ public class ConnectionManagementTest {
     private CloseableHttpClient underTest;
 
     /**
-     * The {@link org.apache.http.conn.HttpClientConnectionManager} implementation that the {@link #underTest
+     * The {@link org.apache.hc.client5.http.io.HttpClientConnectionManager} implementation that the {@link #underTest
      * HttpClient} is configured to used.
      */
     @Spy
     private PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
         // Required because we have a test that doesn't close connections, so we have to insure that the
         // connection manager doesn't block during that test.
         connectionManager.setDefaultMaxPerRoute(HttpMethods.values().length);
 
-        // Set up the expectations on the Mock http server
-        new MockHttpExpectations().initializeExpectations(this.mockServerClient, this.mockServerRule.getPort());
+        // Start the mock http server on a free port and set up its expectations
+        mockServer = ClientAndServer.startClientAndServer();
+        new MockHttpExpectations().initializeExpectations(mockServer, mockServer.getLocalPort());
 
         // Uris that we connect to, and answered by the Mock http server
         uris = new MockHttpExpectations.SupportedUris();
@@ -164,9 +161,10 @@ public class ConnectionManagementTest {
 
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         client.close();
+        mockServer.stop();
     }
 
     /**
@@ -188,8 +186,8 @@ public class ConnectionManagementTest {
                     actualCount.getAndIncrement();
                 });
 
-        assertEquals("Expected to make " + expectedCount + " connections; made " + actualCount.get(),
-                expectedCount, actualCount.get());
+        assertEquals(expectedCount, actualCount.get(),
+        "Expected to make " + expectedCount + " connections; made " + actualCount.get());
 
         verifyConnectionRequestedAndClosed(actualCount.get(), connectionManager);
     }
@@ -211,8 +209,8 @@ public class ConnectionManagementTest {
                     actualCount.getAndIncrement();
                 });
 
-        assertEquals("Expected to make " + expectedCount + " connections; made " + actualCount.get(),
-                expectedCount, actualCount.get());
+        assertEquals(expectedCount, actualCount.get(),
+        "Expected to make " + expectedCount + " connections; made " + actualCount.get());
         verifyConnectionRequestedAndClosed(actualCount.get(), connectionManager);
     }
 
@@ -232,8 +230,8 @@ public class ConnectionManagementTest {
                     actualCount.getAndIncrement();
                 });
 
-        assertEquals("Expected to make " + expectedCount + " connections; made " + actualCount.get(),
-                expectedCount, actualCount.get());
+        assertEquals(expectedCount, actualCount.get(),
+        "Expected to make " + expectedCount + " connections; made " + actualCount.get());
         verifyConnectionRequestedAndClosed(actualCount.get(), connectionManager);
     }
 
@@ -254,8 +252,8 @@ public class ConnectionManagementTest {
                     actualCount.getAndIncrement();
                 });
 
-        assertEquals("Expected to make " + expectedCount + " connections; made " + actualCount.get(),
-                expectedCount, actualCount.get());
+        assertEquals(expectedCount, actualCount.get(),
+        "Expected to make " + expectedCount + " connections; made " + actualCount.get());
         verifyConnectionRequestedButNotClosed(actualCount.get(), connectionManager);
     }
 
@@ -275,8 +273,8 @@ public class ConnectionManagementTest {
                     actualCount.getAndIncrement();
                 });
 
-        assertEquals("Expected to make " + expectedCount + " connections; made " + actualCount.get(),
-                expectedCount, actualCount.get());
+        assertEquals(expectedCount, actualCount.get(),
+        "Expected to make " + expectedCount + " connections; made " + actualCount.get());
         verifyConnectionRequestedAndClosed(actualCount.get(), connectionManager);
     }
 
@@ -334,10 +332,9 @@ public class ConnectionManagementTest {
                 fail("Expected a FcrepoOperationFailedException to be thrown for HTTP method " + method.name());
             }
         } catch (final FcrepoOperationFailedException e) {
-            assertEquals(
-                    "Expected request for " + uri.asUri() + " to return a " + uri.statusCode + ".  " +
-                            "Was: " + e.getStatusCode() + " Method:" + method,
-                    uri.statusCode, e.getStatusCode());
+            assertEquals(uri.statusCode, e.getStatusCode(),
+        "Expected request for " + uri.asUri() + " to return a " + uri.statusCode + ".  " +
+                            "Was: " + e.getStatusCode() + " Method:" + method);
         } finally {
             if (responseHandler != null) {
                 responseHandler.accept(response);

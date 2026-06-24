@@ -5,13 +5,13 @@
  */
 package org.fcrepo.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author bbpennel
@@ -67,5 +67,35 @@ public class HeaderHelpersTest {
         final String result = HeaderHelpers.formatQualityValues(qualityMap);
         // can't guarantee order
         assertTrue(result.contains("md5,sha") || result.contains("sha,md5"));
+    }
+
+    @Test
+    public void testAttachmentContentDispositionNoFilename() {
+        assertEquals("attachment", HeaderHelpers.attachmentContentDisposition(null));
+    }
+
+    @Test
+    public void testAttachmentContentDispositionWithFilename() {
+        assertEquals("attachment; filename=\"file.txt\"",
+                HeaderHelpers.attachmentContentDisposition("file.txt"));
+    }
+
+    @Test
+    public void testAttachmentContentDispositionEscapesQuotesAndBackslashes() {
+        // a filename containing a double-quote and a backslash must have both escaped
+        assertEquals("attachment; filename=\"a\\\"b\\\\c.txt\"",
+                HeaderHelpers.attachmentContentDisposition("a\"b\\c.txt"));
+    }
+
+    @Test
+    public void testAttachmentContentDispositionEscapesQuoteOnly() {
+        assertEquals("attachment; filename=\"a\\\"b.txt\"",
+                HeaderHelpers.attachmentContentDisposition("a\"b.txt"));
+    }
+
+    @Test
+    public void testAttachmentContentDispositionEscapesBackslashOnly() {
+        assertEquals("attachment; filename=\"a\\\\b.txt\"",
+                HeaderHelpers.attachmentContentDisposition("a\\b.txt"));
     }
 }

@@ -5,18 +5,15 @@
  */
 package org.fcrepo.client;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link FcrepoClient.FcrepoClientBuilder}.
  *
  * @author surfrdan
  */
-@RunWith(JUnit4.class)
 public class FcrepoClientBuilderTest {
 
     @Test
