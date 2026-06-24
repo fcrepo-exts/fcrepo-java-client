@@ -56,6 +56,14 @@ gone entirely**. The emitted header value is unchanged
 (`attachment` / `attachment; filename="…"`). Applications that were relying on
 this library to put Spring on their classpath must now declare Spring themselves.
 
+### Deprecated: HTTP MOVE and COPY methods
+
+`HttpMethods.MOVE` / `HttpMethods.COPY` and the `HttpMethods.HttpMove` /
+`HttpMethods.HttpCopy` request classes are now `@Deprecated`. Fedora has not
+supported the MOVE or COPY operations since Fedora 5; they are retained only
+for use against Fedora 4/5 repositories and are slated for removal in a future
+release. Code targeting Fedora 6/7 should not use them.
+
 ### Transitive (compile-scope) dependency upgrades
 
 These land on the classpath of every consumer and are the changes most likely

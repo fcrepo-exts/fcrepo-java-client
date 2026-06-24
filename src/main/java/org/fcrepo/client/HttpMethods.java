@@ -31,7 +31,17 @@ public enum HttpMethods {
     DELETE(HttpDelete.class, false),
     HEAD(HttpHead.class, false),
     OPTIONS(HttpOptions.class, false),
+    /**
+     * @deprecated Fedora has not supported the MOVE operation since Fedora 5; retained only for use against
+     *      Fedora 4/5 repositories and slated for removal in a future release.
+     */
+    @Deprecated
     MOVE(HttpMove.class, false),
+    /**
+     * @deprecated Fedora has not supported the COPY operation since Fedora 5; retained only for use against
+     *      Fedora 4/5 repositories and slated for removal in a future release.
+     */
+    @Deprecated
     COPY(HttpCopy.class, false);
 
     final Class<? extends HttpUriRequestBase> clazz;
@@ -60,9 +70,12 @@ public enum HttpMethods {
 
     /**
      * HTTP MOVE method.
-     * 
+     *
      * @author bbpennel
+     * @deprecated Fedora has not supported the MOVE operation since Fedora 5; retained only for use against
+     *      Fedora 4/5 repositories and slated for removal in a future release.
      */
+    @Deprecated
     public static class HttpMove extends HttpUriRequestBase {
 
         public final static String METHOD_NAME = "MOVE";
@@ -79,9 +92,12 @@ public enum HttpMethods {
 
     /**
      * HTTP COPY method.
-     * 
+     *
      * @author bbpennel
+     * @deprecated Fedora has not supported the COPY operation since Fedora 5; retained only for use against
+     *      Fedora 4/5 repositories and slated for removal in a future release.
      */
+    @Deprecated
     public static class HttpCopy extends HttpUriRequestBase {
 
         public final static String METHOD_NAME = "COPY";
